@@ -1,73 +1,76 @@
-# React + TypeScript + Vite
+# Emerald Web FE
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Tech Stack
 
-Currently, two official plugins are available:
+* Vite + React 18 + TypeScript
+* Tailwind CSS v3
+* React Router DOM v6
+* Biome (linter + formatter + organize imports)
+* Font: [Reem Kufi Fun](https://fonts.google.com/specimen/Reem+Kufi+Fun)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Palette
 
-## React Compiler
+| Tên        | Hex       |
+| ---------- | --------- |
+| Main       | `#244B35` |
+| Secondary  | `#E09B6B` |
+| Third      | `#EFEAE1` |
+| Border     | `#D9D9D9` |
+| Background | `#FFFFFF` |
+| Text       | `#000000` |
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Cấu trúc thư mục
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+src/
+├── assets/          → ảnh, icon, logo
+├── components/      → component tái sử dụng
+│   ├── ui/          → Button, Card, Input...
+│   ├── layout/      → Header, Footer, Container
+│   └── common/      → Loading, Error, EmptyState
+├── hooks/           → custom hooks
+├── pages/           → mỗi trang 1 folder
+├── routes/          → cấu hình route + lazy load
+├── services/        → API calls (axios)
+├── store/           → Zustand / Context (sau này thêm)
+├── styles/          → globals.css (Tailwind + font)
+├── types/           → global types
+├── utils/           → hàm thuần (cn.ts, format.ts...)
+└── App.tsx + main.tsx
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Alias
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+| Alias         | Path             |
+| ------------- | ---------------- |
+| `@`           | `src/`           |
+| `@pages`      | `src/pages`      |
+| `@components` | `src/components` |
+| `@hooks`      | `src/hooks`      |
+| `@assets`     | `src/assets`     |
+| `@utils`      | `src/utils`      |
+| `@services`   | `src/services`   |
+| `@store`      | `src/store`      |
+| `@types`      | `src/types`      |
+| `@styles`     | `src/styles`     |
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+**Ví dụ sử dụng:**
+
+```ts
+import Home from '@pages/Home';
+import { Button } from '@components/ui/Button';
+import logo from '@assets/images/logo.svg';
+```
+
+## Development
+
+```bash
+# Cài dependencies
+npm install
+
+# Chạy dev server
+npm run dev
+
+# Build production
+npm run build
 ```
