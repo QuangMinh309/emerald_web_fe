@@ -1,0 +1,32 @@
+# Build output
+dist
+build
+
+# Node modules
+node_modules
+
+# Vite cache
+.vite
+.vite-deps
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Git
+.git
+.gitignore
+
+# Editor configs
+.vscode
+.idea
+
+# Misc
+coverage
+public/*.svg
+public/*.png
+public/*.jpg
