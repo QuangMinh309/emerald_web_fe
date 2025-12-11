@@ -33,10 +33,10 @@ const Sidebar: React.FC<SidebarProps> = ({ activeMenu, onMenuChange }) => {
   ];
 
   return (
-    <div className="w-60 bg-main min-h-screen text-white flex flex-col">
+    <div className="w-60 bg-main min-h-screen text-white flex flex-col fixed top-0 left-0">
       <div className="p-6 border-b border-white/20 flex flex-col items-center">
         <div className="mb-3">
-          <img src={Logo} alt="Emerald Tower Logo" className="w-12 h-12" />
+          <img src={Logo} alt="Emerald Tower Logo" className="w-14 h-14" />
         </div>
         <h1 className="font-semibold text-lg text-center">Emerald Tower</h1>
       </div>

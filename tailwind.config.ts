@@ -12,7 +12,7 @@ export default {
         foreground: "#000000",
       },
       fontFamily: {
-        inter: ['"Inter"', "sans-serif"],
+        inter: ['"Be Vietnam Pro"', "sans-serif"],
       },
     },
   },
