@@ -1,17 +1,17 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { Suspense } from "react";
-import { routes } from "./config";
+import { lazy } from "react";
+import { createBrowserRouter } from "react-router-dom";
+import MainLayout from "@components/layout/MainLayout";
 
-export default function AppRoutes() {
-  return (
-    <BrowserRouter>
-      <Suspense>
-        <Routes>
-          {routes.map(({ path, element }) => (
-            <Route key={path} path={path} element={element} />
-          ))}
-        </Routes>
-      </Suspense>
-    </BrowserRouter>
-  );
-}
+const Apartments = lazy(() => import("@/pages/Home"));
+const Residents = lazy(() => import("@/pages/About"));
+
+export const routes = createBrowserRouter([
+  {
+    path: "/",
+    element: <MainLayout />,
+    children: [
+      { path: "apartments", element: <Apartments /> },
+      { path: "residents", element: <Residents /> },
+    ],
+  },
+]);
