@@ -64,20 +64,23 @@ export function ColumnFilter<T>({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0" align="start">
-        <div className="p-2 font-semibold text-sm border-b bg-gray-50">Lọc {title}</div>
+        <div className="p-2 font-semibold text-sm border-b bg-gray-50">
+          Lọc {title.toLowerCase()}
+        </div>
+
         <div className="p-1 max-h-[200px] overflow-y-auto">
           {options.length > 0 ? (
             options.map((option) => (
               <div
                 key={option}
-                className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-md cursor-pointer transition-colors"
+                className="flex items-center space-x-2 px-2 py-2.5 hover:bg-gray-100 rounded-md cursor-pointer transition-colors"
                 onClick={() => toggleOption(option)}
               >
                 <Checkbox
                   checked={selectedValues.includes(option)}
                   className="data-[state=checked]:bg-main data-[state=checked]:border-main"
                 />
-                <span className="text-sm truncate leading-none pt-0.5">{option}</span>
+                <span className="text-sm truncate leading-normal">{option}</span>
               </div>
             ))
           ) : (
@@ -92,7 +95,7 @@ export function ColumnFilter<T>({
               <Button
                 variant="ghost"
                 size="sm"
-                className="w-full text-xs h-7 text-gray-500 hover:text-red-600 hover:bg-red-50"
+                className="w-full text-xs h-8 text-gray-500 hover:text-red-600 hover:bg-red-50"
                 onClick={clearFilter}
               >
                 Xóa lọc
