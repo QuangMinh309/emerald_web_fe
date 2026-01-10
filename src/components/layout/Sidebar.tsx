@@ -1,16 +1,18 @@
 import type React from "react";
 import {
-  Users,
-  FileText,
-  Bell,
-  FileBox,
-  Wrench,
-  BarChart3,
-  TrendingUp,
-  Settings,
   Building2,
+  Home,
+  CircleDollarSign,
+  Users,
+  Armchair,
+  Store,
+  Info,
+  Wrench,
+  Vote,
+  MessageSquare,
+  TrendingUp,
+  UserCog,
 } from "lucide-react";
-import type { MenuItem } from "@/types";
 import Logo from "@assets/logo.svg";
 
 interface SidebarProps {
@@ -19,42 +21,53 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ activeMenu, onMenuChange }) => {
-  const menuItems: MenuItem[] = [
-    { id: "apartments", icon: Building2, label: "Quản lý căn hộ" },
-    { id: "residents", icon: Users, label: "Quản lý cư dân" },
-    { id: "feedback", icon: FileText, label: "Phản ánh, yêu cầu" },
-    { id: "notifications", icon: Bell, label: "Thông báo" },
-    { id: "assets", icon: FileBox, label: "Tài sản, thiết bị" },
+  const menuItems = [
+    { id: "building", icon: Building2, label: "Quản lý tòa nhà" },
+    { id: "apartments", icon: Home, label: "Căn hộ" },
+    { id: "debts", icon: CircleDollarSign, label: "Công nợ" },
+    { id: "residents", icon: Users, label: "Cư dân" },
+    { id: "assets", icon: Armchair, label: "Tài sản, thiết bị" },
+    { id: "services", icon: Store, label: "Dịch vụ" },
+    { id: "feedback", icon: Info, label: "Phản ánh, yêu cầu" },
     { id: "maintenance", icon: Wrench, label: "Bảo trì" },
-    { id: "rules", icon: FileText, label: "Biểu quyết" },
-    { id: "services", icon: Settings, label: "Dịch vụ" },
-    { id: "amenities", icon: BarChart3, label: "Tiện ích" },
+    { id: "voting", icon: Vote, label: "Biểu quyết" },
+    { id: "notifications", icon: MessageSquare, label: "Thông báo" },
     { id: "reports", icon: TrendingUp, label: "Báo cáo thống kê" },
+    { id: "permissions", icon: UserCog, label: "Phân quyền" },
   ];
 
   return (
-    <div className="w-60 bg-main min-h-screen text-white flex flex-col fixed top-0 left-0">
-      <div className="p-6 border-b border-white/20 flex flex-col items-center">
-        <div className="mb-3">
-          <img src={Logo} alt="Emerald Tower Logo" className="w-14 h-14" />
+    <div className="w-64 bg-main h-screen text-white flex flex-col fixed top-0 left-0 shadow-xl z-50 font-inter overflow-hidden border-r border-main">
+      <div className="py-6 flex flex-col items-center shrink-0">
+        <div className="mb-3 bg-secondary p-2 rounded-md shadow-md flex items-center justify-center">
+          <img src={Logo} alt="Emerald Tower" className="w-10 h-10 object-contain" />
         </div>
-        <h1 className="font-semibold text-lg text-center">Emerald Tower</h1>
+        <h1 className="font-semibold text-lg text-center tracking-wide">Emerald Tower</h1>
       </div>
 
-      <nav className="flex-1 py-4">
+      <nav className="flex-1 px-3 pb-6 space-y-1 overflow-y-auto custom-scrollbar">
         {menuItems.map((item) => {
           const Icon = item.icon;
+          const isActive = activeMenu === item.id;
+
           return (
             <button
               type="button"
               key={item.id}
               onClick={() => onMenuChange(item.id)}
-              className={`w-full flex items-center gap-3 px-6 py-3 transition-colors ${
-                activeMenu === item.id ? "bg-white/10 border-r-4 border-white" : "hover:bg-white/5"
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 group relative ${
+                isActive
+                  ? "bg-white text-main font-bold shadow-md"
+                  : "text-white/90 hover:bg-white/10 hover:text-white"
               }`}
             >
-              <Icon className="w-5 h-5" />
-              <span className="text-sm">{item.label}</span>
+              <Icon
+                className={`w-5 h-5 shrink-0 transition-colors ${
+                  isActive ? "text-main" : "text-white/80 group-hover:text-white"
+                }`}
+                strokeWidth={isActive ? 2.5 : 2}
+              />
+              <span className="text-sm truncate">{item.label}</span>
             </button>
           );
         })}
