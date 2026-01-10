@@ -1,17 +1,6 @@
-import AppRoutes from "./routes";
-import "./index.css";
+import { RouterProvider } from "react-router-dom";
+import { routes } from "./routes";
 
-function App() {
-  return (
-    <div className="min-h-screen flex flex-col">
-      {/* <Header /> */}
-      {/* Sidebar */}
-      <main className="flex-1">
-        <AppRoutes />
-      </main>
-      {/* <Footer /> */}
-    </div>
-  );
+export default function App() {
+  return <RouterProvider router={routes} />;
 }
-
-export default App;
