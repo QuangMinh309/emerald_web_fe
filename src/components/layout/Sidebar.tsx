@@ -1,4 +1,5 @@
 import type React from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   Building2,
   Home,
@@ -15,12 +16,10 @@ import {
 } from "lucide-react";
 import Logo from "@assets/logo.svg";
 
-interface SidebarProps {
-  activeMenu: string;
-  onMenuChange: (menuId: string) => void;
-}
+const Sidebar: React.FC = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
 
-const Sidebar: React.FC<SidebarProps> = ({ activeMenu, onMenuChange }) => {
   const menuItems = [
     { id: "building", icon: Building2, label: "Quản lý tòa nhà" },
     { id: "apartments", icon: Home, label: "Căn hộ" },
@@ -39,23 +38,25 @@ const Sidebar: React.FC<SidebarProps> = ({ activeMenu, onMenuChange }) => {
   return (
     <div className="w-64 bg-main h-screen text-white flex flex-col fixed top-0 left-0 shadow-xl z-50 font-inter overflow-hidden border-r border-main">
       <div className="py-6 flex flex-col items-center shrink-0">
-        <div className="mb-3 bg-secondary p-2 rounded-md shadow-md flex items-center justify-center">
-          <img src={Logo} alt="Emerald Tower" className="w-10 h-10 object-contain" />
+        <div className="mb-2 bg-secondary rounded-md shadow-md flex items-center justify-center">
+          <img src={Logo} alt="Emerald Tower" className="w-13 h-13 object-contain" />
         </div>
         <h1 className="font-semibold text-lg text-center tracking-wide">Emerald Tower</h1>
       </div>
 
+      <div className="mb-2 h-px bg-white/50 shrink-0" />
+
       <nav className="flex-1 px-3 pb-6 space-y-1 overflow-y-auto custom-scrollbar">
         {menuItems.map((item) => {
           const Icon = item.icon;
-          const isActive = activeMenu === item.id;
+          const isActive = location.pathname.startsWith(`/${item.id}`);
 
           return (
             <button
               type="button"
               key={item.id}
-              onClick={() => onMenuChange(item.id)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 group relative ${
+              onClick={() => navigate(`/${item.id}`)}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-md transition-all duration-200 group relative ${
                 isActive
                   ? "bg-white text-main font-bold shadow-md"
                   : "text-white/90 hover:bg-white/10 hover:text-white"

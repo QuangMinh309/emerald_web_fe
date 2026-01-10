@@ -47,7 +47,7 @@
   },
 
   "css": {
-    "formatter": { "enabled": true },
+    "formatter": { "enabled": false },
     "linter": { "enabled": false },
     "parser": { "allowWrongLineComments": true }
   },

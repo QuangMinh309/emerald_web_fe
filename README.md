@@ -69,7 +69,7 @@ import logo from '@assets/images/logo.svg';
 npm install
 
 # Chạy dev server
-npm run dev
+npm run dev || npm start
 
 # Build production
 npm run build

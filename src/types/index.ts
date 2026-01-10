@@ -2,6 +2,7 @@ export interface MenuItem {
   id: string;
   icon: React.ComponentType<{ className?: string }>;
   label: string;
+  path?: string;
 }
 
 export interface TabItem {
@@ -11,21 +12,22 @@ export interface TabItem {
 }
 
 export interface TableColumn<T> {
-  key: string;
+  key: keyof T | string;
   label: string;
-  render?: (row: T) => React.ReactNode;
+  width?: string;
+  align?: "left" | "center" | "right";
+  sortable?: boolean;
+  filterable?: boolean;
+  searchable?: boolean;
+  filterAccessor?: (item: T) => string;
+  render?: (item: T) => React.ReactNode;
+  isImage?: boolean;
 }
 
-export interface ActionButtonsProps {
-  onEdit?: () => void;
-  onDelete?: () => void;
-  onView?: () => void;
-  showDelete?: boolean;
-}
-
-export interface PageHeaderAction {
+export interface ActionOption {
+  id: string;
   label: string;
-  icon?: React.ReactNode;
-  variant?: "primary" | "secondary";
+  icon?: React.ReactElement;
+  variant?: "default" | "danger";
   onClick: () => void;
 }
