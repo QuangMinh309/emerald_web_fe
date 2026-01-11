@@ -116,16 +116,15 @@ const CreateAssetModal = ({ open, setOpen }: ModalProps) => {
       {
         onSuccess: () => {
           toast.success("Tài sản đã được tạo thành công");
+          handleClose();
         },
         onError: (error) => {
-          toast.error(`Ohh!!! ${error.message}`);
-        },
-        onSettled: () => {
-          handleClose;
+          toast.error(`Lỗi: ${error.message}`);
         },
       },
     );
   }
+
   const handleClose = () => {
     setOpen(false);
     form.reset();
@@ -141,7 +140,7 @@ const CreateAssetModal = ({ open, setOpen }: ModalProps) => {
       onSubmit={form.handleSubmit(onSubmit)}
     >
       <Form {...form}>
-        <form className="space-y-4">
+        <form className="space-y-4 ">
           <div className="grid grid-cols-2 gap-x-4 gap-y-4">
             {/* Tên thiết bị */}
             <FormField
