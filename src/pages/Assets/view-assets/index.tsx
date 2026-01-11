@@ -7,37 +7,56 @@ import { TabNavigation } from "@/components/common/TabNavigation";
 import { SearchBar } from "@/components/common/SearchBar";
 
 import { assetColumns } from "./columns";
+import { assetTypeColumns } from "../view-asset-types/columns";
 import type { ActionOption } from "@/types";
 import { normalizeString } from "@/utils/string";
-import { useAssets } from "@/hooks/data/useAssests";
+import { useAssets, useAssetTypes } from "@/hooks/data/useAssests";
 import CreateAssetModal from "@/pages/Assets/create-asset";
 import DeleteAsset from "@/pages/Assets/delete-asset";
-import type { Asset } from "@/types/asset";
+import type { Asset, AssetType } from "@/types/asset";
+import UpdateAssetModal from "@/pages/Assets/update-asset";
+import CreateAssetTypeModal from "@/pages/Assets/create-asset-type";
+import UpdateAssetTypeModal from "@/pages/Assets/update-asset-type";
+import DeleteAssetType from "@/pages/Assets/delete-asset-type";
 
 const AssetsPage = () => {
-  const [activeTab, setActiveTab] = useState("all");
+  const [activeTab, setActiveTab] = useState("assets");
   const [searchTerm, setSearchTerm] = useState("");
+
+  // Asset states
   const [isNewModalOpen, setNewIsModalOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const [selectedAsset, setSelectedAsset] = useState<Asset>();
-  // Lấy dữ liệu từ Hook
-  const { data: assets = [], isLoading, isError, error, refetch } = useAssets();
+  const [deletedAsset, setDeletedAsset] = useState<Asset>();
+  const [isUpdateOpen, setIsUpdateOpen] = useState(false);
+  const [updatedAsset, setUpdatedAsset] = useState<number>();
 
-  // Logic lọc dữ liệu tổng hợp (Tab + Search)
-  const filteredData = useMemo(() => {
+  // AssetType states
+  const [isCreateAssetTypeModalOpen, setIsCreateAssetTypeModalOpen] = useState(false);
+  const [isDeleteAssetTypeOpen, setIsDeleteAssetTypeOpen] = useState(false);
+  const [deletedAssetType, setDeletedAssetType] = useState<AssetType>();
+  const [isUpdateAssetTypeOpen, setIsUpdateAssetTypeOpen] = useState(false);
+  const [updatedAssetType, setUpdatedAssetType] = useState<number>();
+
+  // Lấy dữ liệu từ Hooks
+  const {
+    data: assets = [],
+    isLoading: isAssetsLoading,
+    isError: isAssetsError,
+    error: assetsError,
+    refetch: refetchAssets,
+  } = useAssets();
+  const {
+    data: assetTypes = [],
+    isLoading: isAssetTypesLoading,
+    isError: isAssetTypesError,
+    error: assetTypesError,
+    refetch: refetchAssetTypes,
+  } = useAssetTypes();
+
+  // Logic lọc dữ liệu Assets
+  const filteredAssets = useMemo(() => {
     let result = [...assets];
 
-    // 1. Lọc theo Tab (Dựa trên typeName)
-    if (activeTab !== "all") {
-      result = result.filter((item) => {
-        const type = item.typeName.toLowerCase();
-        if (activeTab === "elevator") return type.includes("thang máy");
-        if (activeTab === "electric") return type.includes("điện");
-        return true;
-      });
-    }
-
-    // 2. Lọc theo ô tìm kiếm
     if (searchTerm.trim()) {
       const search = normalizeString(searchTerm);
       result = result.filter(
@@ -50,7 +69,32 @@ const AssetsPage = () => {
     }
 
     return result;
-  }, [assets, activeTab, searchTerm]);
+  }, [assets, searchTerm]);
+
+  // Logic lọc dữ liệu AssetTypes
+  const filteredAssetTypes = useMemo(() => {
+    let result = [...assetTypes];
+
+    if (searchTerm.trim()) {
+      const search = normalizeString(searchTerm);
+      result = result.filter(
+        (item) =>
+          normalizeString(item.name).includes(search) ||
+          normalizeString(item.description || "").includes(search),
+      );
+    }
+
+    return result;
+  }, [assetTypes, searchTerm]);
+
+  // Xác định data và state dựa vào activeTab
+  const isLoading = activeTab === "assets" ? isAssetsLoading : isAssetTypesLoading;
+  const isError = activeTab === "assets" ? isAssetsError : isAssetTypesError;
+  const error = activeTab === "assets" ? assetsError : assetTypesError;
+  const refetch = activeTab === "assets" ? refetchAssets : refetchAssetTypes;
+  const filteredData = activeTab === "assets" ? filteredAssets : filteredAssetTypes;
+  const columns = activeTab === "assets" ? assetColumns : assetTypeColumns;
+  const dataLength = activeTab === "assets" ? assets.length : assetTypes.length;
 
   // Actions cho Dropdown
   const actions: ActionOption[] = useMemo(
@@ -61,7 +105,7 @@ const AssetsPage = () => {
         icon: <Trash2 className="w-4 h-4" />,
         variant: "danger",
         onClick: () => confirm("Xóa toàn bộ dữ liệu?") && console.log("Delete All"),
-        disabled: assets.length === 0,
+        disabled: dataLength === 0,
       },
       {
         id: "import",
@@ -74,10 +118,10 @@ const AssetsPage = () => {
         label: "In danh sách",
         icon: <Printer className="w-4 h-4" />,
         onClick: () => window.print(),
-        disabled: assets.length === 0,
+        disabled: dataLength === 0,
       },
     ],
-    [assets.length],
+    [dataLength],
   );
 
   return (
@@ -89,15 +133,26 @@ const AssetsPage = () => {
           actions={
             <div className="flex items-center gap-2">
               <button
-                onClick={() => setNewIsModalOpen(true)}
+                onClick={() => {
+                  if (activeTab === "assets") {
+                    setNewIsModalOpen(true);
+                  } else {
+                    setIsCreateAssetTypeModalOpen(true);
+                  }
+                }}
                 className="flex items-center gap-2 bg-main text-white px-4 py-2 rounded-lg hover:bg-main/90 transition-colors text-sm font-medium"
               >
-                <Plus className="w-4 h-4" /> Tạo tài sản
+                <Plus className="w-4 h-4" />
+                {activeTab === "assets" ? "Tạo tài sản" : "Tạo phân loại"}
               </button>
 
               <ActionDropdown
                 options={actions}
-                sampleFileUrl="/template/asset_import_template.xlsx"
+                sampleFileUrl={
+                  activeTab === "assets"
+                    ? "/template/asset_import_template.xlsx"
+                    : "/template/asset_type_import_template.xlsx"
+                }
               />
             </div>
           }
@@ -107,22 +162,33 @@ const AssetsPage = () => {
         <div className="bg-white p-4 rounded-sm border border-gray-200 shadow-sm space-y-4">
           <TabNavigation
             tabs={[
-              { id: "all", label: "Tất cả thiết bị" },
-              { id: "elevator", label: "Thang máy" },
-              { id: "electric", label: "Hệ thống điện" },
+              { id: "assets", label: "Tài sản" },
+              { id: "assetType", label: "Phân loại" },
             ]}
             activeTab={activeTab}
-            onChange={setActiveTab}
+            onChange={(tab) => {
+              setActiveTab(tab);
+              setSearchTerm(""); // Reset search khi đổi tab
+            }}
           />
 
-          <SearchBar placeholder="Tìm kiếm theo tên, loại, vị trí..." onSearch={setSearchTerm} />
+          <SearchBar
+            placeholder={
+              activeTab === "assets"
+                ? "Tìm kiếm theo tên, loại, vị trí..."
+                : "Tìm kiếm theo tên, mô tả..."
+            }
+            onSearch={setSearchTerm}
+          />
         </div>
 
         {/* Hiển thị nội dung chính */}
         <div className="min-h-[400px]">
           {isLoading ? (
             <div className="bg-white p-12 text-center text-gray-500 border rounded shadow-sm">
-              Đang tải dữ liệu tài sản...
+              {activeTab === "assets"
+                ? "Đang tải dữ liệu tài sản..."
+                : "Đang tải dữ liệu phân loại..."}
             </div>
           ) : isError ? (
             <div className="bg-red-50 border border-red-200 p-8 rounded text-center space-y-3 text-red-600">
@@ -137,21 +203,52 @@ const AssetsPage = () => {
             </div>
           ) : (
             <CustomTable
-              data={filteredData}
-              columns={assetColumns}
+              data={filteredData as any}
+              columns={columns as any}
               defaultPageSize={10}
-              onEdit={(row) => console.log("Sửa", row)}
-              onDelete={(row) => {
-                setIsDeleteOpen(true);
-                setSelectedAsset(row);
+              onEdit={(row) => {
+                if (activeTab === "assets") {
+                  setIsUpdateOpen(true);
+                  setUpdatedAsset((row as Asset).id);
+                } else {
+                  setIsUpdateAssetTypeOpen(true);
+                  setUpdatedAssetType((row as AssetType).id);
+                }
               }}
-              onView={(row) => console.log("Xem", row)}
+              onDelete={(row) => {
+                if (activeTab === "assets") {
+                  setIsDeleteOpen(true);
+                  setDeletedAsset(row as Asset);
+                } else {
+                  setIsDeleteAssetTypeOpen(true);
+                  setDeletedAssetType(row as AssetType);
+                }
+              }}
             />
           )}
         </div>
       </div>
+
+      {/* Asset Modals */}
       <CreateAssetModal open={isNewModalOpen} setOpen={setNewIsModalOpen} />
-      <DeleteAsset seclectedAsset={selectedAsset} open={isDeleteOpen} setOpen={setIsDeleteOpen} />
+      <DeleteAsset seclectedAsset={deletedAsset} open={isDeleteOpen} setOpen={setIsDeleteOpen} />
+      <UpdateAssetModal open={isUpdateOpen} setOpen={setIsUpdateOpen} assetId={updatedAsset!} />
+
+      {/* AssetType Modals */}
+      <CreateAssetTypeModal
+        open={isCreateAssetTypeModalOpen}
+        setOpen={setIsCreateAssetTypeModalOpen}
+      />
+      <DeleteAssetType
+        selectedAssetType={deletedAssetType}
+        open={isDeleteAssetTypeOpen}
+        setOpen={setIsDeleteAssetTypeOpen}
+      />
+      <UpdateAssetTypeModal
+        open={isUpdateAssetTypeOpen}
+        setOpen={setIsUpdateAssetTypeOpen}
+        assetTypeId={updatedAssetType!}
+      />
     </>
   );
 };
