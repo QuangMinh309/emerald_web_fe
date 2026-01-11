@@ -2,9 +2,10 @@ import type { TableColumn } from "@/types";
 import StatusBadge from "@components/common/StatusBadge";
 
 // data model
-export interface Asset {
+export interface Service {
   id: string;
   code: string;
+  description?: string;
   name: string;
   price: number;
   unit: string;
@@ -23,7 +24,7 @@ const statusMap: Record<
   inactive: { label: "Tạm ngừng", type: "error" },
 };
 
-export const assetColumns: TableColumn<Asset>[] = [
+export const assetColumns: TableColumn<Service>[] = [
   { key: "stt", label: "STT", align: "center", width: "60px" },
   { key: "code", label: "Mã dịch vụ", width: "110px"},
   { key: "name", label: "Tên dịch vụ", sortable: true, width: "170px"},

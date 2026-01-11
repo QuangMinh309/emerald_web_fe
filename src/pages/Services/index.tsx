@@ -5,20 +5,23 @@ import ActionDropdown from "@components/common/ActionDropdown";
 import CustomTable from "@components/common/CustomTable";
 import { TabNavigation } from "@components/common/TabNavigation";
 import { SearchBar } from "@/components/common/SearchBar";
-import type { Asset } from "./columns";
+import type { Service } from "./columns";
 import { assetColumns } from "./columns";
 import type { ActionOption } from "@/types";
 import { normalizeString } from "@/utils/string";
+import { useNavigate } from "react-router-dom";
 
 const ServicesPage = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
 
   // data mẫu
-  const data: Asset[] = [
+  const data: Service[] = [
       {
     id: "1",
     code: "TS-001",
+    description: "Dịch vụ cho thuê sân bóng bàn trong khuôn viên chung cư.",
     name: "Bóng bàn",
     price: 70000,
     unit: "30 phút",
@@ -30,6 +33,7 @@ const ServicesPage = () => {
   {
     id: "2",
     code: "TS-002",
+    description: "Dịch vụ cho thuê sân cầu lông dành cho cư dân.",
     name: "Sân cầu lông",
     price: 50000,
     unit: "60 phút",
@@ -132,7 +136,11 @@ const ServicesPage = () => {
         defaultPageSize={10}
         onEdit={(row) => console.log("Sửa", row)}
         onDelete={(row) => console.log("Xóa", row)}
-        onView={(row) => console.log("Xem", row)}
+        onView={(row) =>
+        navigate(`/services/${row.id}`, {
+          state: { service: row },
+        })
+      }
       />
     </div>
   );

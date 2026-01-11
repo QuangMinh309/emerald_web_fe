@@ -148,7 +148,7 @@ function CustomTable<T extends { id: string | number }>({
         <Table>
           <TableHeader className="bg-third">
             <TableRow className="hover:bg-third border-b border-gray-300/50">
-              <TableHead className="w-12 border-r border-gray-300/50">
+              <TableHead className="w-12 border-r p-0 border-gray-300/50">
                 <div className="flex items-center justify-center">
                   <Checkbox
                     checked={data.length > 0 && selectedIds.length === data.length}
@@ -239,8 +239,8 @@ function CustomTable<T extends { id: string | number }>({
                   key={row.id}
                   className="hover:bg-gray-50 border-b border-gray-300/50 last:border-0"
                 >
-                  <TableCell className="py-4 border-r border-gray-300/50">
-                    <div className="flex items-center justify-center">
+                  <TableCell className="border-r border-gray-300/50 p-0 text-center align-middle w-12 min-w-12">
+                    <div className="flex items-center  justify-center">
                       <Checkbox
                         checked={selectedIds.includes(row.id)}
                         onCheckedChange={(c) => handleCheckRow(row.id, c as boolean)}
