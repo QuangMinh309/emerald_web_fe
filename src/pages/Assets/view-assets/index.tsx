@@ -18,7 +18,7 @@ const AssetsPage = () => {
   const [activeTab, setActiveTab] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [isNewModalOpen, setNewIsModalOpen] = useState(false);
-  const [isDeleteOpen, setIsDeleteOpen] = useState(true);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedAsset, setSelectedAsset] = useState<Asset>();
   // Lấy dữ liệu từ Hook
   const { data: assets = [], isLoading, isError, error, refetch } = useAssets();
