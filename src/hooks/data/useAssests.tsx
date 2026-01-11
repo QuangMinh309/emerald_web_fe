@@ -2,8 +2,10 @@ import {
   createAsset,
   createAssetType,
   deleteAsset,
+  getAssetById,
   getAssets,
   getAssetTypes,
+  updateAsset,
 } from "@/services/assests.service";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -19,6 +21,17 @@ export const useCreateAsset = () => {
     mutationFn: createAsset,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["assets"] });
+    },
+  });
+};
+export const useUpdateAsset = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: updateAsset,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["assets"] });
+      queryClient.invalidateQueries({ queryKey: ["asset"] });
     },
   });
 };
@@ -45,5 +58,11 @@ export const useDeleteAsset = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["assets"] });
     },
+  });
+};
+export const useGetAssetById = (id: number) => {
+  return useQuery({
+    queryKey: ["asset", id],
+    queryFn: () => getAssetById(id),
   });
 };

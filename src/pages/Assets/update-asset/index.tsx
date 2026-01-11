@@ -22,18 +22,18 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { DatePicker } from "@/components/common/DatePicker";
-import { useAssetTypes, useCreateAsset } from "@/hooks/data/useAssests";
+import { useAssetTypes, useGetAssetById, useUpdateAsset } from "@/hooks/data/useAssests"; // Đổi hook update
 import { useBlocks } from "@/hooks/data/useBlocks";
 import { toast } from "sonner";
 import { useEffect, useMemo } from "react";
 
-interface ModalProps {
+interface UpdateModalProps {
   open: boolean;
   setOpen: (value: boolean) => void;
+  assetId?: number | undefined; // Tài sản được chọn để update
 }
 
-// 1. Schema với thông báo lỗi thân thiện
-const CreateAssetSchema = z.object({
+const UpdateAssetSchema = z.object({
   name: z.string().min(1, "Vui lòng nhập tên thiết bị"),
   typeId: z.string().min(1, "Vui lòng chọn loại thiết bị"),
   status: z.string().min(1, "Vui lòng chọn trạng thái"),
@@ -47,14 +47,16 @@ const CreateAssetSchema = z.object({
   note: z.string().optional(),
 });
 
-type AssetFormValues = z.infer<typeof CreateAssetSchema>;
+type AssetFormValues = z.infer<typeof UpdateAssetSchema>;
 
-const CreateAssetModal = ({ open, setOpen }: ModalProps) => {
-  const { data: assestTypes } = useAssetTypes();
+const UpdateAssetModal = ({ open, setOpen, assetId }: UpdateModalProps) => {
+  const { data: asset } = useGetAssetById(assetId!);
+  const { data: assetTypes } = useAssetTypes();
   const { data: blocks } = useBlocks();
-  const { mutate: createAsset, isPending } = useCreateAsset();
+  const { mutate: updateAsset, isPending } = useUpdateAsset();
+
   const form = useForm<AssetFormValues>({
-    resolver: zodResolver(CreateAssetSchema),
+    resolver: zodResolver(UpdateAssetSchema),
     defaultValues: {
       name: "",
       status: "ACTIVE",
@@ -63,89 +65,103 @@ const CreateAssetModal = ({ open, setOpen }: ModalProps) => {
       floor: "",
       blockId: "",
       installationDate: undefined,
+      warrantyYears: 0,
     },
   });
-  // 1. Theo dõi giá trị blockId đã chọn
+
+  // Cập nhật giá trị form khi prop `asset` thay đổi
+  useEffect(() => {
+    if (asset && open) {
+      form.reset({
+        name: asset.name,
+        status: asset.status,
+        note: asset.note,
+        typeId: asset.type.id.toString(),
+        floor: asset.location.floor.toString(),
+        blockId: asset.location.blockId.toString(),
+        locationDetail: asset.location.detail,
+        installationDate: new Date(asset.timeline.installationDate),
+        warrantyYears: asset.timeline.warrantyExpirationDate ? 1 : 0,
+      });
+    }
+  }, [asset, open, form]);
+
   const selectedBlockId = form.watch("blockId");
 
-  // 2. Tạo buildingOptions
-  const buildingOptions =
-    blocks?.map((item) => ({
-      value: item.id.toString(),
-      label: item.buildingName,
-    })) || [];
+  const buildingOptions = useMemo(
+    () =>
+      blocks?.map((item) => ({
+        value: item.id.toString(),
+        label: item.buildingName,
+      })) || [],
+    [blocks],
+  );
 
-  // 3. Logic lấy floorOptions dựa trên block được chọn
   const floorOptions = useMemo(() => {
     if (!selectedBlockId || !blocks) return [];
-
-    // Tìm tòa nhà đang được chọn trong danh sách blocks
     const selectedBlock = blocks.find((b) => b.id.toString() === selectedBlockId);
-
     if (!selectedBlock || !selectedBlock.totalFloors) return [];
 
-    // Tạo mảng từ 1 đến số tầng của tòa nhà đó
     return Array.from({ length: selectedBlock.totalFloors }, (_, i) => ({
       value: (i + 1).toString(),
       label: `Tầng ${i + 1}`,
     }));
   }, [selectedBlockId, blocks]);
 
-  // Reset tầng về rỗng nếu đổi tòa nhà
-  useEffect(() => {
-    form.setValue("floor", "");
-  }, [selectedBlockId, form]);
-  const assetTypeOptions = assestTypes?.map((item) => ({
+  const assetTypeOptions = assetTypes?.map((item) => ({
     value: item.id.toString(),
     label: item.name,
   }));
 
-  function onSubmit(values: AssetFormValues) {
-    createAsset(
-      {
-        name: values.name,
-        typeId: Number(values.typeId),
-        status: values.status,
-        blockId: Number(values.blockId),
-        locationDetail: values.locationDetail,
-        floor: Number(values.floor),
-        installationDate: values.installationDate.toISOString(),
-        warrantyYears: values.warrantyYears,
-        note: values.note,
-      },
-      {
-        onSuccess: () => {
-          toast.success("Tài sản đã được tạo thành công");
-        },
-        onError: (error) => {
-          toast.error(`Ohh!!! ${error.message}`);
-        },
-        onSettled: () => {
-          handleClose;
-        },
-      },
-    );
-  }
   const handleClose = () => {
     setOpen(false);
     form.reset();
   };
+
+  function onSubmit(values: AssetFormValues) {
+    if (!asset?.id) return;
+
+    updateAsset(
+      {
+        id: asset.id, // Truyền ID để API biết update bản ghi nào
+        data: {
+          name: values.name,
+          typeId: Number(values.typeId),
+          status: values.status,
+          blockId: Number(values.blockId),
+          locationDetail: values.locationDetail,
+          floor: Number(values.floor),
+          installationDate: values.installationDate.toISOString(),
+          warrantyYears: values.warrantyYears,
+          note: values.note,
+        },
+      },
+      {
+        onSuccess: () => {
+          toast.success("Cập nhật tài sản thành công");
+          handleClose();
+        },
+        onError: (error: any) => {
+          toast.error(`Lỗi cập nhật: ${error.message}`);
+        },
+      },
+    );
+  }
+
   return (
     <Modal
       open={open}
       setOpen={setOpen}
-      title="Tạo tài sản mới"
-      submitText="Tạo mới"
-      onLoading={isPending}
-      // Kích hoạt submit qua hook form
+      title="Chỉnh sửa tài sản"
+      submitText="Lưu thay đổi"
       onSubmit={form.handleSubmit(onSubmit)}
+      onLoading={isPending}
     >
       <Form {...form}>
         <form className="space-y-4">
           <div className="grid grid-cols-2 gap-x-4 gap-y-4">
             {/* Tên thiết bị */}
             <FormField
-              disabled={isPending}
               control={form.control}
               name="name"
               render={({ field }) => (
@@ -161,13 +177,12 @@ const CreateAssetModal = ({ open, setOpen }: ModalProps) => {
 
             {/* Loại thiết bị */}
             <FormField
-              disabled={isPending}
               control={form.control}
               name="typeId"
               render={({ field }) => (
                 <FormItem className="space-y-1.5">
                   <FormLabel isRequired>Loại thiết bị</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Chọn loại thiết bị" />
@@ -188,13 +203,12 @@ const CreateAssetModal = ({ open, setOpen }: ModalProps) => {
 
             {/* Trạng thái */}
             <FormField
-              disabled={isPending}
               control={form.control}
               name="status"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel isRequired>Trạng thái</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Chọn trạng thái" />
@@ -214,13 +228,12 @@ const CreateAssetModal = ({ open, setOpen }: ModalProps) => {
 
             {/* Tòa nhà */}
             <FormField
-              disabled={isPending}
               control={form.control}
               name="blockId"
               render={({ field }) => (
                 <FormItem className="space-y-1.5">
                   <FormLabel isRequired>Tòa</FormLabel>
-                  <Select onValueChange={field.onChange}>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Chọn tòa" />
@@ -241,13 +254,12 @@ const CreateAssetModal = ({ open, setOpen }: ModalProps) => {
 
             {/* Tầng */}
             <FormField
-              disabled={isPending}
               control={form.control}
               name="floor"
               render={({ field }) => (
                 <FormItem className="space-y-1.5">
                   <FormLabel isRequired>Tầng</FormLabel>
-                  <Select onValueChange={field.onChange}>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Chọn tầng" />
@@ -266,9 +278,8 @@ const CreateAssetModal = ({ open, setOpen }: ModalProps) => {
               )}
             />
 
-            {/* Mô tả chi tiết */}
+            {/* Địa chỉ chi tiết */}
             <FormField
-              disabled={isPending}
               control={form.control}
               name="locationDetail"
               render={({ field }) => (
@@ -284,11 +295,10 @@ const CreateAssetModal = ({ open, setOpen }: ModalProps) => {
 
             {/* Ngày lắp đặt */}
             <FormField
-              disabled={isPending}
               control={form.control}
               name="installationDate"
               render={({ field }) => (
-                <FormItem className="space-y-1.5 ">
+                <FormItem className="space-y-1.5">
                   <FormLabel isRequired>Ngày lắp đặt</FormLabel>
                   <FormControl>
                     <DatePicker value={field.value} onChange={field.onChange} />
@@ -300,7 +310,6 @@ const CreateAssetModal = ({ open, setOpen }: ModalProps) => {
 
             {/* Số năm bảo hành */}
             <FormField
-              disabled={isPending}
               control={form.control}
               name="warrantyYears"
               render={({ field }) => (
@@ -320,9 +329,7 @@ const CreateAssetModal = ({ open, setOpen }: ModalProps) => {
             />
           </div>
 
-          {/* Ghi chú */}
           <FormField
-            disabled={isPending}
             control={form.control}
             name="note"
             render={({ field }) => (
@@ -341,4 +348,4 @@ const CreateAssetModal = ({ open, setOpen }: ModalProps) => {
   );
 };
 
-export default CreateAssetModal;
+export default UpdateAssetModal;

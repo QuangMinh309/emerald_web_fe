@@ -13,13 +13,17 @@ import { useAssets } from "@/hooks/data/useAssests";
 import CreateAssetModal from "@/pages/Assets/create-asset";
 import DeleteAsset from "@/pages/Assets/delete-asset";
 import type { Asset } from "@/types/asset";
+import { se } from "date-fns/locale";
+import UpdateAssetModal from "@/pages/Assets/update-asset";
 
 const AssetsPage = () => {
   const [activeTab, setActiveTab] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [isNewModalOpen, setNewIsModalOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const [selectedAsset, setSelectedAsset] = useState<Asset>();
+  const [deletedAsset, setDeletedAsset] = useState<Asset>();
+  const [isUpdateOpen, setIsUpdateOpen] = useState(false);
+  const [updatedAsset, setUpdatedAsset] = useState<number>();
   // Lấy dữ liệu từ Hook
   const { data: assets = [], isLoading, isError, error, refetch } = useAssets();
 
@@ -140,10 +144,14 @@ const AssetsPage = () => {
               data={filteredData}
               columns={assetColumns}
               defaultPageSize={10}
-              onEdit={(row) => console.log("Sửa", row)}
+              onEdit={(row) => {
+                console.log("Sửa", row);
+                setIsUpdateOpen(true);
+                setUpdatedAsset(row.id);
+              }}
               onDelete={(row) => {
                 setIsDeleteOpen(true);
-                setSelectedAsset(row);
+                setDeletedAsset(row);
               }}
               onView={(row) => console.log("Xem", row)}
             />
@@ -151,7 +159,8 @@ const AssetsPage = () => {
         </div>
       </div>
       <CreateAssetModal open={isNewModalOpen} setOpen={setNewIsModalOpen} />
-      <DeleteAsset seclectedAsset={selectedAsset} open={isDeleteOpen} setOpen={setIsDeleteOpen} />
+      <DeleteAsset seclectedAsset={deletedAsset} open={isDeleteOpen} setOpen={setIsDeleteOpen} />
+      <UpdateAssetModal open={isUpdateOpen} setOpen={setIsUpdateOpen} assetId={updatedAsset!} />
     </>
   );
 };

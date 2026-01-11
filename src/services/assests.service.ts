@@ -1,5 +1,5 @@
 import axiosInstance from "@/lib/axios";
-import type { Asset, AssetType } from "@/types/asset";
+import type { Asset, AssetDetail, AssetType } from "@/types/asset";
 // nao chi can sua service là xong
 export const getAssets = async () => {
   const response = await axiosInstance.get("/assets");
@@ -24,6 +24,27 @@ export const createAsset = async (assetData: {
   console.log("Created asset response:", assetData);
   return response.data.data as Asset;
 };
+export const updateAsset = async ({
+  id,
+  data,
+}: {
+  id: number;
+  data: {
+    name: string;
+    typeId: number;
+    blockId: number;
+    floor: number;
+    locationDetail: string;
+    status: string;
+    installationDate: string;
+    warrantyYears: number;
+    note?: string;
+  };
+}) => {
+  console.log("Update asset called with id:", id, "and data:", data);
+  const response = await axiosInstance.patch(`/assets/${id}`, data);
+  return response.data.data as Asset;
+};
 export const createAssetType = async (assetTypeData: { name: string; description?: string }) => {
   const response = await axiosInstance.post("/asset-types", assetTypeData);
   return response.data;
@@ -31,4 +52,8 @@ export const createAssetType = async (assetTypeData: { name: string; description
 export const deleteAsset = async (assetId: number) => {
   const response = await axiosInstance.delete(`/assets/${assetId}`);
   return response.data;
+};
+export const getAssetById = async (id: number) => {
+  const response = await axiosInstance.get(`/assets/${id}`);
+  return response.data.data as AssetDetail;
 };
