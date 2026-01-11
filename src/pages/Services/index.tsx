@@ -3,19 +3,22 @@ import { Plus, Printer, FileDown, Trash2 } from "lucide-react";
 import PageHeader from "@components/common/PageHeader";
 import ActionDropdown from "@components/common/ActionDropdown";
 import CustomTable from "@components/common/CustomTable";
-import { TabNavigation } from "@components/common/TabNavigation";
 import { SearchBar } from "@/components/common/SearchBar";
 import type { Service } from "./columns";
-import { assetColumns } from "./columns";
+import { serviceColumns } from "./columns";
 import type { ActionOption } from "@/types";
 import { normalizeString } from "@/utils/string";
 import { useNavigate } from "react-router-dom";
 
 const ServicesPage = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [isNewModalOpen, setNewIsModalOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [selectedService, setSelectedService] = useState<Service>();
 
+  // const { data: services = [], isLoading, isError, error, refetch } = useAssets();
+  
   // data mẫu
   const data: Service[] = [
       {
@@ -121,7 +124,7 @@ const ServicesPage = () => {
 
       <CustomTable
         data={filteredData}
-        columns={assetColumns}
+        columns={serviceColumns}
         defaultPageSize={10}
         onEdit={(row) => console.log("Sửa", row)}
         onDelete={(row) => console.log("Xóa", row)}

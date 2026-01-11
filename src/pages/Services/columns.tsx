@@ -24,7 +24,7 @@ const statusMap: Record<
   inactive: { label: "Tạm ngừng", type: "error" },
 };
 
-export const assetColumns: TableColumn<Service>[] = [
+export const serviceColumns: TableColumn<Service>[] = [
   { key: "stt", label: "STT", align: "center", width: "60px" },
   { key: "code", label: "Mã dịch vụ", width: "110px"},
   { key: "name", label: "Tên dịch vụ", sortable: true, width: "170px"},
