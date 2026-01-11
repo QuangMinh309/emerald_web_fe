@@ -4,7 +4,6 @@ import { Outlet } from "react-router-dom";
 import Spinner from "@components/common/Spinner";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
-
 const MainLayout: React.FC = () => {
   const handleLogout = () => {
     console.log("Logout clicked");

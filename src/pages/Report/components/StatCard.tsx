@@ -1,0 +1,43 @@
+import { cn } from "@/lib/format";
+
+type Accent = "emerald" | "red" | "amber";
+
+const accentMap: Record<Accent, string> = {
+  emerald: "border-l-4 border-emerald-600",
+  red: "border-l-4 border-red-500",
+  amber: "border-l-4 border-amber-500",
+};
+
+const valueMap: Record<Accent, string> = {
+  emerald: "text-emerald-600",
+  red: "text-red-600",
+  amber: "text-amber-500",
+};
+
+export default function StatCard(props: {
+  title: string;
+  value: string;
+  note: string;
+  accent: Accent;
+  clickable?: boolean;
+}) {
+  const { title, value, note, accent, clickable } = props;
+
+  return (
+    <div
+      className={cn(
+        "rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm",
+        accentMap[accent],
+        clickable ? "cursor-pointer hover:bg-neutral-50" : ""
+      )}
+      role={clickable ? "button" : undefined}
+      tabIndex={clickable ? 0 : undefined}
+    >
+      <div className="text-base font-semibold">{title}</div>
+      <div className={cn("mt-1 text-2xl font-semibold", valueMap[accent])}>
+        {value}
+      </div>
+      <div className="mt-4 text-sm text-neutral-500">{note}</div>
+    </div>
+  );
+}
