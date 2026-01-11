@@ -11,12 +11,15 @@ import type { ActionOption } from "@/types";
 import { normalizeString } from "@/utils/string";
 import { useAssets } from "@/hooks/data/useAssests";
 import CreateAssetModal from "@/pages/Assets/create-asset";
+import DeleteAsset from "@/pages/Assets/delete-asset";
+import type { Asset } from "@/types/asset";
 
 const AssetsPage = () => {
   const [activeTab, setActiveTab] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [isNewModalOpen, setNewIsModalOpen] = useState(false);
-
+  const [isDeleteOpen, setIsDeleteOpen] = useState(true);
+  const [selectedAsset, setSelectedAsset] = useState<Asset>();
   // Lấy dữ liệu từ Hook
   const { data: assets = [], isLoading, isError, error, refetch } = useAssets();
 
@@ -138,14 +141,17 @@ const AssetsPage = () => {
               columns={assetColumns}
               defaultPageSize={10}
               onEdit={(row) => console.log("Sửa", row)}
-              onDelete={(row) => console.log("Xóa", row)}
+              onDelete={(row) => {
+                setIsDeleteOpen(true);
+                setSelectedAsset(row);
+              }}
               onView={(row) => console.log("Xem", row)}
             />
           )}
         </div>
       </div>
-
       <CreateAssetModal open={isNewModalOpen} setOpen={setNewIsModalOpen} />
+      <DeleteAsset seclectedAsset={selectedAsset} open={isDeleteOpen} setOpen={setIsDeleteOpen} />
     </>
   );
 };

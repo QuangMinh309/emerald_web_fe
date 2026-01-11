@@ -28,3 +28,7 @@ export const createAssetType = async (assetTypeData: { name: string; description
   const response = await axiosInstance.post("/asset-types", assetTypeData);
   return response.data;
 };
+export const deleteAsset = async (assetId: number) => {
+  const response = await axiosInstance.delete(`/assets/${assetId}`);
+  return response.data;
+};
