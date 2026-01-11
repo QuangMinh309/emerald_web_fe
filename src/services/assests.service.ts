@@ -1,30 +1,30 @@
-import type { Asset } from "@/pages/Assets/view-assets/columns";
-
-const data: Asset[] = [
-  {
-    id: "1",
-    code: "TS-001",
-    name: "Thang máy A01",
-    type: "Thang máy",
-    location: "Tòa A - Sảnh",
-    status: "good",
-    lastMaintenance: "02/12/2025",
-  },
-  {
-    id: "2",
-    code: "TS-002",
-    name: "Tủ điện tổng",
-    type: "Điện",
-    location: "Tòa A - Hầm",
-    status: "broken",
-    lastMaintenance: "01/12/2025",
-  },
-];
+import axiosInstance from "@/lib/axios";
+import type { Asset, AssetType } from "@/types/asset";
 // nao chi can sua service là xong
-export const getAssets = async (): Promise<Asset[]> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(data);
-    }, 800); // 800ms delay
-  });
+export const getAssets = async () => {
+  const response = await axiosInstance.get("/assets");
+  return response.data.data as Asset[];
+};
+export const getAssetTypes = async (): Promise<AssetType[]> => {
+  const response = await axiosInstance.get("/asset-types");
+  return response.data.data as AssetType[];
+};
+export const createAsset = async (assetData: {
+  name: string;
+  typeId: number;
+  blockId: number;
+  floor: number;
+  locationDetail: string;
+  status: string;
+  installationDate: string;
+  warrantyYears: number;
+  note?: string;
+}) => {
+  const response = await axiosInstance.post("/assets", assetData);
+  console.log("Created asset response:", assetData);
+  return response.data.data as Asset;
+};
+export const createAssetType = async (assetTypeData: { name: string; description?: string }) => {
+  const response = await axiosInstance.post("/asset-types", assetTypeData);
+  return response.data;
 };
