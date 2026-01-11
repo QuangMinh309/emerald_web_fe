@@ -37,15 +37,9 @@ const ActionDropdown: React.FC<ActionDropdownProps> = ({
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end" className="w-56 p-2">
-        {options.map((opt, index) => {
-          const showSeparator =
-            index > 0 &&
-            (opt.id.toLowerCase().includes("import") || opt.id.toLowerCase().includes("print"));
-
+        {options.map((opt, _index) => {
           return (
             <React.Fragment key={opt.id}>
-              {showSeparator && <DropdownMenuSeparator className="my-1 bg-gray-200" />}
-
               <DropdownMenuItem
                 onClick={opt.onClick}
                 className={cn(
