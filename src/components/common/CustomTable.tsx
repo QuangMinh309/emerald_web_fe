@@ -297,7 +297,7 @@ function CustomTable<T extends { id: string | number }>({
 
                   {(onEdit || onDelete || onView) && (
                     <TableCell className="text-center py-4">
-                      <div className="flex items-center justify-center gap-2">
+                      <div className="flex items-center justify-center gap-1.2">
                         {onEdit && (
                           <Button
                             variant="ghost"
