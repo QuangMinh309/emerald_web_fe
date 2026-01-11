@@ -5,44 +5,26 @@ import ActionDropdown from "@components/common/ActionDropdown";
 import CustomTable from "@components/common/CustomTable";
 import { TabNavigation } from "@components/common/TabNavigation";
 import { SearchBar } from "@/components/common/SearchBar";
-import type { Asset } from "./columns";
+
 import { assetColumns } from "./columns";
 import type { ActionOption } from "@/types";
 import { normalizeString } from "@/utils/string";
+import { useAssets } from "@/hooks/data/useAssests";
 
 const AssetsPage = () => {
   const [activeTab, setActiveTab] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
 
-  // data mẫu
-  const data: Asset[] = [
-    {
-      id: "1",
-      code: "TS-001",
-      name: "Thang máy A01",
-      type: "Thang máy",
-      location: "Tòa A - Sảnh",
-      status: "good",
-      lastMaintenance: "02/12/2025",
-    },
-    {
-      id: "2",
-      code: "TS-002",
-      name: "Tủ điện tổng",
-      type: "Điện",
-      location: "Tòa A - Hầm",
-      status: "broken",
-      lastMaintenance: "01/12/2025",
-    },
-  ];
+  const { data: assets = [], isLoading, isError, error, refetch } = useAssets();
 
   const filteredData = useMemo(() => {
-    if (!searchTerm.trim()) return data;
+    if (!assets.length) return [];
+
+    if (!searchTerm.trim()) return assets;
 
     const normalizedSearch = normalizeString(searchTerm);
 
-    return data.filter((item) => {
-      // đang hard code, nhưng nếu nhiều tab, các tab khác cột thì check config columns để dynamic
+    return assets.filter((item) => {
       return (
         normalizeString(item.name).includes(normalizedSearch) ||
         normalizeString(item.code).includes(normalizedSearch) ||
@@ -50,19 +32,20 @@ const AssetsPage = () => {
         normalizeString(item.location).includes(normalizedSearch)
       );
     });
-  }, [data, searchTerm]);
+  }, [assets, searchTerm]);
 
   const handleImport = () => {
     console.log("import");
   };
 
   const handleDeleteAll = () => {
+    if (!assets.length) return;
+
     if (confirm("Bạn có chắc muốn xóa tất cả?")) {
       console.log("deleting all...");
     }
   };
 
-  // muốn thêm thao tác thì thêm, danger => đỏ
   const actions: ActionOption[] = useMemo(
     () => [
       {
@@ -71,6 +54,7 @@ const AssetsPage = () => {
         icon: <Trash2 />,
         variant: "danger",
         onClick: handleDeleteAll,
+        disabled: assets.length === 0,
       },
       {
         id: "delete_more",
@@ -78,6 +62,7 @@ const AssetsPage = () => {
         icon: <Trash2 />,
         variant: "danger",
         onClick: () => console.log("Xóa nhiều"),
+        disabled: assets.length === 0,
       },
       {
         id: "import",
@@ -90,9 +75,10 @@ const AssetsPage = () => {
         label: "In danh sách",
         icon: <Printer />,
         onClick: () => console.log("In"),
+        disabled: assets.length === 0,
       },
     ],
-    [],
+    [assets.length],
   );
 
   return (
@@ -106,7 +92,6 @@ const AssetsPage = () => {
               <Plus className="w-4 h-4" /> Tạo tài sản
             </button>
 
-            {/* nếu có import thì truyền file */}
             <ActionDropdown
               options={actions}
               sampleFileUrl="/template/asset_import_template.xlsx"
@@ -117,7 +102,6 @@ const AssetsPage = () => {
 
       <div className="bg-white p-4 pt-6 pb-6 rounded-sm border border-gray-200 shadow-sm space-y-6">
         <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
-          {/* có thể chỉnh kích thước tab */}
           <TabNavigation
             tabs={[
               { id: "all", label: "Tất cả thiết bị" },
@@ -126,7 +110,6 @@ const AssetsPage = () => {
             ]}
             activeTab={activeTab}
             onChange={setActiveTab}
-            // size = "md"
           />
         </div>
 
@@ -138,14 +121,41 @@ const AssetsPage = () => {
         </div>
       </div>
 
-      <CustomTable
-        data={filteredData}
-        columns={assetColumns}
-        defaultPageSize={10}
-        onEdit={(row) => console.log("Sửa", row)}
-        onDelete={(row) => console.log("Xóa", row)}
-        onView={(row) => console.log("Xem", row)}
-      />
+      {isLoading && (
+        <div className="bg-white p-6 rounded border text-center text-gray-500">
+          Đang tải dữ liệu tài sản...
+        </div>
+      )}
+
+      {isError && (
+        <div className="bg-red-50 border border-red-200 p-6 rounded text-red-600 space-y-2">
+          <div>Không thể tải dữ liệu tài sản.</div>
+          <div className="text-sm">{(error as Error)?.message}</div>
+          <button
+            onClick={() => refetch()}
+            className="mt-2 px-3 py-1.5 bg-red-600 text-white rounded text-sm hover:bg-red-700"
+          >
+            Thử lại
+          </button>
+        </div>
+      )}
+
+      {!isLoading && !isError && filteredData.length === 0 && (
+        <div className="bg-white p-6 rounded border text-center text-gray-500">
+          Không có dữ liệu tài sản.
+        </div>
+      )}
+
+      {!isLoading && !isError && filteredData.length > 0 && (
+        <CustomTable
+          data={filteredData}
+          columns={assetColumns}
+          defaultPageSize={10}
+          onEdit={(row) => console.log("Sửa", row)}
+          onDelete={(row) => console.log("Xóa", row)}
+          onView={(row) => console.log("Xem", row)}
+        />
+      )}
     </div>
   );
 };
