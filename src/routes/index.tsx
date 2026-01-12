@@ -8,7 +8,16 @@ const Apartments = lazy(() => import("@/pages/Feedback"));
 const Services = lazy(() => import("@/pages/Services"));
 const Report = lazy(() => import("@/pages/Report"));
 const DetailServicePage = lazy(() => import("@/pages/Services/DetailService"));
+const Login = lazy(() => import("@/pages/Login"));
+const ForgotPassword = lazy(() => import("@/pages/ForgotPassword"));
+const VerifyEmail = lazy(() => import("@/pages/VerifyEmail"));
+const ResetPassword = lazy(() => import("@/pages/ResetPassword"));
+
 export const routes = createBrowserRouter([
+  { path: "/login", element: <Login /> },
+  { path: "/forgot-password", element: <ForgotPassword /> },
+  { path: "/verify-email", element: <VerifyEmail /> },
+  { path: "/reset-password", element: <ResetPassword /> },
   {
     path: "/",
     element: <MainLayout />,
