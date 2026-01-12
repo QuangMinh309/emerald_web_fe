@@ -25,12 +25,7 @@ const DeleteService = ({ open, setOpen, selectedService }: DeleteServiceProps) =
   };
 
   return (
-    <PopConfirm
-      title="Xác nhận xóa"
-      open={open}
-      setOpen={setOpen}
-      handleConfirm={handleDelete}
-    >
+    <PopConfirm title="Xác nhận xóa" open={open} setOpen={setOpen} handleConfirm={handleDelete}>
       <p>{`Bạn có chắc chắn muốn xóa dịch vụ "${selectedService?.name}" không?`}</p>
     </PopConfirm>
   );

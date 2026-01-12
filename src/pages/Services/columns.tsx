@@ -43,7 +43,9 @@ export const serviceColumns: TableColumn<Service>[] = [
     filterable: true,
     filterAccessor: (row) => typeMap[String(row.status)]?.label ?? String(row.status),
     render: (row) => {
-      const config = typeMap[String(row.status ?? "NORMAL")] ?? { label: String(row.type ?? "NORMAL") };
+      const config = typeMap[String(row.status ?? "NORMAL")] ?? {
+        label: String(row.type ?? "NORMAL"),
+      };
       return <StatusBadge label={config.label} type={config.type} />;
     },
   },

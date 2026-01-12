@@ -1,6 +1,6 @@
 // src/services/services.service.ts
 import axiosInstance from "@/lib/axios";
-import type { Service } from "@/types/service"
+import type { Service } from "@/types/service";
 
 const USE_MOCK = true;
 
@@ -35,13 +35,11 @@ const mockServices: Service[] = [
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-
 export const getServices = async (): Promise<Service[]> => {
-    if (USE_MOCK) {
+  if (USE_MOCK) {
     await sleep(200);
     return [...mockServices];
   }
-
 
   const res = await axiosInstance.get("/services");
   return res.data.data as Service[];
@@ -54,7 +52,6 @@ export const getServiceById = async (id: number): Promise<Service> => {
     if (!found) throw new Error("Service not found");
     return { ...found };
   }
-
 
   const res = await axiosInstance.get(`/services/${id}`);
   return res.data.data as Service;
@@ -82,7 +79,10 @@ export const createService = async (payload: CreateServiceInput): Promise<Servic
 // Payload update: partial
 export type UpdateServiceInput = Partial<CreateServiceInput>;
 
-export const updateService = async (args: { id: number; payload: UpdateServiceInput }): Promise<Service> => {
+export const updateService = async (args: {
+  id: number;
+  payload: UpdateServiceInput;
+}): Promise<Service> => {
   if (USE_MOCK) {
     await sleep(200);
     const idx = mockServices.findIndex((s) => s.id === args.id);
@@ -90,7 +90,7 @@ export const updateService = async (args: { id: number; payload: UpdateServiceIn
     mockServices[idx] = { ...mockServices[idx], ...args.payload };
     return mockServices[idx];
   }
-  
+
   const res = await axiosInstance.patch(`/services/${args.id}`, args.payload);
   return res.data.data as Service;
 };

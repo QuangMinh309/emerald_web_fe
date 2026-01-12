@@ -7,12 +7,12 @@ export interface BookingCustomerRow {
 
   customerName: string;
   phone: string;
-  bookingDate: string;   
-  price?: number;        
-  unit?: string;         
-  checkinDate?: string;  
-  startTime?: string;    
-  endTime?: string;      
+  bookingDate: string;
+  price?: number;
+  unit?: string;
+  checkinDate?: string;
+  startTime?: string;
+  endTime?: string;
   status: "active" | "inactive";
 }
 
@@ -25,7 +25,7 @@ const statusMap: Record<
 };
 
 export const bookingColumns: TableColumn<BookingCustomerRow>[] = [
-  { key: "stt", label: "STT", align: "center"},
+  { key: "stt", label: "STT", align: "center" },
 
   { key: "customerName", label: "Tên khách", sortable: true, width: "180px" },
   { key: "phone", label: "Số điện thoại", width: "120px" },

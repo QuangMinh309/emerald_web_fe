@@ -33,32 +33,30 @@ interface UpdateModalProps {
   setOpen: (value: boolean) => void;
   serviceId?: number;
 }
-const UpdateServiceSchema = z
-  .object({
-    name: z.string().min(1, "Vui lòng nhập tên dịch vụ"),
-    description: z.string().optional(),
+const UpdateServiceSchema = z.object({
+  name: z.string().min(1, "Vui lòng nhập tên dịch vụ"),
+  description: z.string().optional(),
 
-    unitPrice: z
-      .string()
-      .min(1, "Vui lòng nhập giá")
-      .refine((v) => !Number.isNaN(Number(v)), "Giá không hợp lệ"),
+  unitPrice: z
+    .string()
+    .min(1, "Vui lòng nhập giá")
+    .refine((v) => !Number.isNaN(Number(v)), "Giá không hợp lệ"),
 
-    unitTimeBlock: z.string().min(1, "Vui lòng chọn đơn vị"),
+  unitTimeBlock: z.string().min(1, "Vui lòng chọn đơn vị"),
 
-    openHour: z.string().min(1, "Vui lòng chọn giờ mở cửa"),
-    closeHour: z.string().min(1, "Vui lòng chọn giờ đóng cửa"),
+  openHour: z.string().min(1, "Vui lòng chọn giờ mở cửa"),
+  closeHour: z.string().min(1, "Vui lòng chọn giờ đóng cửa"),
 
-    totalSlot: z
-      .string()
-      .min(1, "Vui lòng nhập sức chứa")
-      .refine((v) => Number(v) > 0, "Sức chứa phải lớn hơn 0"),
+  totalSlot: z
+    .string()
+    .min(1, "Vui lòng nhập sức chứa")
+    .refine((v) => Number(v) > 0, "Sức chứa phải lớn hơn 0"),
 
-    type: z.string().optional(),
-    status: z.string().min(1, "Vui lòng chọn trạng thái"),
+  type: z.string().optional(),
+  status: z.string().min(1, "Vui lòng chọn trạng thái"),
 
-    // imageUrl: z.string().optional(),
-  })
-
+  // imageUrl: z.string().optional(),
+});
 
 type ServiceFormValues = z.infer<typeof UpdateServiceSchema>;
 
@@ -101,7 +99,9 @@ const UpdateServiceModal = ({ open, setOpen, serviceId }: UpdateModalProps) => {
   );
 
   const typeOptions = useMemo(() => {
-    const opts: { value: AmenityType; label: string }[] = [{ value: "NORMAL", label: "Bình thường" }];
+    const opts: { value: AmenityType; label: string }[] = [
+      { value: "NORMAL", label: "Bình thường" },
+    ];
     return opts;
   }, []);
 

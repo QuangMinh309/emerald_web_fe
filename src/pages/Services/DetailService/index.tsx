@@ -10,13 +10,11 @@ import { normalizeString } from "@/utils/string";
 
 import { useServiceDetail } from "@hooks/data/useServices";
 
-const titleStyle = "text-xl font-bold text-main";
-const subtitleStyle = "text-base mt-1";
-const contentStyle = "text-sm text-gray-500";
 // tạm: booking mock để page không lỗi (khi bạn chưa có booking API/hook)
 const bookingData: BookingCustomerRow[] = [];
 
-const formatVND = (n?: number) => (n == null ? "—" : new Intl.NumberFormat("vi-VN").format(n) + " VND");
+const formatVND = (n?: number) =>
+  n == null ? "—" : new Intl.NumberFormat("vi-VN").format(n) + " VND";
 
 const formatHour = (time?: string) => {
   if (!time) return "—";
@@ -44,7 +42,6 @@ const DetailServicePage = () => {
       return normalizeString(b.customerName).includes(q) || normalizeString(b.phone).includes(q);
     });
   }, [searchTerm]);
-
 
   // Loading / Error UI
   if (!Number.isFinite(serviceId) || serviceId <= 0) {
@@ -83,58 +80,55 @@ const DetailServicePage = () => {
             {/* Thông tin chung */}
             <div className="space-y-10">
               <div className="space-y-5">
-
-                <h2 className={titleStyle}>Thông tin chung</h2>
+                <h2 className="title-text">Thông tin chung</h2>
 
                 <div className="space-y-2">
-                  <h3 className={subtitleStyle}>Mô tả</h3>
-                  <p className={contentStyle}>{service.description ?? "—"}</p>
+                  <h3 className="subtitle-text">Mô tả</h3>
+                  <p className="content-text">{service.description ?? "—"}</p>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
                   <div>
-                    <h3 className={subtitleStyle}>Đơn giá</h3>
-                    <p className={contentStyle}>
+                    <h3 className="subtitle-text">Đơn giá</h3>
+                    <p className="content-text">
                       {formatVND(service.unitPrice)} / {service.unitTimeBlock} phút
                     </p>
                   </div>
 
                   <div>
-                    <h3 className={subtitleStyle}>Giờ mở cửa</h3>
-                    <p className={contentStyle}>{formatHour(service.openHour)}</p>
+                    <h3 className="subtitle-text">Giờ mở cửa</h3>
+                    <p className="content-text">{formatHour(service.openHour)}</p>
                   </div>
 
                   <div>
-                    <h3 className={subtitleStyle}>Giờ đóng cửa</h3>
-                    <p className={contentStyle}>{formatHour(service.closeHour)}</p>
+                    <h3 className="subtitle-text">Giờ đóng cửa</h3>
+                    <p className="content-text">{formatHour(service.closeHour)}</p>
                   </div>
 
                   <div>
-                    <h3 className={subtitleStyle}>Sức chứa</h3>
-                    <p className={contentStyle}>{service.totalSlot} chỗ</p>
+                    <h3 className="subtitle-text">Sức chứa</h3>
+                    <p className="content-text">{service.totalSlot} chỗ</p>
                   </div>
                 </div>
               </div>
 
-            {/* Lịch sử đặt chỗ */}
-            <div className="space-y-4">
-              <h2 className={titleStyle}>Lịch sử đặt chỗ</h2>
-              <div className="w-full">
-                <SearchBar
-                  placeholder="Tìm kiếm theo tên khách hàng, số điện thoại..."
-                  onSearch={setSearchTerm}
+              {/* Lịch sử đặt chỗ */}
+              <div className="space-y-4">
+                <h2 className="title-text">Lịch sử đặt chỗ</h2>
+                <div className="w-full">
+                  <SearchBar
+                    placeholder="Tìm kiếm theo tên khách hàng, số điện thoại..."
+                    onSearch={setSearchTerm}
+                  />
+                </div>
+                <CustomTable
+                  data={filteredBookings}
+                  columns={bookingColumns}
+                  defaultPageSize={10}
+                  onDelete={(row) => console.log("Xóa booking", row)}
                 />
               </div>
-              <CustomTable
-                data={filteredBookings}
-                columns={bookingColumns}
-                defaultPageSize={10}
-                onDelete={(row) => console.log("Xóa booking", row)}
-              />
             </div>
-            </div>
-
-
           </>
         )}
       </div>

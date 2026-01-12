@@ -31,7 +31,6 @@ const ServicesPage = () => {
   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
   const [serviceToEdit, setServiceToEdit] = useState<Service | null>(null);
 
-
   // Lấy dữ liệu từ Hook (mock đang nằm ở service file)
   const { data: services = [], isLoading, isError, error, refetch } = useServices();
 
@@ -95,17 +94,16 @@ const ServicesPage = () => {
                 <Plus className="w-4 h-4" /> Thêm dịch vụ
               </button>
 
-              <ActionDropdown options={actions} sampleFileUrl="/template/service_import_template.xlsx" />
+              <ActionDropdown
+                options={actions}
+                sampleFileUrl="/template/service_import_template.xlsx"
+              />
             </div>
           }
         />
 
         <div className="bg-white p-4 rounded-sm border border-gray-200 shadow-sm space-y-4">
-
-          <SearchBar
-            placeholder="Tìm kiếm theo tên dịch vụ, mô tả..."
-            onSearch={setSearchTerm}
-          />
+          <SearchBar placeholder="Tìm kiếm theo tên dịch vụ, mô tả..." onSearch={setSearchTerm} />
         </div>
 
         <div className="min-h-[400px]">
@@ -148,10 +146,7 @@ const ServicesPage = () => {
         </div>
       </div>
 
-      <CreateServiceModal
-        open={isNewModalOpen}
-        setOpen={setNewIsModalOpen}
-      />
+      <CreateServiceModal open={isNewModalOpen} setOpen={setNewIsModalOpen} />
       <DeleteService
         open={isDeleteOpen}
         setOpen={setIsDeleteOpen}
@@ -164,8 +159,8 @@ const ServicesPage = () => {
           if (!open) setServiceToEdit(null);
         }}
         serviceId={serviceToEdit?.id}
-      // nếu modal hỗ trợ callback:
-      // onUpdated={() => { setIsUpdateOpen(false); setServiceToEdit(null); refetch(); }}
+        // nếu modal hỗ trợ callback:
+        // onUpdated={() => { setIsUpdateOpen(false); setServiceToEdit(null); refetch(); }}
       />
     </>
   );

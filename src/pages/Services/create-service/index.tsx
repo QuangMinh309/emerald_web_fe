@@ -95,7 +95,6 @@ const CreateServiceModal = ({ open, setOpen }: ModalProps) => {
     return options;
   }, []);
 
-
   const unitOptions = useMemo(
     () => [
       { value: "30", label: "30 phút" },
