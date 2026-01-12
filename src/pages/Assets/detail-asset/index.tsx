@@ -49,10 +49,6 @@ const DetailAssetPage = () => {
       <div className="bg-white p-4 pt-6 pb-6 rounded-sm border border-gray-200 shadow-sm space-y-6">
         <div className="flex justify-between items-center">
           <h2 className="title-text">Thông tin chung</h2>
-          {
-            /* trạng thái thiết bị: tốt / cảnh báo / hỏng  */
-            asset?.status
-          }
           <StatusBadge label={cfg.label} type={cfg.type} />
         </div>
         <div className="space-y-2">

@@ -1,4 +1,4 @@
-interface Block {
+export interface Block {
   id: number;
   buildingName: string;
   status: string;
@@ -13,4 +13,20 @@ interface Block {
     penthouse: number;
   };
 }
-export type { Block };
+
+export interface BlockDetail {
+  id: number;
+  buildingName: string;
+  status: string;
+  totalFloors: number;
+  managerName: string;
+  managerPhone: string;
+  totalRooms: number;
+  apartments: {
+    id: number;
+    roomName: string;
+    type: string;
+    area: string;
+    floor: number;
+  }[];
+}

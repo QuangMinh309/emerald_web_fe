@@ -2,6 +2,8 @@ import { lazy } from "react";
 import { createBrowserRouter } from "react-router-dom";
 import MainLayout from "@components/layout/MainLayout";
 import DetailAssetPage from "@/pages/Assets/detail-asset";
+import ResidentsPage from "@/pages/Residents/view-residents";
+import DetailResidentPage from "@/pages/Residents/detail-resident";
 
 const Assets = lazy(() => import("@/pages/Assets/view-assets"));
 const Apartments = lazy(() => import("@/pages/Feedback"));
@@ -23,7 +25,8 @@ export const routes = createBrowserRouter([
     element: <MainLayout />,
     children: [
       { path: "assets", element: <Assets /> },
-      { path: "residents", element: <Apartments /> },
+      { path: "residents", element: <ResidentsPage /> },
+      { path: "residents/:id", element: <DetailResidentPage /> },
       { path: "services", element: <Services /> },
       { path: "reports", element: <Report /> },
       { path: "services/:id", element: <DetailServicePage /> },
