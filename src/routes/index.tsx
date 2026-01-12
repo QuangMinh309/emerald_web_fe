@@ -1,6 +1,7 @@
 import { lazy } from "react";
 import { createBrowserRouter } from "react-router-dom";
 import MainLayout from "@components/layout/MainLayout";
+import DetailAssetPage from "@/pages/Assets/detail-asset";
 
 const Assets = lazy(() => import("@/pages/Assets/view-assets"));
 const Apartments = lazy(() => import("@/pages/Feedback"));
@@ -17,6 +18,7 @@ export const routes = createBrowserRouter([
       { path: "services", element: <Services /> },
       { path: "reports", element: <Report /> },
       { path: "services/:id", element: <DetailServicePage /> },
+      { path: "assets/:id", element: <DetailAssetPage /> },
     ],
   },
 ]);

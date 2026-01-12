@@ -1,0 +1,149 @@
+import CustomTable from "@/components/common/CustomTable";
+import PageHeader from "@/components/common/PageHeader";
+import { SearchBar } from "@/components/common/SearchBar";
+import StatusBadge from "@/components/common/StatusBadge";
+import { useGetAssetById } from "@/hooks/data/useAssests";
+import { useMaintenances } from "@/hooks/data/useMaintenance";
+import { maintenanceColumns } from "@/pages/Assets/detail-asset/columns";
+import type { Maintenance } from "@/types/maintenance";
+import { normalizeString } from "@/utils/string";
+import { useMemo, useState } from "react";
+import { useParams } from "react-router-dom";
+const statusMap: Record<
+  string,
+  { label: string; type: "success" | "warning" | "error" | "default" }
+> = {
+  ACTIVE: { label: "Hoạt động", type: "success" },
+  INACTIVE: { label: "Ngưng sử dụng", type: "default" },
+  MAINTENANCE: { label: "Đang bảo trì", type: "warning" },
+  BROKEN: { label: "Hư hỏng", type: "error" },
+};
+const DetailAssetPage = () => {
+  const { id } = useParams();
+  const { data: asset } = useGetAssetById(Number(id));
+  const cfg = statusMap[asset?.status ?? ""] || {
+    label: asset?.status ?? "Unknown",
+    type: "default",
+  };
+  const [search, setSearch] = useState("");
+
+  const { data = [], isLoading, isError, refetch } = useMaintenances();
+
+  const filtered = useMemo(() => {
+    if (!search.trim()) return data;
+    const s = normalizeString(search);
+    return data.filter(
+      (m) =>
+        normalizeString(m.title).includes(s) ||
+        normalizeString(m.maintenanceType).includes(s) ||
+        normalizeString(m.technicianName).includes(s),
+    );
+  }, [data, search]);
+  return (
+    <div className="p-1.5 pt-0 space-y-4">
+      <PageHeader
+        title={asset?.name ?? "Chi tiết dịch vụ"}
+        // subtitle="Quản lý  danh sách các dịch vụ của chung cư"
+        showBack
+      />
+      <div className="bg-white p-4 pt-6 pb-6 rounded-sm border border-gray-200 shadow-sm space-y-6">
+        <div className="flex justify-between items-center">
+          <h2 className="title-text">Thông tin chung</h2>
+          {
+            /* trạng thái thiết bị: tốt / cảnh báo / hỏng  */
+            asset?.status
+          }
+          <StatusBadge label={cfg.label} type={cfg.type} />
+        </div>
+        <div className="space-y-2">
+          {/* 4 cột thông tin */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+            <div>
+              <h3 className="display-label">Loại thiết bị</h3>
+              <p className="display-text">{asset?.type.name}</p>
+            </div>
+
+            <div>
+              <h3 className="display-label">Tòa</h3>
+              <p className="display-text">{asset?.location.blockName}</p>
+            </div>
+
+            <div>
+              <h3 className="display-label">Tầng</h3>
+              <p className="display-text">{asset?.location.floorDisplay}</p>
+            </div>
+
+            <div>
+              <h3 className="display-label">Mô tả chi tiết</h3>
+              <p className="display-text">{asset?.description}</p>
+            </div>
+          </div>
+          <div>
+            <h3 className="display-label">Ghi chú</h3>
+            <p className="display-text">{asset?.note}</p>
+          </div>
+        </div>
+
+        <div>
+          <h2 className="title-text">Thông tin thời gian</h2>
+        </div>
+        <div className="space-y-2">
+          {/* 4 cột thông tin */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+            <div>
+              <h3 className="display-label">Ngày lắp đặt</h3>
+              <p className="display-text">{asset?.timeline.installationDate}</p>
+            </div>
+
+            <div>
+              <h3 className="display-label">Bảo trì gần nhất</h3>
+              <p className="display-text">
+                {asset?.timeline.lastMaintenanceDate || "Chưa từng bảo trì"}
+              </p>
+            </div>
+
+            <div>
+              <h3 className="display-label">Bảo trì tiếp theo</h3>
+              <p className="display-text">{asset?.timeline.nextMaintenanceDate || "Chưa có"}</p>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h2 className="title-text">Lịch sử bảo trì, sửa chữa</h2>
+        </div>
+        <div className="bg-white p-4 rounded border shadow-sm">
+          <SearchBar
+            placeholder="Tìm theo tiêu đề, loại bảo trì, kỹ thuật viên..."
+            onSearch={setSearch}
+          />
+        </div>
+
+        <div>
+          {isLoading ? (
+            <div className="bg-white p-12 text-center text-gray-500 border rounded">
+              Đang tải dữ liệu...
+            </div>
+          ) : isError ? (
+            <div className="bg-red-50 border p-8 rounded text-center">
+              Không thể tải dữ liệu
+              <button
+                onClick={() => refetch()}
+                className="block mx-auto mt-3 px-4 py-2 bg-red-600 text-white rounded"
+              >
+                Thử lại
+              </button>
+            </div>
+          ) : (
+            <CustomTable
+              data={filtered as Maintenance[]}
+              columns={maintenanceColumns}
+              defaultPageSize={10}
+            />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+export default DetailAssetPage;

@@ -1,9 +1,7 @@
 import { useState, useMemo } from "react";
-import { Plus, Printer, FileDown, Trash2 } from "lucide-react";
+import { Printer, FileDown, Trash2 } from "lucide-react";
 import PageHeader from "@components/common/PageHeader";
-import ActionDropdown from "@components/common/ActionDropdown";
 import CustomTable from "@components/common/CustomTable";
-import { TabNavigation } from "@components/common/TabNavigation";
 import { SearchBar } from "@/components/common/SearchBar";
 import { bookingColumns, type BookingCustomerRow } from "./columns";
 import type { Service } from "../columns";
@@ -11,9 +9,6 @@ import type { ActionOption } from "@/types";
 import { normalizeString } from "@/utils/string";
 import { useLocation, useParams } from "react-router-dom";
 type LocationState = { service?: Service };
-const titleStyle = "text-2xl font-bold text-main";
-const subtitleStyle = "text-gray-500 text-base mt-1";
-const contentStyle = "text-[18px] font-normal text-black";
 
 const DetailServicePage = () => {
   const { id } = useParams();
@@ -52,19 +47,14 @@ const DetailServicePage = () => {
     },
   ];
 
-
   const filteredBookings = useMemo(() => {
     if (!searchTerm.trim()) return bookingData;
     const q = normalizeString(searchTerm);
 
     return bookingData.filter((b) => {
-      return (
-        normalizeString(b.customerName).includes(q) ||
-        normalizeString(b.phone).includes(q)
-      );
+      return normalizeString(b.customerName).includes(q) || normalizeString(b.phone).includes(q);
     });
   }, [bookingData, searchTerm]);
-
 
   const handleImport = () => {
     console.log("import");
@@ -131,45 +121,43 @@ const DetailServicePage = () => {
       <div className="bg-white p-4 pt-6 pb-6 rounded-sm border border-gray-200 shadow-sm space-y-6">
         <div className="space-y-8">
           <div className="space-y-2">
-            <h2 className={titleStyle}>Thông tin chung</h2>
+            <h2 className="title-text">Thông tin chung</h2>
           </div>
           {/* Mô tả */}
           <div className="space-y-2">
-            <h2 className={subtitleStyle}>Mô tả</h2>
-            <p className={contentStyle}>
-              {service?.description ?? "—"}
-            </p>
+            <h2 className="display-label">Mô tả</h2>
+            <p className="display-text">{service?.description ?? "—"}</p>
           </div>
 
           {/* 4 cột thông tin */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
             <div>
-              <h3 className={subtitleStyle}>Đơn giá</h3>
-              <p className={contentStyle}>
+              <h3 className="display-label">Đơn giá</h3>
+              <p className="display-text">
                 {formatVND(service?.price ?? 0)} / {service?.unit}
               </p>
             </div>
 
             <div>
-              <h3 className={subtitleStyle}>Giờ mở cửa</h3>
-              <p className={contentStyle}>{formatHour(service?.start ?? "")}</p>
+              <h3 className="display-label">Giờ mở cửa</h3>
+              <p className="display-text">{formatHour(service?.start ?? "")}</p>
             </div>
 
             <div>
-              <h3 className={subtitleStyle}>Giờ đóng cửa</h3>
-              <p className={contentStyle}>{formatHour(service?.end ?? "")}</p>
+              <h3 className="display-label">Giờ đóng cửa</h3>
+              <p className="display-text">{formatHour(service?.end ?? "")}</p>
             </div>
 
             <div>
-              <h3 className={subtitleStyle}>Sức chứa</h3>
-              <p className={contentStyle}>
+              <h3 className="display-label">Sức chứa</h3>
+              <p className="display-text">
                 {service?.max} người / {service?.unit}
               </p>
             </div>
           </div>
         </div>
         <div className="space-y-2">
-          <h2 className={titleStyle}>Lịch sử đặt chỗ</h2>
+          <h2 className="title-text">Lịch sử đặt chỗ</h2>
         </div>
 
         <div className="w-full">
@@ -185,8 +173,6 @@ const DetailServicePage = () => {
           onDelete={(row) => console.log("Xóa", row)}
         />
       </div>
-
-
     </div>
   );
 };

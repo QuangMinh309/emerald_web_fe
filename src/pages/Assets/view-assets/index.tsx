@@ -18,8 +18,10 @@ import UpdateAssetModal from "@/pages/Assets/update-asset";
 import CreateAssetTypeModal from "@/pages/Assets/create-asset-type";
 import UpdateAssetTypeModal from "@/pages/Assets/update-asset-type";
 import DeleteAssetType from "@/pages/Assets/delete-asset-type";
+import { useNavigate } from "react-router-dom";
 
 const AssetsPage = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("assets");
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -224,6 +226,7 @@ const AssetsPage = () => {
                   setDeletedAssetType(row as AssetType);
                 }
               }}
+              onView={(row) => navigate(`/assets/${row.id}`)}
             />
           )}
         </div>

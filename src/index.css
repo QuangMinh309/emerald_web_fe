@@ -88,3 +88,16 @@
     @apply bg-background text-foreground;
   }
 }
+@layer components {
+  .display-text {
+    @apply text-[18px] font-normal text-black;
+  }
+
+  .display-label {
+    @apply text-gray-500 text-base mt-1;
+  }
+
+  .title-text {
+    @apply text-2xl font-bold text-main;
+  }
+}
