@@ -9,7 +9,6 @@ import RevenueExpenseChart from "./components/RevenueChart";
 import StatCard from "./components/StatCard";
 
 const ReportPage = () => {
-
   const handleImport = () => {
     console.log("import");
   };
@@ -20,23 +19,8 @@ const ReportPage = () => {
     }
   };
 
-  // muốn thêm thao tác thì thêm, danger => đỏ
   const actions: ActionOption[] = useMemo(
     () => [
-      {
-        id: "delete_all",
-        label: "Xóa tất cả",
-        icon: <Trash2 />,
-        variant: "danger",
-        onClick: handleDeleteAll,
-      },
-      {
-        id: "delete_more",
-        label: "Xóa nhiều",
-        icon: <Trash2 />,
-        variant: "danger",
-        onClick: () => console.log("Xóa nhiều"),
-      },
       {
         id: "import",
         label: "Import Excel",
@@ -70,53 +54,43 @@ const ReportPage = () => {
       />
 
       <div className="space-y-6">
-      {/* Top stats */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <StatCard
-          title="Doanh thu"
-          value="980 triệu"
-          note="+8.2% so với tháng trước"
-          accent="emerald"
-        />
-        <StatCard
-          title="Tổng công nợ"
-          value="245,8 triệu"
-          note="32 căn hộ còn nợ"
-          accent="red"
-        />
-        <StatCard
-          title="Đã bảo trì"
-          value="10 thiết bị"
-          note="Xem chi tiết"
-          accent="amber"
-          clickable
-        />
-      </div>
-
-      {/* Big chart */}
-      <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
-        <h2 className="mb-4 text-xl font-semibold">Doanh thu &amp; Chi phí</h2>
-        <RevenueExpenseChart />
-      </div>
-
-      {/* Bottom cards */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
-          <h3 className="mb-3 text-sm font-semibold">Dịch vụ (lượt)</h3>
-          <ServicesBarChart />
-        </div>
-
-        <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
-          <h3 className="mb-7 text-sm font-semibold">Tài sản &amp; Thiết bị</h3>
-          <AssetStatusSummary
-            broken={96}
-            maintaining={705}
-            good={1113}
+        {/* Top stats */}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <StatCard
+            title="Doanh thu"
+            value="980 triệu"
+            note="+8.2% so với tháng trước"
+            accent="emerald"
+          />
+          <StatCard title="Tổng công nợ" value="245,8 triệu" note="32 căn hộ còn nợ" accent="red" />
+          <StatCard
+            title="Đã bảo trì"
+            value="10 thiết bị"
+            note="Xem chi tiết"
+            accent="amber"
+            clickable
           />
         </div>
-      </div>
-    </div>
 
+        {/* Big chart */}
+        <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
+          <h2 className="mb-4 text-xl font-semibold">Doanh thu &amp; Chi phí</h2>
+          <RevenueExpenseChart />
+        </div>
+
+        {/* Bottom cards */}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
+            <h3 className="mb-3 text-sm font-semibold">Dịch vụ (lượt)</h3>
+            <ServicesBarChart />
+          </div>
+
+          <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
+            <h3 className="mb-7 text-sm font-semibold">Tài sản &amp; Thiết bị</h3>
+            <AssetStatusSummary broken={96} maintaining={705} good={1113} />
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

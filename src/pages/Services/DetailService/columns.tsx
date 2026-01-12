@@ -7,19 +7,15 @@ export interface BookingCustomerRow {
 
   customerName: string;
   phone: string;
-
-  bookingDate: string;   // Ngày đặt sân (vd: "2026-01-11")
-  price?: number;        // Đơn giá
-  unit?: string;         // Đơn vị (vd: "30 phút")
-
-  checkinDate?: string;  // Ngày nhận sân
-  startTime?: string;    // Giờ vào (vd: "05:00")
-  endTime?: string;      // Giờ ra (vd: "22:00")
-
+  bookingDate: string;
+  price?: number;
+  unit?: string;
+  checkinDate?: string;
+  startTime?: string;
+  endTime?: string;
   status: "active" | "inactive";
 }
 
-// màu có thể dùng type hoặc className
 const statusMap: Record<
   string,
   { label: string; type?: "success" | "warning" | "error"; className?: string }
@@ -29,7 +25,7 @@ const statusMap: Record<
 };
 
 export const bookingColumns: TableColumn<BookingCustomerRow>[] = [
-  { key: "stt", label: "STT", align: "center"},
+  { key: "stt", label: "STT", align: "center" },
 
   { key: "customerName", label: "Tên khách", sortable: true, width: "180px" },
   { key: "phone", label: "Số điện thoại", width: "120px" },
@@ -56,5 +52,4 @@ export const bookingColumns: TableColumn<BookingCustomerRow>[] = [
       return <StatusBadge label={config.label} type={config.type} className={config.className} />;
     },
   },
-
 ];

@@ -1,140 +1,168 @@
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Plus, Printer, FileDown, Trash2 } from "lucide-react";
-import PageHeader from "@components/common/PageHeader";
-import ActionDropdown from "@components/common/ActionDropdown";
-import CustomTable from "@components/common/CustomTable";
-import { SearchBar } from "@/components/common/SearchBar";
-import type { Service } from "./columns";
-import { serviceColumns } from "./columns";
-import type { ActionOption } from "@/types";
-import { normalizeString } from "@/utils/string";
 import { useNavigate } from "react-router-dom";
+
+import PageHeader from "@/components/common/PageHeader";
+import ActionDropdown from "@/components/common/ActionDropdown";
+import CustomTable from "@/components/common/CustomTable";
+import { SearchBar } from "@/components/common/SearchBar";
+// import { TabNavigation } from "@/components/common/TabNavigation"; // nếu bạn muốn lọc theo tab
+
+import { normalizeString } from "@/utils/string";
+import type { ActionOption } from "@/types";
+
+import type { Service } from "@/types/service";
+import { serviceColumns } from "./columns";
+
+import { useServices } from "@/hooks/data/useServices";
+import DeleteService from "./delete-service";
+import CreateServiceModal from "./create-service";
+import UpdateServiceModal from "./update-service";
 
 const ServicesPage = () => {
   const navigate = useNavigate();
+
   const [searchTerm, setSearchTerm] = useState("");
   const [isNewModalOpen, setNewIsModalOpen] = useState(false);
+
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const [selectedService, setSelectedService] = useState<Service>();
+  const [selectedService, setSelectedService] = useState<Service | undefined>(undefined);
 
-  // const { data: services = [], isLoading, isError, error, refetch } = useAssets();
-  
-  // data mẫu
-  const data: Service[] = [
-      {
-    id: "1",
-    code: "TS-001",
-    description: "Dịch vụ cho thuê sân bóng bàn trong khuôn viên chung cư.",
-    name: "Bóng bàn",
-    price: 70000,
-    unit: "30 phút",
-    start: "08:00",
-    end: "20:00",
-    max: 10,
-    status: "active",
-  },
-  {
-    id: "2",
-    code: "TS-002",
-    description: "Dịch vụ cho thuê sân cầu lông dành cho cư dân.",
-    name: "Sân cầu lông",
-    price: 50000,
-    unit: "60 phút",
-    start: "00:00",
-    end: "23:59",
-    max: 1,
-    status: "inactive",
-  },
+  const [isUpdateOpen, setIsUpdateOpen] = useState(false);
+  const [serviceToEdit, setServiceToEdit] = useState<Service | null>(null);
 
-  ];
+  // Lấy dữ liệu từ Hook (mock đang nằm ở service file)
+  const { data: services = [], isLoading, isError, error, refetch } = useServices();
 
+  // Filter theo search (bạn có thể thêm lọc theo tab/status sau)
   const filteredData = useMemo(() => {
-    if (!searchTerm.trim()) return data;
+    let result = [...services];
 
-    const normalizedSearch = normalizeString(searchTerm);
+    if (searchTerm.trim()) {
+      const search = normalizeString(searchTerm);
+      result = result.filter((item) => {
+        return (
+          normalizeString(item.name).includes(search) ||
+          normalizeString(item.description ?? "").includes(search)
+        );
+      });
+    }
 
-    return data.filter((item) => {
-      return (
-        normalizeString(item.name).includes(normalizedSearch) ||
-        normalizeString(item.code).includes(normalizedSearch)
-      );
-    });
-  }, [data, searchTerm]);
+    return result;
+  }, [services, searchTerm]);
 
-  const handleImport = () => {
-    console.log("import");
-  };
-
-  // muốn thêm thao tác thì thêm, danger => đỏ
   const actions: ActionOption[] = useMemo(
     () => [
-      
       {
         id: "import",
         label: "Import Excel",
-        icon: <FileDown />,
-        onClick: handleImport,
+        icon: <FileDown className="w-4 h-4" />,
+        onClick: () => console.log("Importing..."),
       },
       {
         id: "print",
         label: "In danh sách",
-        icon: <Printer />,
-        onClick: () => console.log("In"),
+        icon: <Printer className="w-4 h-4" />,
+        onClick: () => window.print(),
+        disabled: services.length === 0,
       },
-      
       {
         id: "delete_more",
         label: "Xóa nhiều",
-        icon: <Trash2 />,
+        icon: <Trash2 className="w-4 h-4" />,
         variant: "danger",
         onClick: () => console.log("Xóa nhiều"),
+        disabled: services.length === 0,
       },
     ],
-    [],
+    [services.length],
   );
 
   return (
-    <div className="p-1.5 pt-0 space-y-4">
-      <PageHeader
-        title="Danh sách dịch vụ"
-        subtitle="Quản lý  danh sách các dịch vụ của chung cư"
-        actions={
-          <div className="flex items-center gap-2">
-            <button className="flex items-center gap-2 bg-main text-white px-4 py-2 rounded-lg hover:bg-main/90 transition-colors text-sm font-medium">
-              <Plus className="w-4 h-4" /> Thêm dịch vụ
-            </button>
+    <>
+      <div className="p-1.5 pt-0 space-y-4">
+        <PageHeader
+          title="Danh sách dịch vụ"
+          subtitle="Quản lý danh sách các dịch vụ của chung cư"
+          actions={
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setNewIsModalOpen(true)}
+                className="flex items-center gap-2 bg-main text-white px-4 py-2 rounded-lg hover:bg-main/90 transition-colors text-sm font-medium"
+              >
+                <Plus className="w-4 h-4" /> Thêm dịch vụ
+              </button>
 
-            {/* nếu có import thì truyền file */}
-            <ActionDropdown
-              options={actions}
-              sampleFileUrl="/template/asset_import_template.xlsx"
+              <ActionDropdown
+                options={actions}
+                sampleFileUrl="/template/service_import_template.xlsx"
+              />
+            </div>
+          }
+        />
+
+        <div className="bg-white p-4 rounded-sm border border-gray-200 shadow-sm space-y-4">
+          <SearchBar placeholder="Tìm kiếm theo tên dịch vụ, mô tả..." onSearch={setSearchTerm} />
+        </div>
+
+        <div className="min-h-[400px]">
+          {isLoading ? (
+            <div className="bg-white p-12 text-center text-gray-500 border rounded shadow-sm">
+              Đang tải dữ liệu dịch vụ...
+            </div>
+          ) : isError ? (
+            <div className="bg-red-50 border border-red-200 p-8 rounded text-center space-y-3 text-red-600">
+              <p className="font-medium">Không thể tải dữ liệu!</p>
+              <p className="text-sm">{(error as Error)?.message}</p>
+              <button
+                type="button"
+                onClick={() => refetch()}
+                className="px-4 py-2 bg-red-600 text-white rounded-md text-sm"
+              >
+                Thử lại ngay
+              </button>
+            </div>
+          ) : (
+            <CustomTable
+              data={filteredData}
+              columns={serviceColumns}
+              defaultPageSize={10}
+              onEdit={(row) => {
+                setServiceToEdit(row);
+                setIsUpdateOpen(true);
+              }}
+              onDelete={(row) => {
+                setIsDeleteOpen(true);
+                setSelectedService(row);
+              }}
+              onView={(row) =>
+                navigate(`/services/${row.id}`, {
+                  state: { service: row },
+                })
+              }
             />
-          </div>
-        }
-      />
-
-      <div className="bg-white p-4 pt-6 pb-6 rounded-sm border border-gray-200 shadow-sm space-y-6">
-        <div className="w-full">
-          <SearchBar
-            placeholder="Tìm kiếm theo tên dịch vụ, mã dịch vụ..."
-            onSearch={setSearchTerm}
-          />
+          )}
         </div>
       </div>
 
-      <CustomTable
-        data={filteredData}
-        columns={serviceColumns}
-        defaultPageSize={10}
-        onEdit={(row) => console.log("Sửa", row)}
-        onDelete={(row) => console.log("Xóa", row)}
-        onView={(row) =>
-        navigate(`/services/${row.id}`, {
-          state: { service: row },
-        })
-      }
+      <CreateServiceModal open={isNewModalOpen} setOpen={setNewIsModalOpen} />
+      <DeleteService
+        open={isDeleteOpen}
+        setOpen={setIsDeleteOpen}
+        selectedService={selectedService}
       />
-    </div>
+      <UpdateServiceModal
+        open={isUpdateOpen}
+        setOpen={(open) => {
+          setIsUpdateOpen(open);
+          if (!open) setServiceToEdit(null);
+        }}
+        serviceId={serviceToEdit?.id}
+        // nếu modal hỗ trợ callback:
+        // onUpdated={() => { setIsUpdateOpen(false); setServiceToEdit(null); refetch(); }}
+      />
+    </>
   );
 };
 
