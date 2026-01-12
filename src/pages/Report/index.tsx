@@ -20,23 +20,8 @@ const ReportPage = () => {
     }
   };
 
-  // muốn thêm thao tác thì thêm, danger => đỏ
   const actions: ActionOption[] = useMemo(
     () => [
-      {
-        id: "delete_all",
-        label: "Xóa tất cả",
-        icon: <Trash2 />,
-        variant: "danger",
-        onClick: handleDeleteAll,
-      },
-      {
-        id: "delete_more",
-        label: "Xóa nhiều",
-        icon: <Trash2 />,
-        variant: "danger",
-        onClick: () => console.log("Xóa nhiều"),
-      },
       {
         id: "import",
         label: "Import Excel",

@@ -1,192 +1,143 @@
-import { useState, useMemo } from "react";
-import { Plus, Printer, FileDown, Trash2 } from "lucide-react";
+import { useMemo, useState } from "react";
+import { useParams } from "react-router-dom";
+
 import PageHeader from "@components/common/PageHeader";
-import ActionDropdown from "@components/common/ActionDropdown";
 import CustomTable from "@components/common/CustomTable";
-import { TabNavigation } from "@components/common/TabNavigation";
 import { SearchBar } from "@/components/common/SearchBar";
+
 import { bookingColumns, type BookingCustomerRow } from "./columns";
-import type { Service } from "../columns";
-import type { ActionOption } from "@/types";
 import { normalizeString } from "@/utils/string";
-import { useLocation, useParams } from "react-router-dom";
-type LocationState = { service?: Service };
-const titleStyle = "text-2xl font-bold text-main";
-const subtitleStyle = "text-gray-500 text-base mt-1";
-const contentStyle = "text-[18px] font-normal text-black";
+
+import { useServiceDetail } from "@hooks/data/useServices";
+
+const titleStyle = "text-xl font-bold text-main";
+const subtitleStyle = "text-base mt-1";
+const contentStyle = "text-sm text-gray-500";
+// tạm: booking mock để page không lỗi (khi bạn chưa có booking API/hook)
+const bookingData: BookingCustomerRow[] = [];
+
+const formatVND = (n?: number) => (n == null ? "—" : new Intl.NumberFormat("vi-VN").format(n) + " VND");
+
+const formatHour = (time?: string) => {
+  if (!time) return "—";
+  // hỗ trợ "08:00" hoặc "08:00:00"
+  const parts = time.split(":");
+  const h = String(Number(parts[0] || 0));
+  const m = parts[1] ?? "00";
+  if (m === "00") return `${h}h`;
+  return `${h}h${m}`;
+};
 
 const DetailServicePage = () => {
   const { id } = useParams();
-  const location = useLocation();
-  const state = location.state as LocationState | null;
+  const serviceId = Number(id);
 
-  const service = state?.service;
+  const { data: service, isLoading, isError, error, refetch } = useServiceDetail(serviceId);
 
   const [searchTerm, setSearchTerm] = useState("");
-
-  // data mẫu
-  const bookingData: BookingCustomerRow[] = [
-    {
-      id: "b1",
-      customerName: "Nguyễn Văn A",
-      phone: "0909123456",
-      bookingDate: "2026-01-10",
-      price: service?.price,
-      unit: service?.unit ?? "30 phút",
-      checkinDate: "2026-01-11",
-      startTime: "05:00",
-      endTime: "22:00",
-      status: "active",
-    },
-    {
-      id: "b2",
-      customerName: "Trần Thị B",
-      phone: "0988777666",
-      bookingDate: "2026-01-09",
-      price: service?.price,
-      unit: service?.unit ?? "30 phút",
-      checkinDate: "2026-01-11",
-      startTime: "08:00",
-      endTime: "09:00",
-      status: "inactive",
-    },
-  ];
-
 
   const filteredBookings = useMemo(() => {
     if (!searchTerm.trim()) return bookingData;
     const q = normalizeString(searchTerm);
 
     return bookingData.filter((b) => {
-      return (
-        normalizeString(b.customerName).includes(q) ||
-        normalizeString(b.phone).includes(q)
-      );
+      return normalizeString(b.customerName).includes(q) || normalizeString(b.phone).includes(q);
     });
-  }, [bookingData, searchTerm]);
+  }, [searchTerm]);
 
 
-  const handleImport = () => {
-    console.log("import");
-  };
-
-  const handleDeleteAll = () => {
-    if (confirm("Bạn có chắc muốn xóa tất cả?")) {
-      console.log("deleting all...");
-    }
-  };
-
-  // muốn thêm thao tác thì thêm, danger => đỏ
-  const actions: ActionOption[] = useMemo(
-    () => [
-      {
-        id: "delete_all",
-        label: "Xóa tất cả",
-        icon: <Trash2 />,
-        variant: "danger",
-        onClick: handleDeleteAll,
-      },
-      {
-        id: "delete_more",
-        label: "Xóa nhiều",
-        icon: <Trash2 />,
-        variant: "danger",
-        onClick: () => console.log("Xóa nhiều"),
-      },
-      {
-        id: "import",
-        label: "Import Excel",
-        icon: <FileDown />,
-        onClick: handleImport,
-      },
-      {
-        id: "print",
-        label: "In danh sách",
-        icon: <Printer />,
-        onClick: () => console.log("In"),
-      },
-    ],
-    [],
-  );
-
-  // helpers (tuỳ bạn dùng/không)
-  const formatVND = (n: number) => new Intl.NumberFormat("vi-VN").format(n) + "VND";
-
-  const formatHour = (time: string) => {
-    // "08:00" -> "8h", "08:30" -> "8h30"
-    const [hRaw, m] = (time || "").split(":");
-    const h = String(Number(hRaw || 0)); // bỏ số 0 đầu
-    if (!m || m === "00") return `${h}h`;
-    return `${h}h${m}`;
-  };
+  // Loading / Error UI
+  if (!Number.isFinite(serviceId) || serviceId <= 0) {
+    return (
+      <div className="p-1.5 pt-0">
+        <div className="bg-red-50 border border-red-200 p-6 rounded text-red-600">
+          ID dịch vụ không hợp lệ.
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-1.5 pt-0 space-y-4">
-      <PageHeader
-        title={service?.name ?? "Chi tiết dịch vụ"}
-        // subtitle="Quản lý  danh sách các dịch vụ của chung cư"
-        showBack
-      />
+      <PageHeader title={service?.name ?? "Chi tiết dịch vụ"} showBack />
 
       <div className="bg-white p-4 pt-6 pb-6 rounded-sm border border-gray-200 shadow-sm space-y-6">
-        <div className="space-y-8">
-          <div className="space-y-2">
-            <h2 className={titleStyle}>Thông tin chung</h2>
+        {isLoading ? (
+          <div className="p-10 text-center text-gray-500">Đang tải dữ liệu dịch vụ...</div>
+        ) : isError ? (
+          <div className="bg-red-50 border border-red-200 p-8 rounded text-center space-y-3 text-red-600">
+            <p className="font-medium">Không thể tải dữ liệu!</p>
+            <p className="text-sm">{(error as Error)?.message}</p>
+            <button
+              type="button"
+              onClick={() => refetch()}
+              className="px-4 py-2 bg-red-600 text-white rounded-md text-sm"
+            >
+              Thử lại ngay
+            </button>
           </div>
-          {/* Mô tả */}
-          <div className="space-y-2">
-            <h2 className={subtitleStyle}>Mô tả</h2>
-            <p className={contentStyle}>
-              {service?.description ?? "—"}
-            </p>
-          </div>
+        ) : !service ? (
+          <div className="p-10 text-center text-gray-500">Không tìm thấy dịch vụ.</div>
+        ) : (
+          <>
+            {/* Thông tin chung */}
+            <div className="space-y-10">
+              <div className="space-y-5">
 
-          {/* 4 cột thông tin */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
-            <div>
-              <h3 className={subtitleStyle}>Đơn giá</h3>
-              <p className={contentStyle}>
-                {formatVND(service?.price ?? 0)} / {service?.unit}
-              </p>
+                <h2 className={titleStyle}>Thông tin chung</h2>
+
+                <div className="space-y-2">
+                  <h3 className={subtitleStyle}>Mô tả</h3>
+                  <p className={contentStyle}>{service.description ?? "—"}</p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+                  <div>
+                    <h3 className={subtitleStyle}>Đơn giá</h3>
+                    <p className={contentStyle}>
+                      {formatVND(service.unitPrice)} / {service.unitTimeBlock} phút
+                    </p>
+                  </div>
+
+                  <div>
+                    <h3 className={subtitleStyle}>Giờ mở cửa</h3>
+                    <p className={contentStyle}>{formatHour(service.openHour)}</p>
+                  </div>
+
+                  <div>
+                    <h3 className={subtitleStyle}>Giờ đóng cửa</h3>
+                    <p className={contentStyle}>{formatHour(service.closeHour)}</p>
+                  </div>
+
+                  <div>
+                    <h3 className={subtitleStyle}>Sức chứa</h3>
+                    <p className={contentStyle}>{service.totalSlot} chỗ</p>
+                  </div>
+                </div>
+              </div>
+
+            {/* Lịch sử đặt chỗ */}
+            <div className="space-y-4">
+              <h2 className={titleStyle}>Lịch sử đặt chỗ</h2>
+              <div className="w-full">
+                <SearchBar
+                  placeholder="Tìm kiếm theo tên khách hàng, số điện thoại..."
+                  onSearch={setSearchTerm}
+                />
+              </div>
+              <CustomTable
+                data={filteredBookings}
+                columns={bookingColumns}
+                defaultPageSize={10}
+                onDelete={(row) => console.log("Xóa booking", row)}
+              />
+            </div>
             </div>
 
-            <div>
-              <h3 className={subtitleStyle}>Giờ mở cửa</h3>
-              <p className={contentStyle}>{formatHour(service?.start ?? "")}</p>
-            </div>
 
-            <div>
-              <h3 className={subtitleStyle}>Giờ đóng cửa</h3>
-              <p className={contentStyle}>{formatHour(service?.end ?? "")}</p>
-            </div>
-
-            <div>
-              <h3 className={subtitleStyle}>Sức chứa</h3>
-              <p className={contentStyle}>
-                {service?.max} người / {service?.unit}
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className="space-y-2">
-          <h2 className={titleStyle}>Lịch sử đặt chỗ</h2>
-        </div>
-
-        <div className="w-full">
-          <SearchBar
-            placeholder="Tìm kiếm theo tên khách hàng, số điện thoại..."
-            onSearch={setSearchTerm}
-          />
-        </div>
-        <CustomTable
-          data={filteredBookings}
-          columns={bookingColumns}
-          defaultPageSize={10}
-          onDelete={(row) => console.log("Xóa", row)}
-        />
+          </>
+        )}
       </div>
-
-
     </div>
   );
 };
