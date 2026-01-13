@@ -4,6 +4,8 @@ import MainLayout from "@components/layout/MainLayout";
 import DetailAssetPage from "@/pages/Assets/detail-asset";
 import ResidentsPage from "@/pages/Residents/view-residents";
 import DetailResidentPage from "@/pages/Residents/detail-resident";
+import BlocksPage from "@/pages/Blocks/view-blocks";
+import CreateBlockPage from "@/pages/Blocks/create-block";
 
 const Assets = lazy(() => import("@/pages/Assets/view-assets"));
 const Apartments = lazy(() => import("@/pages/Feedback"));
@@ -25,12 +27,14 @@ export const routes = createBrowserRouter([
     element: <MainLayout />,
     children: [
       { path: "assets", element: <Assets /> },
+      { path: "assets/:id", element: <DetailAssetPage /> },
       { path: "residents", element: <ResidentsPage /> },
       { path: "residents/:id", element: <DetailResidentPage /> },
       { path: "services", element: <Services /> },
-      { path: "reports", element: <Report /> },
       { path: "services/:id", element: <DetailServicePage /> },
-      { path: "assets/:id", element: <DetailAssetPage /> },
+      { path: "reports", element: <Report /> },
+      { path: "blocks", element: <BlocksPage /> },
+      { path: "blocks/create", element: <CreateBlockPage /> },
     ],
   },
 ]);

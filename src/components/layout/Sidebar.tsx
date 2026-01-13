@@ -21,7 +21,7 @@ const Sidebar: React.FC = () => {
   const navigate = useNavigate();
 
   const menuItems = [
-    { id: "building", icon: Building2, label: "Quản lý tòa nhà" },
+    { id: "blocks", icon: Building2, label: "Quản lý tòa nhà" },
     { id: "apartments", icon: Home, label: "Căn hộ" },
     { id: "debts", icon: CircleDollarSign, label: "Công nợ" },
     { id: "residents", icon: Users, label: "Cư dân" },
