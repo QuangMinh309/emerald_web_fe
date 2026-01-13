@@ -4,6 +4,7 @@ import MainLayout from "@components/layout/MainLayout";
 import DetailAssetPage from "@/pages/Assets/detail-asset";
 
 const Assets = lazy(() => import("@/pages/Assets/view-assets"));
+const Notifications = lazy(() => import("@/pages/Notifications/view-notifications"));
 const Apartments = lazy(() => import("@/pages/Feedback"));
 const Services = lazy(() => import("@/pages/Services"));
 const Report = lazy(() => import("@/pages/Report"));
@@ -14,6 +15,7 @@ export const routes = createBrowserRouter([
     element: <MainLayout />,
     children: [
       { path: "assets", element: <Assets /> },
+      { path: "notifications", element: <Notifications /> },
       { path: "residents", element: <Apartments /> },
       { path: "services", element: <Services /> },
       { path: "reports", element: <Report /> },

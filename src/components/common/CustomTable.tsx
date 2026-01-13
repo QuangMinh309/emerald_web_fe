@@ -37,6 +37,7 @@ interface CustomTableProps<T> {
   data: T[];
   columns: TableColumn<T>[];
   onSelectionChange?: (selectedIds: string[]) => void;
+  selection?: (string | number)[];
   onEdit?: (item: T) => void;
   onDelete?: (item: T) => void;
   onView?: (item: T) => void;
@@ -48,6 +49,7 @@ function CustomTable<T extends { id: string | number }>({
   data,
   columns,
   onSelectionChange,
+  selection,
   onEdit,
   onDelete,
   onView,
@@ -80,6 +82,13 @@ function CustomTable<T extends { id: string | number }>({
       el.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   }, [currentPage, pageSize]);
+
+  // cập nhật checkbox xóa
+  useEffect(() => {
+    if (selection !== undefined) {
+      setSelectedIds(selection);
+    }
+  }, [selection]);
 
   const handleFilterChange = (key: string, values: string[]) => {
     setActiveFilters((prev) => ({ ...prev, [key]: values }));
