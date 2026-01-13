@@ -1,8 +1,7 @@
 import type { TableColumn } from "@/types";
 import StatusBadge from "@components/common/StatusBadge";
 import type { Service } from "@/types/service";
-
-// const formatVND = (n: number) => new Intl.NumberFormat("vi-VN").format(n) + " VND";
+import { formatVND } from "@/utils/money";
 
 const typeMap: Record<string, { label: string; type?: "success" | "warning" | "error" }> = {
   active: { label: "Hoạt động", type: "success" },
@@ -20,7 +19,7 @@ export const serviceColumns: TableColumn<Service>[] = [
     sortable: true,
     width: "90px",
     align: "center",
-    // render: (row) => formatVND(row.unitPrice),
+    render: (row) => formatVND(row.unitPrice),
   },
   {
     key: "unitTimeBlock",
