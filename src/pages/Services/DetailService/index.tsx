@@ -83,31 +83,31 @@ const DetailServicePage = () => {
                 <h2 className="title-text">Thông tin chung</h2>
 
                 <div className="space-y-2">
-                  <h3 className="subtitle-text">Mô tả</h3>
-                  <p className="content-text">{service.description ?? "—"}</p>
+                  <h3 className="display-label">Mô tả</h3>
+                  <p className="display-text">{service.description ?? "—"}</p>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
                   <div>
-                    <h3 className="subtitle-text">Đơn giá</h3>
-                    <p className="content-text">
+                    <h3 className="display-label">Đơn giá</h3>
+                    <p className="display-text">
                       {formatVND(service.unitPrice)} / {service.unitTimeBlock} phút
                     </p>
                   </div>
 
                   <div>
-                    <h3 className="subtitle-text">Giờ mở cửa</h3>
-                    <p className="content-text">{formatHour(service.openHour)}</p>
+                    <h3 className="display-label">Giờ mở cửa</h3>
+                    <p className="display-text">{formatHour(service.openHour)}</p>
                   </div>
 
                   <div>
-                    <h3 className="subtitle-text">Giờ đóng cửa</h3>
-                    <p className="content-text">{formatHour(service.closeHour)}</p>
+                    <h3 className="display-label">Giờ đóng cửa</h3>
+                    <p className="display-text">{formatHour(service.closeHour)}</p>
                   </div>
 
                   <div>
-                    <h3 className="subtitle-text">Sức chứa</h3>
-                    <p className="content-text">{service.totalSlot} chỗ</p>
+                    <h3 className="display-label">Sức chứa</h3>
+                    <p className="display-text">{service.totalSlot} chỗ</p>
                   </div>
                 </div>
               </div>

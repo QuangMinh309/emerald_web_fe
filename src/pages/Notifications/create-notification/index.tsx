@@ -147,10 +147,9 @@ const CreateNotificationModal = ({ open, setOpen }: ModalProps) => {
       submitText="Tạo mới"
       onLoading={isPending}
       onSubmit={form.handleSubmit(onSubmit)}
-      className="min-w-[600px] max-w-2xl"
     >
       <Form {...form}>
-        <form className="space-y-4 max-h-[75vh] overflow-y-auto px-1 pr-2 custom-scrollbar">
+        <form className="space-y-4">
           <FormField
             control={form.control}
             name="title"

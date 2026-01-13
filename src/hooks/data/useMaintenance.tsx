@@ -1,4 +1,4 @@
-import { getMaintenances } from "@/services/maintenance.service";
+import { getMaintenances } from "@/services/maintenances.service";
 import { useQuery } from "@tanstack/react-query";
 
 export const useMaintenances = () =>

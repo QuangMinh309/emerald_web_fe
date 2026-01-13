@@ -21,7 +21,7 @@ const Sidebar: React.FC = () => {
   const navigate = useNavigate();
 
   const menuItems = [
-    { id: "building", icon: Building2, label: "Quản lý tòa nhà" },
+    { id: "blocks", icon: Building2, label: "Quản lý tòa nhà" },
     { id: "apartments", icon: Home, label: "Căn hộ" },
     { id: "debts", icon: CircleDollarSign, label: "Công nợ" },
     { id: "residents", icon: Users, label: "Cư dân" },
@@ -34,6 +34,11 @@ const Sidebar: React.FC = () => {
     { id: "reports", icon: TrendingUp, label: "Báo cáo thống kê" },
     { id: "permissions", icon: UserCog, label: "Phân quyền" },
   ];
+
+  const handleNavigate = (path: string) => {
+    navigate(path);
+    window.scrollTo({ top: 0, behavior: "instant" });
+  };
 
   return (
     <div className="w-64 bg-main h-screen text-white flex flex-col fixed top-0 left-0 shadow-xl z-50 font-inter overflow-hidden border-r border-main">
@@ -55,7 +60,7 @@ const Sidebar: React.FC = () => {
             <button
               type="button"
               key={item.id}
-              onClick={() => navigate(`/${item.id}`)}
+              onClick={() => handleNavigate(`/${item.id}`)}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-md transition-all duration-200 group relative ${
                 isActive
                   ? "bg-white text-main font-bold shadow-md"

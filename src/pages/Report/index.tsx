@@ -13,12 +13,6 @@ const ReportPage = () => {
     console.log("import");
   };
 
-  const handleDeleteAll = () => {
-    if (confirm("Bạn có chắc muốn xóa tất cả?")) {
-      console.log("deleting all...");
-    }
-  };
-
   const actions: ActionOption[] = useMemo(
     () => [
       {
