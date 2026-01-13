@@ -1,24 +1,40 @@
 import { buildLinearScale } from "@/lib/chart";
 
-const data = [
-  { label: "Tennis", value: 360 },
-  { label: "BBQ", value: 240 },
-  { label: "Cầu lông", value: 180 },
-  { label: "Nhà SHC", value: 110 },
-];
+export type BarPoint = { label: string; value: number };
 
-export default function ServicesBarChart() {
-  const width = 520;
-  const height = 240;
+type Props = {
+  data: BarPoint[];
+  width?: number;
+  height?: number;
+  ariaLabel?: string;
+  maxFallback?: number; // nếu data nhỏ vẫn có trục đẹp
+};
 
+export default function ServicesBarChart({
+  data,
+  width = 520,
+  height = 240,
+  ariaLabel = "Dịch vụ",
+  maxFallback = 400,
+}: Props) {
   const padding = { l: 44, r: 18, t: 10, b: 44 };
   const innerW = width - padding.l - padding.r;
   const innerH = height - padding.t - padding.b;
 
-  const max = Math.max(...data.map((d) => d.value), 400);
+  if (!data || data.length === 0) {
+    return (
+      <div className="rounded-xl border border-dashed border-neutral-200 p-6 text-sm text-neutral-600">
+        Không có dữ liệu để hiển thị.
+      </div>
+    );
+  }
+
+  const max = Math.max(...data.map((d) => d.value), maxFallback);
   const y = buildLinearScale(0, max, padding.t + innerH, padding.t);
 
-  const ticks = [0, 100, 200, 300, 400].filter((t) => t <= max);
+  // tick tự động theo max (đỡ hardcode)
+  const tickStep = max <= 50 ? 10 : max <= 200 ? 50 : 100;
+  const ticks = Array.from({ length: Math.floor(max / tickStep) + 1 }, (_, i) => i * tickStep);
 
   const gap = 22;
   const barW = (innerW - gap * (data.length - 1)) / data.length;
@@ -29,7 +45,7 @@ export default function ServicesBarChart() {
         viewBox={`0 0 ${width} ${height}`}
         className="h-[240px] w-full min-w-[420px]"
         role="img"
-        aria-label="Dịch vụ"
+        aria-label={ariaLabel}
       >
         {/* Grid + y labels */}
         {ticks.map((t) => {
@@ -45,12 +61,7 @@ export default function ServicesBarChart() {
                 strokeDasharray="4 4"
                 strokeWidth="1"
               />
-              <text
-                x={padding.l - 10}
-                y={yy + 4}
-                textAnchor="end"
-                className="fill-neutral-500 text-[12px]"
-              >
+              <text x={padding.l - 10} y={yy + 4} textAnchor="end" className="fill-neutral-500 text-[12px]">
                 {t}
               </text>
             </g>
@@ -65,14 +76,7 @@ export default function ServicesBarChart() {
 
           return (
             <g key={d.label}>
-              <rect
-                x={x}
-                y={yy}
-                width={barW}
-                height={h}
-                rx="10"
-                className="fill-neutral-200"
-              />
+              <rect x={x} y={yy} width={barW} height={h} rx="10" className="fill-neutral-200" />
               <text
                 x={x + barW / 2}
                 y={height - 16}
