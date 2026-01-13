@@ -9,6 +9,7 @@ interface ModalProps {
   onSubmit?: () => void;
   children: React.ReactNode;
   onLoading?: boolean;
+  className?: string;
 }
 export function Modal({
   open,
@@ -18,10 +19,11 @@ export function Modal({
   onSubmit,
   children,
   onLoading = false,
+  className,
 }: ModalProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="w-auto p-0">
+      <DialogContent className={`w-auto p-0 ${className ?? ""}`}>
         <p className="text-[#244B35] font-bold p-4 pb-0">{title}</p>
         <div className="w-full h-[1px] bg-[#D9D9D9]"></div>
         <div className="px-4 ">{children}</div>

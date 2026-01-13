@@ -68,8 +68,16 @@ function CustomTable<T extends { id: string | number }>({
 
   // cuộn lên khi chuyển trang
   useEffect(() => {
-    if (tableRef.current) {
-      tableRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    const el = tableRef.current;
+    if (!el) return;
+
+    const rect = el.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+
+    const isInView = rect.top >= 0 && rect.bottom <= viewportHeight;
+
+    if (!isInView) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   }, [currentPage, pageSize]);
 
