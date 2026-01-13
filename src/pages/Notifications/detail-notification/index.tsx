@@ -108,23 +108,23 @@ const DetailNotificationPage = () => {
             <div className="space-y-6">
               <div>
                 <h3 className="display-label">Ngày gửi</h3>
-                <p className="display-text font-medium">{formatDate(notification.createdAt)}</p>
+                <p className="display-text">{formatDate(notification.createdAt)}</p>
               </div>
               <div>
                 <h3 className="display-label">Loại nội dung</h3>
-                <p className={`display-text font-bold ${typeCfg.className}`}>{typeCfg.label}</p>
+                <p className={`display-text ${typeCfg.className}`}>{typeCfg.label}</p>
               </div>
             </div>
 
             <div className="space-y-6">
               <div>
                 <h3 className="display-label">Ngày cập nhật</h3>
-                <p className="display-text font-medium">{formatDate(notification.updatedAt)}</p>
+                <p className="display-text">{formatDate(notification.updatedAt)}</p>
               </div>
               <div>
                 <h3 className="display-label">Mức độ ưu tiên</h3>
                 <p
-                  className={`display-text font-medium ${
+                  className={`display-text ${
                     notification.isUrgent ? "text-red-600 font-bold" : ""
                   }`}
                 >
@@ -138,9 +138,7 @@ const DetailNotificationPage = () => {
 
           <div>
             <h2 className="title-text mb-3">Nội dung</h2>
-            <div className="display-text leading-relaxed whitespace-pre-wrap">
-              {notification.content}
-            </div>
+            <div className="display-text">{notification.content}</div>
           </div>
 
           {notification.fileUrls && notification.fileUrls.length > 0 && (

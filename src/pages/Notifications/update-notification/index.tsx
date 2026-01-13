@@ -194,22 +194,34 @@ const UpdateNotificationModal = ({ open, setOpen, notificationId }: UpdateModalP
               name="type"
               render={({ field }) => {
                 const type = typeMap[field.value] ?? typeMap.default;
+
                 return (
                   <FormItem>
                     <FormLabel isRequired>Loại tin</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <span className={`text-sm ${type.className}`}>{type.label}</span>
                         </SelectTrigger>
                       </FormControl>
+
                       <SelectContent>
-                        <SelectItem value="GENERAL">Thông báo chung</SelectItem>
-                        <SelectItem value="MAINTENANCE">Bảo trì</SelectItem>
-                        <SelectItem value="WARNING">Cảnh báo</SelectItem>
-                        <SelectItem value="POLICY">Chính sách</SelectItem>
+                        <SelectItem value="POLICY">
+                          <span className="text-purple-600">Chính sách</span>
+                        </SelectItem>
+                        <SelectItem value="MAINTENANCE">
+                          <span className="text-emerald-600">Bảo trì</span>
+                        </SelectItem>
+                        <SelectItem value="WARNING">
+                          <span className="text-orange-600">Cảnh báo</span>
+                        </SelectItem>
+                        <SelectItem value="GENERAL">
+                          <span className="text-blue-600">Thông báo chung</span>
+                        </SelectItem>
                       </SelectContent>
                     </Select>
+
                     <FormMessage />
                   </FormItem>
                 );
