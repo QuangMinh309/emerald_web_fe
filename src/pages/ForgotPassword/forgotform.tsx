@@ -87,11 +87,7 @@ export function ForgotPasswordForm({
         </div>
 
         <div className="mt-auto pt-10 sm:pt-12 flex justify-center">
-          <Button
-            type="submit"
-            className="min-w-[120px] rounded-lg text-white"
-            disabled={loading}
-          >
+          <Button type="submit" className="min-w-[120px] rounded-lg text-white" disabled={loading}>
             {loading ? "Đang gửi..." : "Gửi"}
           </Button>
         </div>
@@ -100,10 +96,7 @@ export function ForgotPasswordForm({
           <span>Đăng nhập bằng tài khoản khác? </span>
 
           {loginHref ? (
-            <a
-              href={loginHref}
-              className="font-medium text-orange-500 hover:underline"
-            >
+            <a href={loginHref} className="font-medium text-orange-500 hover:underline">
               Đăng nhập
             </a>
           ) : (
