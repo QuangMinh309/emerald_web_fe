@@ -13,7 +13,6 @@ const ReportPage = () => {
     console.log("import");
   };
 
-
   const actions: ActionOption[] = useMemo(
     () => [
       {

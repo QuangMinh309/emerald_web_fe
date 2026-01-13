@@ -35,6 +35,11 @@ const Sidebar: React.FC = () => {
     { id: "permissions", icon: UserCog, label: "Phân quyền" },
   ];
 
+  const handleNavigate = (path: string) => {
+    navigate(path);
+    window.scrollTo({ top: 0, behavior: "instant" });
+  };
+
   return (
     <div className="w-64 bg-main h-screen text-white flex flex-col fixed top-0 left-0 shadow-xl z-50 font-inter overflow-hidden border-r border-main">
       <div className="py-6 flex flex-col items-center shrink-0">
@@ -55,7 +60,7 @@ const Sidebar: React.FC = () => {
             <button
               type="button"
               key={item.id}
-              onClick={() => navigate(`/${item.id}`)}
+              onClick={() => handleNavigate(`/${item.id}`)}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-md transition-all duration-200 group relative ${
                 isActive
                   ? "bg-white text-main font-bold shadow-md"

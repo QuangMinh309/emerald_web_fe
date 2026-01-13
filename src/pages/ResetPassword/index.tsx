@@ -7,7 +7,7 @@ export default function LoginPage() {
       <main className="flex min-h-[calc(100vh-96px)] items-center justify-center px-4">
         <AuthCard title="Đăng nhập">
           <ResetPasswordForm />
-        </AuthCard>      
+        </AuthCard>
       </main>
     </div>
   );
