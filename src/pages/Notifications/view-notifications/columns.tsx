@@ -2,6 +2,7 @@ import { Info } from "lucide-react";
 import type { TableColumn } from "@/types";
 import StatusBadge from "@/components/common/StatusBadge";
 import type { NotificationData } from "@/types/notification";
+import { format } from "date-fns";
 
 const typeMap: Record<string, { label: string; className: string }> = {
   MAINTENANCE: {
@@ -88,7 +89,7 @@ export const notificationColumns: TableColumn<NotificationData>[] = [
     align: "center",
     render: (row) => {
       try {
-        return <span>{new Date(row.createdAt).toLocaleDateString("vi-VN")}</span>;
+        return <span>{format(new Date(row.createdAt), "dd/MM/yyyy")}</span>;
       } catch {
         return <span>-</span>;
       }
@@ -101,7 +102,7 @@ export const notificationColumns: TableColumn<NotificationData>[] = [
     align: "center",
     render: (row) => {
       try {
-        return <span>{new Date(row.updatedAt).toLocaleDateString("vi-VN")}</span>;
+        return <span>{format(new Date(row.updatedAt), "dd/MM/yyyy")}</span>;
       } catch {
         return <span>-</span>;
       }

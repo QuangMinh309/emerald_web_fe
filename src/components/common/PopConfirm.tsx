@@ -34,7 +34,7 @@ const PopConfirm = ({
     <>
       <AlertDialog open={open} onOpenChange={setOpen}>
         <AlertDialogContent className="w-auto p-0">
-          <p className="text-[#244B35] font-bold p-4 pb-0">{title}</p>
+          <p className="text-[#c91616] font-bold p-4 pb-0">{title}</p>
           <div className="w-full h-[1px] bg-[#D9D9D9]"></div>
           <div className="px-4 ">{children}</div>
           <div className="w-full h-[0.5px] bg-[#D9D9D9]"></div>

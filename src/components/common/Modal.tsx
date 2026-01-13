@@ -36,7 +36,7 @@ export function Modal({
       <DialogContent
         className={cn("p-0 gap-0 flex flex-col", "w-full max-w-[600px]", "max-h-[85vh]", className)}
       >
-        <div className="p-4 pb-3 border-b border-gray-200">
+        <div className="p-4 pb-3 border-b border-gray-400">
           <DialogHeader>
             <DialogTitle className="text-[#244B35] font-bold text-lg text-left">
               {title}
@@ -46,7 +46,7 @@ export function Modal({
 
         <div className="flex-1 overflow-y-auto px-4 py-4 custom-scrollbar">{children}</div>
 
-        <div className="p-4 border-t border-gray-200 bg-gray-50/50 rounded-b-lg">
+        <div className="p-4 border-t border-gray-400 bg-gray-50/50 rounded-b-lg">
           <DialogFooter className="gap-2 sm:justify-end">
             <DialogClose disabled={onLoading} asChild>
               <Button variant="outline" type="button">
