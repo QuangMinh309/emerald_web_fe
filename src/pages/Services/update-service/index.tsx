@@ -25,7 +25,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 
-import type { AmenityType } from "@/types/service";
+import type { ServiceType } from "@/types/service";
 import { useGetServiceById, useUpdateService } from "@/hooks/data/useServices";
 
 interface UpdateModalProps {
@@ -99,7 +99,7 @@ const UpdateServiceModal = ({ open, setOpen, serviceId }: UpdateModalProps) => {
   );
 
   const typeOptions = useMemo(() => {
-    const opts: { value: AmenityType; label: string }[] = [
+    const opts: { value: ServiceType; label: string }[] = [
       { value: "NORMAL", label: "Bình thường" },
     ];
     return opts;
@@ -122,7 +122,7 @@ const UpdateServiceModal = ({ open, setOpen, serviceId }: UpdateModalProps) => {
         openHour: normalizeTime(service.openHour) || "06:00",
         closeHour: normalizeTime(service.closeHour) || "17:00",
         totalSlot: String(service.totalSlot ?? "1"),
-        type: (service.type ?? "NORMAL") as AmenityType,
+        type: (service.type ?? "NORMAL") as ServiceType,
         status: service.status ?? "active",
         // imageUrl: service.imageUrl ?? "",
       });
@@ -144,7 +144,7 @@ const UpdateServiceModal = ({ open, setOpen, serviceId }: UpdateModalProps) => {
           closeHour: values.closeHour,
           totalSlot: Number(values.totalSlot),
           // imageUrl: values.imageUrl,
-          type: (values.type ?? "NORMAL") as AmenityType,
+          type: (values.type ?? "NORMAL") as ServiceType,
           status: values.status,
         },
       } as any,

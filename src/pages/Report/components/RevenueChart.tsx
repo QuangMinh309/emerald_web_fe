@@ -1,54 +1,58 @@
 import { buildLinearScale, buildPoints } from "@/lib/chart";
-// import { cn } from "@/lib/format";
 
-type Point = { label: string; value: number };
+export type Point = { label: string; value: number };
 
-const revenue: Point[] = [
-  { label: "1 Oct", value: 1800 },
-  { label: "3 Oct", value: 2600 },
-  { label: "7 Oct", value: 2000 },
-  { label: "10 Oct", value: 2800 },
-  { label: "14 Oct", value: 3900 },
-  { label: "20 Oct", value: 1600 },
-  { label: "23 Oct", value: 600 },
-  { label: "27 Oct", value: 1800 },
-  { label: "30 Oct", value: 3800 },
-];
+type Props = {
+  revenue: Point[];
+  expense: Point[];
+  width?: number;
+  height?: number;
+  yTicks?: number[];
+  ariaLabel?: string;
+};
 
-const expense: Point[] = [
-  { label: "1 Oct", value: 200 },
-  { label: "3 Oct", value: 1200 },
-  { label: "7 Oct", value: 1500 },
-  { label: "10 Oct", value: 800 },
-  { label: "14 Oct", value: 2900 },
-  { label: "20 Oct", value: 3800 },
-  { label: "23 Oct", value: 2900 },
-  { label: "27 Oct", value: 3600 },
-  { label: "30 Oct", value: 2000 },
-];
-
-export default function RevenueExpenseChart() {
-  const width = 1200;
-  const height = 280;
-
+export default function RevenueExpenseChart({
+  revenue,
+  expense,
+  width = 1200,
+  height = 280,
+  yTicks = [0, 1000, 2000, 3000, 4000],
+  ariaLabel = "Doanh thu và chi phí",
+}: Props) {
   const padding = { l: 44, r: 18, t: 16, b: 42 };
   const innerW = width - padding.l - padding.r;
   const innerH = height - padding.t - padding.b;
 
+  const n = Math.max(revenue.length, expense.length);
+
+  // Empty state (chart render rỗng thay vì crash)
+  if (n === 0) {
+    return (
+      <div className="rounded-xl border border-dashed border-neutral-200 p-6 text-sm text-neutral-600">
+        Không có dữ liệu để hiển thị.
+      </div>
+    );
+  }
+
+  // X scale dựa trên số điểm lớn nhất
+  const x = buildLinearScale(0, Math.max(n - 1, 1), padding.l, padding.l + innerW);
+
+  // Y scale dựa trên max value thực tế (fallback 4000)
   const all = [...revenue, ...expense].map((p) => p.value);
   const min = 0;
   const max = Math.max(...all, 4000);
 
-  const x = buildLinearScale(0, revenue.length - 1, padding.l, padding.l + innerW);
   const y = buildLinearScale(min, max, padding.t + innerH, padding.t);
 
+  // Points: nếu mảng ngắn hơn, vẫn build theo length của nó
   const revPts = buildPoints(revenue.map((d) => d.value), x, y);
   const expPts = buildPoints(expense.map((d) => d.value), x, y);
 
   const revPath = toPath(revPts);
   const expPath = toPath(expPts);
 
-  const ticks = [0, 1000, 2000, 3000, 4000];
+  // X labels: ưu tiên label từ revenue, nếu thiếu thì lấy từ expense
+  const labels = Array.from({ length: n }).map((_, i) => revenue[i]?.label ?? expense[i]?.label ?? "");
 
   return (
     <div className="w-full overflow-x-auto">
@@ -56,10 +60,10 @@ export default function RevenueExpenseChart() {
         viewBox={`0 0 ${width} ${height + 30}`}
         className="h-[290px] w-full min-w-[720px]"
         role="img"
-        aria-label="Doanh thu và chi phí"
+        aria-label={ariaLabel}
       >
         {/* Grid + Y axis labels */}
-        {ticks.map((t) => {
+        {yTicks.map((t) => {
           const yy = y(t);
           return (
             <g key={t}>
@@ -71,12 +75,7 @@ export default function RevenueExpenseChart() {
                 className="stroke-neutral-200"
                 strokeWidth="1"
               />
-              <text
-                x={padding.l - 10}
-                y={yy + 4}
-                textAnchor="end"
-                className="fill-neutral-500 text-[12px]"
-              >
+              <text x={padding.l - 10} y={yy + 4} textAnchor="end" className="fill-neutral-500 text-[12px]">
                 {t === 0 ? "0" : `${t / 1000}k`}
               </text>
             </g>
@@ -84,15 +83,15 @@ export default function RevenueExpenseChart() {
         })}
 
         {/* X labels */}
-        {revenue.map((d, i) => (
+        {labels.map((lab, i) => (
           <text
-            key={d.label}
+            key={`${lab}-${i}`}
             x={x(i)}
             y={height - 16}
             textAnchor="middle"
             className="fill-neutral-500 text-[12px]"
           >
-            {d.label}
+            {lab}
           </text>
         ))}
 
@@ -102,10 +101,24 @@ export default function RevenueExpenseChart() {
 
         {/* Points */}
         {revPts.map((p, idx) => (
-          <circle key={`r-${idx}`} cx={p.x} cy={p.y} r="5" className="fill-white stroke-emerald-900" strokeWidth="2" />
+          <circle
+            key={`r-${idx}`}
+            cx={p.x}
+            cy={p.y}
+            r="5"
+            className="fill-white stroke-emerald-900"
+            strokeWidth="2"
+          />
         ))}
         {expPts.map((p, idx) => (
-          <circle key={`e-${idx}`} cx={p.x} cy={p.y} r="5" className="fill-white stroke-orange-400" strokeWidth="2" />
+          <circle
+            key={`e-${idx}`}
+            cx={p.x}
+            cy={p.y}
+            r="5"
+            className="fill-white stroke-orange-400"
+            strokeWidth="2"
+          />
         ))}
 
         {/* Legend */}
@@ -127,7 +140,5 @@ export default function RevenueExpenseChart() {
 
 function toPath(points: { x: number; y: number }[]) {
   if (points.length === 0) return "";
-  return points.reduce((acc, p, i) => {
-    return i === 0 ? `M ${p.x} ${p.y}` : `${acc} L ${p.x} ${p.y}`;
-  }, "");
+  return points.reduce((acc, p, i) => (i === 0 ? `M ${p.x} ${p.y}` : `${acc} L ${p.x} ${p.y}`), "");
 }

@@ -16,21 +16,22 @@ export const useServices = () => {
   });
 };
 
-export const useGetServiceById = (id?: number) => {
+/**
+ * Lấy detail theo id.
+ * - enabled param giúp bạn chủ động bật/tắt fetch (ví dụ: id chưa hợp lệ)
+ */
+export const useServiceDetail = (id?: number, enabled = true) => {
+  const isValidId = Number.isFinite(id) && (id as number) > 0;
+
   return useQuery({
-    queryKey: ["services", id],
+    queryKey: ["services", id ?? "invalid"],
     queryFn: () => getServiceById(id as number),
-    enabled: Number.isFinite(id) && (id as number) > 0,
+    enabled: enabled && isValidId,
   });
 };
 
-export const useServiceDetail = (id: number) => {
-  return useQuery({
-    queryKey: ["services", id],
-    queryFn: () => getServiceById(id),
-    enabled: Number.isFinite(id) && id > 0,
-  });
-};
+// (Optional) Alias nếu bạn thích tên này
+export const useGetServiceById = useServiceDetail;
 
 export const useCreateService = () => {
   const queryClient = useQueryClient();
@@ -38,7 +39,7 @@ export const useCreateService = () => {
     mutationFn: createService,
     onSuccess: (newItem) => {
       queryClient.setQueryData(["services"], (old: Service[] = []) => [newItem, ...old]);
-      // hoặc vẫn invalidate nếu muốn sync với server:
+      // hoặc invalidate nếu muốn chắc chắn sync với server:
       // queryClient.invalidateQueries({ queryKey: ["services"] });
     },
   });
