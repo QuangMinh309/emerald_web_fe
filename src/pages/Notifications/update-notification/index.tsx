@@ -266,26 +266,26 @@ const UpdateNotificationModal = ({ open, setOpen, notificationId }: UpdateModalP
 
           <div className="space-y-3">
             {notification?.fileUrls && notification.fileUrls.length > 0 && (
-              <div className="space-y-2">
-                <Label className="text-sm text-muted-foreground">
+              <div className="space-y-3">
+                <Label className="text-sm font-semibold text-gray-700">
                   Tài liệu hiện có ({notification.fileUrls.length})
                 </Label>
 
-                <div className="grid gap-2">
+                <div className="flex flex-col gap-2">
                   {notification.fileUrls.map((url: string, idx: number) => {
-                    const fileName = decodeURIComponent(
-                      url.split("/").pop() || `Tài liệu ${idx + 1}`,
-                    );
+                    const rawFileName = url.split("/").pop() || `Tài liệu ${idx + 1}`;
+                    const fileName = decodeURIComponent(rawFileName.split("?")[0]);
 
                     return (
                       <div
                         key={idx}
-                        className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg shadow-sm group hover:border-blue-300 transition-all"
+                        className="group flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg shadow-sm hover:border-orange-400/50"
                       >
-                        <div className="flex items-center gap-3 overflow-hidden">
-                          <div className="p-2 bg-blue-50 text-blue-600 rounded-md">
+                        <div className="flex items-center gap-3 overflow-hidden min-w-0">
+                          <div className="p-2 bg-orange-100 text-orange-600 rounded-md shrink-0">
                             <FileText size={18} />
                           </div>
+
                           <div className="flex flex-col min-w-0">
                             <span
                               className="text-sm font-medium text-gray-700 truncate"
@@ -297,7 +297,7 @@ const UpdateNotificationModal = ({ open, setOpen, notificationId }: UpdateModalP
                               href={url}
                               target="_blank"
                               rel="noreferrer"
-                              className="text-xs text-blue-500 hover:text-blue-700 hover:underline flex items-center gap-1 mt-0.5"
+                              className="text-xs text-gray-400 hover:text-secondary hover:underline flex items-center gap-1 mt-0.5 transition-colors"
                             >
                               Xem tài liệu
                             </a>

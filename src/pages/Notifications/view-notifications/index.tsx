@@ -221,18 +221,17 @@ const NotificationsPage = () => {
         setOpen={setIsDeleteManyOpen}
         title="Xóa nhiều thông báo"
         handleConfirm={handleConfirmDeleteMany}
-        submitText="Xóa ngay"
         onLoading={isDeletingMany}
       >
-        <div className="text-sm text-gray-600">
+        <p>
           Bạn có chắc chắn muốn xóa{" "}
           <span className="font-bold text-red-600 text-base">{selectedIds.length}</span> thông báo
           đã chọn không?
           <br />
-          <span className="italic text-xs text-gray-500 mt-1 block">
+          <span className="italic text-sm text-gray-500 mt-1 block">
             Hành động này không thể hoàn tác. Dữ liệu sẽ bị xóa vĩnh viễn.
           </span>
-        </div>
+        </p>
       </PopConfirm>
     </>
   );
