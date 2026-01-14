@@ -1,11 +1,33 @@
 import PageHeader from "@/components/common/PageHeader";
+import { Button } from "@/components/ui/button";
 import { useGetBlockById } from "@/hooks/data/useBlocks";
+import DeleteBlock from "@/pages/Blocks/delete-block";
 import { DetailApartmentMatrix } from "@/pages/Blocks/detail-block/DetailApartmentMatrix";
-import { useParams } from "react-router-dom";
+import { Edit, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
 const DetailBlockPage = () => {
+  const router = useNavigate();
   const { id } = useParams<{ id: string }>();
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const { data: blockData } = useGetBlockById(Number(id));
+  const headerActions = (
+    <div className="flex items-center gap-2">
+      <Button
+        className="h-9 px-3 bg-red-600 text-white border-red-200 hover:bg-red-700"
+        onClick={() => setIsDeleteOpen(true)}
+      >
+        <Trash2 size={16} className="mr-2" /> Xóa
+      </Button>
+      <Button
+        className="h-9 px-4 bg-[#1F4E3D] hover:bg-[#16382b] text-white shadow-sm"
+        onClick={() => router(`/blocks/update/${id}`)}
+      >
+        <Edit size={16} className="mr-2" /> Chỉnh sửa
+      </Button>
+    </div>
+  );
   if (!id) {
     return (
       <div className="p-1.5 pt-0 space-y-4">
@@ -16,19 +38,26 @@ const DetailBlockPage = () => {
     );
   }
   return (
-    <div className="p-1.5 pt-0 space-y-4">
-      <PageHeader title={blockData?.buildingName || "Xem chi tiết khối nhà"} showBack />
-      <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm space-y-6">
-        <div className=" flex gap-5">
-          <DisplayCard label="Tên tòa nhà" value={blockData?.buildingName || ""} />
-          <DisplayCard label="Tên quản lý" value={blockData?.managerName || ""} />
-          <DisplayCard label="Số điện thoại quản lý" value={blockData?.managerPhone || ""} />
-          <DisplayCard label="Tổng số tầng" value={blockData?.totalFloors || 0} />
-          <DisplayCard label="Tổng số phòng" value={blockData?.totalRooms || 0} />
+    <>
+      <div className="p-1.5 pt-0 space-y-4">
+        <PageHeader
+          title={blockData?.buildingName || "Xem chi tiết khối nhà"}
+          showBack
+          actions={headerActions}
+        />
+        <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm space-y-6">
+          <div className=" flex gap-5">
+            <DisplayCard label="Tên tòa nhà" value={blockData?.buildingName || ""} />
+            <DisplayCard label="Tên quản lý" value={blockData?.managerName || ""} />
+            <DisplayCard label="Số điện thoại quản lý" value={blockData?.managerPhone || ""} />
+            <DisplayCard label="Tổng số tầng" value={blockData?.totalFloors || 0} />
+            <DisplayCard label="Tổng số phòng" value={blockData?.totalRooms || 0} />
+          </div>
+          <DetailApartmentMatrix block={blockData!} />
         </div>
-        <DetailApartmentMatrix block={blockData!} />
       </div>
-    </div>
+      <DeleteBlock open={isDeleteOpen} setOpen={setIsDeleteOpen} seclectedBlock={blockData} />
+    </>
   );
 };
 interface DisplayCardProps {

@@ -73,14 +73,16 @@ export const BlockCard = ({ block, action = false }: BlockCardProps) => {
     type: "success",
   };
   return (
-    <div
-      onClick={() => {
-        if (action) router(`/blocks/${block.id}`);
-      }}
-      className="border rounded-lg shadow-sm p-4 bg-white w-[400px]"
-    >
+    <div className="border rounded-lg shadow-sm p-4 bg-white w-[400px]">
       <div className="flex items-center justify-between">
-        <h3 className="font-bold text-[18px]">{block.buildingName}</h3>
+        <h3
+          className="font-bold text-[18px] hover:underline cursor-pointer hover:text-main  decoration-main"
+          onClick={() => {
+            if (action) router(`/blocks/${block.id}`);
+          }}
+        >
+          {block.buildingName}
+        </h3>
         {action && (
           <>
             <Button
