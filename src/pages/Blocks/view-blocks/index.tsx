@@ -67,6 +67,7 @@ interface BlockCardProps {
   action?: boolean;
 }
 export const BlockCard = ({ block, action = false }: BlockCardProps) => {
+  const router = useNavigate();
   const cfg = statusMap[block?.status ?? ""] || {
     label: block?.status ?? "Unknown",
     type: "success",
@@ -81,6 +82,7 @@ export const BlockCard = ({ block, action = false }: BlockCardProps) => {
               variant="ghost"
               size="icon"
               className="ml-auto h-8 w-8 text-gray-500 hover:text-blue-600 hover:bg-blue-50"
+              onClick={() => router(`/blocks/update/${block.id}`)}
             >
               <Edit className="w-4 h-4 stroke-[2]" />
             </Button>

@@ -6,6 +6,7 @@ interface ActionBlockState {
   managerPhone: string;
   status: string;
   apartments: {
+    id?: number;
     roomName: string;
     type: string;
     area: number;
@@ -15,6 +16,7 @@ interface ActionBlockState {
   apartmentsPerFloor: number;
   areasPerApartment: number;
   typesOfApartment: string;
+  hasResidents: boolean;
 }
 
 const initialState: ActionBlockState = {
@@ -28,6 +30,7 @@ const initialState: ActionBlockState = {
   apartmentsPerFloor: 1,
   areasPerApartment: 1,
   typesOfApartment: "",
+  hasResidents: false,
 };
 
 const actionBlockSlice = createSlice({
@@ -82,10 +85,44 @@ const actionBlockSlice = createSlice({
         (state.totalFloors = 1),
         (state.apartmentsPerFloor = 1),
         (state.areasPerApartment = 1),
-        (state.typesOfApartment = "");
+        (state.typesOfApartment = ""),
+        (state.hasResidents = false);
+    },
+    setHasResidents: (state, action: PayloadAction<boolean>) => {
+      state.hasResidents = action.payload;
+    },
+    initializeUpdateBlock: (
+      state,
+      action: PayloadAction<{
+        buildingName: string;
+        managerName: string;
+        managerPhone: string;
+        status: string;
+        totalFloors: number;
+        apartmentsPerFloor: number;
+        areasPerApartment: number;
+        typesOfApartment: string;
+        apartments: ActionBlockState["apartments"];
+      }>,
+    ) => {
+      state.buildingName = action.payload.buildingName;
+      state.managerName = action.payload.managerName;
+      state.managerPhone = action.payload.managerPhone;
+      state.status = action.payload.status;
+      state.totalFloors = action.payload.totalFloors;
+      state.apartmentsPerFloor = action.payload.apartmentsPerFloor;
+      state.areasPerApartment = action.payload.areasPerApartment;
+      state.typesOfApartment = action.payload.typesOfApartment;
+      state.apartments = action.payload.apartments;
     },
   },
 });
 
-export const { handleStepOne, handleStepTwo, handleStepThree } = actionBlockSlice.actions;
+export const {
+  handleStepOne,
+  handleStepTwo,
+  handleStepThree,
+  setHasResidents,
+  initializeUpdateBlock,
+} = actionBlockSlice.actions;
 export default actionBlockSlice.reducer;

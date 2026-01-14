@@ -40,7 +40,8 @@ export const updateBlock = async ({
     }[];
   };
 }) => {
-  const response = await axiosInstance.put(`/blocks/${id}`, data);
+  console.log("Updating block with data:", data);
+  const response = await axiosInstance.patch(`/blocks/${id}`, data);
   return response.data.data as Block;
 };
 export const deleteBlock = async (id: number) => {
@@ -50,4 +51,9 @@ export const deleteBlock = async (id: number) => {
 export const getBlockById = async (id: number) => {
   const response = await axiosInstance.get(`/blocks/${id}`);
   return response.data.data as BlockDetail;
+};
+export const hasResidentsInBlock = async (id: number) => {
+  return { hasResidents: false };
+  // const response = await axiosInstance.get(`/blocks/${id}/has-residents`);
+  // return response.data.data as { hasResidents: boolean };
 };
