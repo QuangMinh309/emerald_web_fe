@@ -1,10 +1,12 @@
 import {
   AlertDialog,
-  AlertDialogAction,
+  // AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogFooter,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 interface PopConfirmProps {
   title: string;
   open: boolean;
@@ -12,6 +14,7 @@ interface PopConfirmProps {
   handleConfirm: () => void;
   submitText?: string;
   children: React.ReactNode;
+  onLoading?: boolean;
 }
 const PopConfirm = ({
   open,
@@ -20,6 +23,7 @@ const PopConfirm = ({
   title,
   submitText = "Tiếp tục",
   children,
+  onLoading = false,
 }: PopConfirmProps) => {
   const handleConfirmAction = () => {
     handleConfirm();
@@ -30,16 +34,27 @@ const PopConfirm = ({
     <>
       <AlertDialog open={open} onOpenChange={setOpen}>
         <AlertDialogContent className="w-auto p-0">
-          <p className="text-[#244B35] font-bold p-4 pb-0">{title}</p>
+          <p className="text-[#c91616] font-bold p-4 pb-0">{title}</p>
           <div className="w-full h-[1px] bg-[#D9D9D9]"></div>
           <div className="px-4 ">{children}</div>
           <div className="w-full h-[0.5px] bg-[#D9D9D9]"></div>
           <AlertDialogFooter className="px-4 pb-4">
             {/* 3. AlertDialogCancel sẽ tự động gọi setIsOpen(false) */}
-            <AlertDialogCancel>Hủy</AlertDialogCancel>
+            <AlertDialogCancel disabled={onLoading}>Hủy</AlertDialogCancel>
 
             {/* Nếu muốn tự xử lý logic rồi mới đóng, dùng Button hoặc onClick vào Action */}
-            <AlertDialogAction onClick={handleConfirm}>{submitText}</AlertDialogAction>
+            {/* <AlertDialogAction onClick={handleConfirm}>{submitText}</AlertDialogAction> */}
+            <Button
+              onClick={(e) => {
+                e.preventDefault();
+                handleConfirm();
+              }}
+              disabled={onLoading}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {onLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} {/* Icon xoay */}
+              {submitText}
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

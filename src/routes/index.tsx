@@ -6,9 +6,10 @@ import ResidentsPage from "@/pages/Residents/view-residents";
 import DetailResidentPage from "@/pages/Residents/detail-resident";
 import BlocksPage from "@/pages/Blocks/view-blocks";
 import CreateBlockPage from "@/pages/Blocks/create-block";
+import DetailNotificationPage from "@/pages/Notifications/detail-notification";
 
 const Assets = lazy(() => import("@/pages/Assets/view-assets"));
-const Apartments = lazy(() => import("@/pages/Feedback"));
+const Notifications = lazy(() => import("@/pages/Notifications/view-notifications"));
 const Services = lazy(() => import("@/pages/Services"));
 const Report = lazy(() => import("@/pages/Report"));
 const DetailServicePage = lazy(() => import("@/pages/Services/DetailService"));
@@ -27,6 +28,8 @@ export const routes = createBrowserRouter([
     element: <MainLayout />,
     children: [
       { path: "assets", element: <Assets /> },
+      { path: "notifications", element: <Notifications /> },
+      { path: "notifications/:id", element: <DetailNotificationPage /> },
       { path: "assets/:id", element: <DetailAssetPage /> },
       { path: "residents", element: <ResidentsPage /> },
       { path: "residents/:id", element: <DetailResidentPage /> },

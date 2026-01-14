@@ -26,7 +26,15 @@ import z from "zod";
 import { toast } from "sonner";
 
 import { useCreateService } from "@/hooks/data/useServices";
-import type { AmenityType } from "@/types/service";
+import type { ServiceType } from "@/types/service";
+import { formatVND } from "@/utils/money";
+
+const formatVNDInput = (v: string) => {
+  if (!v) return "";
+  return new Intl.NumberFormat("vi-VN").format(Number(v));
+};
+
+const digitsOnly = (text: string) => text.replace(/\D/g, "");
 
 interface ModalProps {
   open: boolean;
@@ -119,7 +127,7 @@ const CreateServiceModal = ({ open, setOpen }: ModalProps) => {
         closeHour: values.closeHour,
         totalSlot: Number(values.totalSlot),
         // imageUrl: values.imageUrl ?? "",
-        type: (values.type ?? "NORMAL") as AmenityType,
+        type: (values.type ?? "NORMAL") as ServiceType,
         status: values.status,
       } as any,
       {
@@ -171,10 +179,11 @@ const CreateServiceModal = ({ open, setOpen }: ModalProps) => {
                   <FormLabel isRequired>Giá</FormLabel>
                   <FormControl>
                     <Input
-                      type="number"
-                      placeholder="VD: 200000"
-                      value={field.value ?? ""}
-                      onChange={(e) => field.onChange(e.target.value)}
+                      type="text"
+                      inputMode="numeric"
+                      value={formatVNDInput(String(field.value ?? ""))} // field.value nên lưu raw digits: "1000"
+                      onChange={(e) => field.onChange(digitsOnly(e.target.value))}
+                      placeholder="Nhập giá"
                     />
                   </FormControl>
                   <FormMessage className="text-xs" />
@@ -288,11 +297,11 @@ const CreateServiceModal = ({ open, setOpen }: ModalProps) => {
               name="totalSlot"
               render={({ field }) => (
                 <FormItem className="space-y-1.5">
-                  <FormLabel isRequired>Sức chứa/đơn vị thời gian</FormLabel>
+                  <FormLabel isRequired>Sức chứa</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
-                      placeholder="VD: 100"
+                      placeholder="Nhập sức chứa"
                       value={field.value ?? ""}
                       onChange={(e) => field.onChange(e.target.value)}
                     />

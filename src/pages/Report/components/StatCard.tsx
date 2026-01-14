@@ -3,9 +3,9 @@ import { cn } from "@/lib/format";
 type Accent = "emerald" | "red" | "amber";
 
 const accentMap: Record<Accent, string> = {
-  emerald: "border-l-4 border-emerald-600",
-  red: "border-l-4 border-red-500",
-  amber: "border-l-4 border-amber-500",
+  emerald: "border-0 border-l-4 border-l-emerald-600 shadow-[0px_0px_2px_#00000080]",
+  red: "border-0 border-l-4 border-l-red-600 shadow-[0px_0px_2px_#00000080]",
+  amber: "border-0 border-l-4 border-l-amber-500 shadow-[0px_0px_2px_#00000080]",
 };
 
 const valueMap: Record<Accent, string> = {

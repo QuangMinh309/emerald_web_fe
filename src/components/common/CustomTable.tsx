@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo, useRef } from "react"; // Bỏ useEffect nếu không dùng
 import {
   ChevronDown,
   ChevronUp,
@@ -32,11 +32,13 @@ import {
 import { cn } from "@/lib/utils";
 import { ColumnFilter } from "./ColumnFilter";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useEffect } from "react";
 
 interface CustomTableProps<T> {
   data: T[];
   columns: TableColumn<T>[];
   onSelectionChange?: (selectedIds: string[]) => void;
+  selection?: (string | number)[];
   onEdit?: (item: T) => void;
   onDelete?: (item: T) => void;
   onView?: (item: T) => void;
@@ -48,6 +50,7 @@ function CustomTable<T extends { id: string | number }>({
   data,
   columns,
   onSelectionChange,
+  selection,
   onEdit,
   onDelete,
   onView,
@@ -63,22 +66,35 @@ function CustomTable<T extends { id: string | number }>({
   } | null>(null);
 
   const [activeFilters, setActiveFilters] = useState<Record<string, string[]>>({});
-
   const tableRef = useRef<HTMLDivElement>(null);
 
-  // cuộn lên khi chuyển trang
+  // hàm cuộn lên khi chuyển trang
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+
+    setTimeout(() => {
+      const el = tableRef.current;
+      if (el) {
+        const rect = el.getBoundingClientRect();
+        if (rect.top < 0) {
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }
+    }, 0);
+  };
+
+  // cập nhật checkbox từ props (khi cha reset)
   useEffect(() => {
-    if (tableRef.current) {
-      tableRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (selection !== undefined) {
+      setSelectedIds(selection);
     }
-  }, [currentPage, pageSize]);
+  }, [selection]);
 
   const handleFilterChange = (key: string, values: string[]) => {
     setActiveFilters((prev) => ({ ...prev, [key]: values }));
     setCurrentPage(1);
   };
 
-  // xử lý filter, sort
   const processedData = useMemo(() => {
     let result = [...data];
 
@@ -109,7 +125,6 @@ function CustomTable<T extends { id: string | number }>({
     return result;
   }, [data, sortConfig, activeFilters]);
 
-  // pagination
   const totalItems = processedData.length;
   const totalPages = Math.ceil(totalItems / pageSize) || 1;
   const startIndex = (currentPage - 1) * pageSize;
@@ -240,7 +255,7 @@ function CustomTable<T extends { id: string | number }>({
                   className="hover:bg-gray-50 border-b border-gray-300/50 last:border-0"
                 >
                   <TableCell className="border-r border-gray-300/50 p-0 text-center align-middle w-12 min-w-12">
-                    <div className="flex items-center  justify-center">
+                    <div className="flex items-center justify-center">
                       <Checkbox
                         checked={selectedIds.includes(row.id)}
                         onCheckedChange={(c) => handleCheckRow(row.id, c as boolean)}
@@ -365,7 +380,7 @@ function CustomTable<T extends { id: string | number }>({
               variant="ghost"
               size="icon"
               className="h-8 w-8"
-              onClick={() => setCurrentPage(1)}
+              onClick={() => handlePageChange(1)}
               disabled={currentPage === 1}
             >
               <ChevronsLeft className="w-4 h-4" />
@@ -374,7 +389,7 @@ function CustomTable<T extends { id: string | number }>({
               variant="ghost"
               size="icon"
               className="h-8 w-8"
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
               disabled={currentPage === 1}
             >
               <ChevronLeft className="w-4 h-4" />
@@ -386,7 +401,7 @@ function CustomTable<T extends { id: string | number }>({
               variant="ghost"
               size="icon"
               className="h-8 w-8"
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
               disabled={currentPage === totalPages}
             >
               <ChevronRight className="w-4 h-4" />
@@ -395,7 +410,7 @@ function CustomTable<T extends { id: string | number }>({
               variant="ghost"
               size="icon"
               className="h-8 w-8"
-              onClick={() => setCurrentPage(totalPages)}
+              onClick={() => handlePageChange(totalPages)}
               disabled={currentPage === totalPages}
             >
               <ChevronsRight className="w-4 h-4" />

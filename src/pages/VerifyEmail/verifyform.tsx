@@ -119,11 +119,7 @@ export function VerifyForm({
         </div>
 
         <div className="mt-auto pt-12 sm:pt-14 flex justify-center">
-          <Button
-            type="submit"
-            className="min-w-[140px] rounded-lg text-white"
-            disabled={loading}
-          >
+          <Button type="submit" className="min-w-[140px] rounded-lg text-white" disabled={loading}>
             {loading ? "Đang xác thực..." : "Xác thực"}
           </Button>
         </div>
@@ -131,10 +127,7 @@ export function VerifyForm({
         <div className="pt-6 text-center text-sm text-muted-foreground">
           <span>Đã có tài khoản? </span>
           {loginHref ? (
-            <a
-              href={loginHref}
-              className="font-medium text-orange-500 hover:underline"
-            >
+            <a href={loginHref} className="font-medium text-orange-500 hover:underline">
               Đăng nhập
             </a>
           ) : (

@@ -16,9 +16,7 @@ export function AuthCard({ title, subtitle, children, footer }: AuthCardProps) {
             {title}
           </h1>
           {subtitle ? (
-            <p className="mt-2 text-center text-sm text-neutral-500">
-              {subtitle}
-            </p>
+            <p className="mt-2 text-center text-sm text-neutral-500">{subtitle}</p>
           ) : null}
         </header>
 
