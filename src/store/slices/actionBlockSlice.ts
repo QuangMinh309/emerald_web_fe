@@ -66,10 +66,26 @@ const actionBlockSlice = createSlice({
       state,
       action: PayloadAction<{ apartments: ActionBlockState["apartments"] }>,
     ) => {
+      const totalFloors = action.payload.apartments.reduce(
+        (max, apt) => Math.max(max, apt.floor),
+        0,
+      );
+      state.totalFloors = totalFloors;
       state.apartments = action.payload.apartments;
+    },
+    handleStepThree: (state) => {
+      (state.apartments = []),
+        (state.buildingName = ""),
+        (state.managerName = ""),
+        (state.managerPhone = ""),
+        (state.status = ""),
+        (state.totalFloors = 1),
+        (state.apartmentsPerFloor = 1),
+        (state.areasPerApartment = 1),
+        (state.typesOfApartment = "");
     },
   },
 });
 
-export const { handleStepOne, handleStepTwo } = actionBlockSlice.actions;
+export const { handleStepOne, handleStepTwo, handleStepThree } = actionBlockSlice.actions;
 export default actionBlockSlice.reducer;

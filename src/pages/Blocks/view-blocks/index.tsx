@@ -54,7 +54,7 @@ const BlocksPage = () => {
         ) : (
           <div className="grid grid-cols-3 gap-10">
             {blocks?.map((block) => (
-              <BlockCard key={block.id} {...block} />
+              <BlockCard key={block.id} block={block} action={true} />
             ))}
           </div>
         )}
@@ -62,7 +62,11 @@ const BlocksPage = () => {
     </div>
   );
 };
-const BlockCard = (block: Block) => {
+interface BlockCardProps {
+  block: Block;
+  action?: boolean;
+}
+export const BlockCard = ({ block, action = false }: BlockCardProps) => {
   const cfg = statusMap[block?.status ?? ""] || {
     label: block?.status ?? "Unknown",
     type: "success",
@@ -71,20 +75,24 @@ const BlockCard = (block: Block) => {
     <div className="border rounded-lg shadow-sm p-4 bg-white w-[400px]">
       <div className="flex items-center justify-between">
         <h3 className="font-bold text-[18px]">{block.buildingName}</h3>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="ml-auto h-8 w-8 text-gray-500 hover:text-blue-600 hover:bg-blue-50"
-        >
-          <Edit className="w-4 h-4 stroke-[2]" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 text-gray-500 hover:text-red-600 hover:bg-red-50"
-        >
-          <Trash2 className="w-4 h-4 stroke-[2]" />
-        </Button>
+        {action && (
+          <>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="ml-auto h-8 w-8 text-gray-500 hover:text-blue-600 hover:bg-blue-50"
+            >
+              <Edit className="w-4 h-4 stroke-[2]" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-gray-500 hover:text-red-600 hover:bg-red-50"
+            >
+              <Trash2 className="w-4 h-4 stroke-[2]" />
+            </Button>
+          </>
+        )}
       </div>
       <StatusBadge className="mt-2 mb-4" label={cfg.label} type={cfg.type} />
       <div className="w-full flex items-center justify-between">
@@ -111,7 +119,7 @@ const BlockCard = (block: Block) => {
           {block.roomDetails.oneBedroom > 0 && (
             <div className="flex justify-between relative">
               <span className="absolute -left-4 top-1/2 w-3 border-t  border-gray-300" />
-              <p className="display-label text-sm text-gray-600">Căn hộ 1 phòng ngủ</p>
+              <p className="display-label ">Căn hộ 1 phòng ngủ</p>
               <p className="display-text">{block.roomDetails.oneBedroom}</p>
             </div>
           )}
@@ -119,7 +127,7 @@ const BlockCard = (block: Block) => {
           {block.roomDetails.twoBedroom > 0 && (
             <div className="flex justify-between relative">
               <span className="absolute -left-4 top-1/2 w-3 border-t border-gray-300" />
-              <p className="display-label text-sm text-gray-600">Căn hộ 2 phòng ngủ</p>
+              <p className="display-label ">Căn hộ 2 phòng ngủ</p>
               <p className="display-text">{block.roomDetails.twoBedroom}</p>
             </div>
           )}
@@ -127,7 +135,7 @@ const BlockCard = (block: Block) => {
           {block.roomDetails.studio > 0 && (
             <div className="flex justify-between relative">
               <span className="absolute -left-4 top-1/2 w-3 border-t border-gray-300" />
-              <p className="display-label text-sm text-gray-600">Căn hộ studio</p>
+              <p className="display-label ">Căn hộ studio</p>
               <p className="display-text">{block.roomDetails.studio}</p>
             </div>
           )}
@@ -135,7 +143,7 @@ const BlockCard = (block: Block) => {
           {block.roomDetails.penthouse > 0 && (
             <div className="flex justify-between relative">
               <span className="absolute -left-4 top-1/2 w-3 border-t border-gray-300" />
-              <p className="display-label text-sm text-gray-600">Căn hộ penthouse</p>
+              <p className="display-label ">Căn hộ penthouse</p>
               <p className="display-text">{block.roomDetails.penthouse}</p>
             </div>
           )}
