@@ -420,7 +420,11 @@ export const UpdateApartmentMatrix: React.FC<UpdateApartmentMatrixProps> = (prop
                         <div
                           key={apt.id}
                           onClick={() => setSelected(apt.id!)}
-                          className={`w-24 h-14 rounded-lg border-2 flex flex-col items-center justify-center text-xs transition-all duration-200 cursor-pointer relative group ${colors.bg} ${colors.text} border-transparent hover:border-main/45 hover:shadow-sm ${
+                          className={`w-24 h-14 rounded-lg border-2 flex flex-col items-center justify-center text-xs transition-all duration-200 cursor-pointer relative group ${
+                            colors.bg
+                          } ${
+                            colors.text
+                          } border-transparent hover:border-main/45 hover:shadow-sm ${
                             apt.hasResidents ? "opacity-60" : ""
                           }`}
                         >
