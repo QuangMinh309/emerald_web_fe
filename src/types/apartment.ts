@@ -1,3 +1,5 @@
+import type { ApartmentStatusType } from "@/constants/apartmentStatus";
+
 export interface Apartment {
   id: number;
   roomName: string;
@@ -6,7 +8,7 @@ export interface Apartment {
   floor: number;
   area: string;
   owner: string;
-  status: string;
+  status: ApartmentStatusType;
 }
 export interface ApartmentDetail {
   generalInfo: {
@@ -15,7 +17,7 @@ export interface ApartmentDetail {
     floor: number;
     area: string;
     type: string;
-    status: string;
+    status: ApartmentStatusType;
   };
   owner: {
     fullName: string;
