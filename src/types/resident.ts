@@ -1,3 +1,5 @@
+import type { GenderType } from "@/constants/genderType";
+
 export interface Resident {
   id: number;
   accountId: number;
@@ -13,7 +15,7 @@ export interface Resident {
   citizenId: string;
   imageUrl: null | string;
   dob: string;
-  gender: string;
+  gender: GenderType;
   phoneNumber: string;
   nationality: string;
   province: string;
@@ -40,7 +42,7 @@ export interface ResidentDetail {
   citizenId: string;
   imageUrl: null;
   dob: string;
-  gender: string;
+  gender: GenderType;
   phoneNumber: string;
   nationality: string;
   province: string;
