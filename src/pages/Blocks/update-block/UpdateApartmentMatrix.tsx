@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { apartmentTypeOptions } from "@/pages/Blocks/create-block/StepOne";
+import { ApartmentTypeOptions } from "@/constants/apartmentType";
 
 export type ApartmentType = "STUDIO" | "ONE_BEDROOM" | "TWO_BEDROOM" | "PENTHOUSE";
 
@@ -386,7 +386,7 @@ export const UpdateApartmentMatrix: React.FC<UpdateApartmentMatrixProps> = (prop
                                   <SelectValue placeholder="Chọn loại căn hộ" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  {apartmentTypeOptions?.map((type) => (
+                                  {ApartmentTypeOptions?.map((type) => (
                                     <SelectItem key={type.value} value={type.value}>
                                       {type.label}
                                     </SelectItem>
