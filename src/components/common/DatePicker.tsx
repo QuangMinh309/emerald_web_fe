@@ -10,11 +10,29 @@ interface DatePickerProps {
   value?: Date | string;
   onChange: (date: Date | undefined) => void;
   placeholder?: string;
+  type?: "date" | "month" | "year";
 }
 
-export function DatePicker({ value, onChange, placeholder = "mm/dd/yyyy" }: DatePickerProps) {
+const typeConfig = {
+  date: {
+    format: "MM/dd/yyyy",
+    mode: "single" as const,
+  },
+  month: {
+    format: "MM/yyyy",
+    mode: "single" as const,
+  },
+  year: {
+    format: "yyyy",
+    mode: "single" as const,
+  },
+};
+
+export function DatePicker({ value, onChange, placeholder, type = "date" }: DatePickerProps) {
   const [open, setOpen] = React.useState(false);
   const dateValue = value ? new Date(value) : undefined;
+
+  const config = typeConfig[type];
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -26,13 +44,18 @@ export function DatePicker({ value, onChange, placeholder = "mm/dd/yyyy" }: Date
             !dateValue && "text-muted-foreground",
           )}
         >
-          {dateValue ? format(dateValue, "MM/dd/yyyy") : <span>{placeholder}</span>}
+          {dateValue ? (
+            format(dateValue, config.format)
+          ) : (
+            <span>{placeholder ?? config.format}</span>
+          )}
           <ChevronDownIcon className="h-4 w-4 opacity-50" />
         </Button>
       </PopoverTrigger>
+
       <PopoverContent className="w-auto p-0" align="start">
         <Calendar
-          mode="single"
+          mode={config.mode}
           captionLayout="dropdown"
           selected={dateValue}
           onSelect={(date) => {

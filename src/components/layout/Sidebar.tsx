@@ -23,7 +23,7 @@ const Sidebar: React.FC = () => {
   const menuItems = [
     { id: "blocks", icon: Building2, label: "Quản lý tòa nhà" },
     { id: "apartments", icon: Home, label: "Căn hộ" },
-    { id: "debts", icon: CircleDollarSign, label: "Công nợ" },
+    { id: "invoices", icon: CircleDollarSign, label: "Công nợ" },
     { id: "residents", icon: Users, label: "Cư dân" },
     { id: "assets", icon: Armchair, label: "Tài sản, thiết bị" },
     { id: "services", icon: Store, label: "Dịch vụ" },

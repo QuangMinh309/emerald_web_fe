@@ -1,0 +1,39 @@
+import PopConfirm from "@/components/common/PopConfirm";
+import { useDeleteInvoice } from "@/hooks/data/useInvoices";
+import type { Invoice } from "@/types/invoice";
+import { toast } from "sonner";
+
+interface DeleteInvoiceProps {
+  open: boolean;
+  setOpen: (value: boolean) => void;
+  seclectedInvoice: Invoice | undefined;
+}
+
+const DeleteInvoice = ({ open, setOpen, seclectedInvoice }: DeleteInvoiceProps) => {
+  const { mutate: deleteInvoice } = useDeleteInvoice();
+
+  const handleDelete = () => {
+    if (!seclectedInvoice?.id) return;
+
+    deleteInvoice(seclectedInvoice.id, {
+      onSuccess: () => {
+        toast.success("Hóa đơn đã được xóa thành công");
+        setOpen(false);
+      },
+      onError: (error) => {
+        toast.error(`Lỗi: ${error.message}`);
+      },
+    });
+  };
+
+  return (
+    <PopConfirm title="Xác nhận xóa" open={open} setOpen={setOpen} handleConfirm={handleDelete}>
+      <p>
+        Bạn có chắc chắn muốn xóa hóa đơn{" "}
+        <span className="font-semibold">"{seclectedInvoice?.invoiceCode}"</span> không?
+      </p>
+    </PopConfirm>
+  );
+};
+
+export default DeleteInvoice;
