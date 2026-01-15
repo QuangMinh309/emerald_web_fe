@@ -1,4 +1,5 @@
 import PageHeader from "@/components/common/PageHeader";
+import Spinner from "@/components/common/Spinner";
 import { Button } from "@/components/ui/button";
 import { useGetBlockById } from "@/hooks/data/useBlocks";
 import DeleteBlock from "@/pages/Blocks/delete-block";
@@ -11,7 +12,7 @@ const DetailBlockPage = () => {
   const router = useNavigate();
   const { id } = useParams<{ id: string }>();
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const { data: blockData } = useGetBlockById(Number(id));
+  const { data: blockData, isLoading } = useGetBlockById(Number(id));
   const headerActions = (
     <div className="flex items-center gap-2">
       <Button
@@ -37,6 +38,15 @@ const DetailBlockPage = () => {
       </div>
     );
   }
+  // bắt buộc phải có loading, nếu không lúc mà fetch data lâu nó sẽ lỗi
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-[500px] ">
+        <Spinner />
+      </div>
+    );
+  }
+
   return (
     <>
       <div className="p-1.5 pt-0 space-y-4">

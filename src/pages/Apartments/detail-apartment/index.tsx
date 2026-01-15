@@ -1,6 +1,7 @@
 import CustomTable from "@/components/common/CustomTable";
 import PageHeader from "@/components/common/PageHeader";
 import { SearchBar } from "@/components/common/SearchBar";
+import Spinner from "@/components/common/Spinner";
 import StatusBadge from "@/components/common/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { useGetApartmentById } from "@/hooks/data/useApartments";
@@ -32,7 +33,7 @@ const DetailApartmentPage = () => {
   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const { id } = useParams();
-  const { data: apartment } = useGetApartmentById(Number(id));
+  const { data: apartment, isLoading } = useGetApartmentById(Number(id));
   const cfg = statusMap[apartment?.generalInfo.status ?? ""] || {
     label: apartment?.generalInfo.status ?? "Unknown",
     type: "default",
@@ -71,6 +72,14 @@ const DetailApartmentPage = () => {
         <div className="bg-red-50 border border-red-200 p-8 rounded text-center text-red-600">
           Không tìm thấy ID tòa nhà
         </div>
+      </div>
+    );
+  }
+  // bắt buộc phải có loading, nếu không lúc mà fetch data lâu nó sẽ lỗi
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-[500px] ">
+        <Spinner />
       </div>
     );
   }
