@@ -1,4 +1,5 @@
-import axios from "axios";
+import axios, { type AxiosError, type AxiosRequestConfig } from "axios";
+import { clearAuthStorage, getAccessToken, getRefreshToken, setTokens } from "@/lib/auth-storage";
 
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:8080/api",
@@ -7,9 +8,26 @@ const axiosInstance = axios.create({
     "Content-Type": "application/json",
   },
 });
+
+const refreshClient = axios.create({
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8080/api",
+  timeout: 10000,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+let isRefreshing = false;
+let refreshQueue: Array<(token: string | null) => void> = [];
+
+const resolveRefreshQueue = (token: string | null) => {
+  refreshQueue.forEach((callback) => callback(token));
+  refreshQueue = [];
+};
+
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("access_token");
+    const token = getAccessToken();
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -21,18 +39,80 @@ axiosInstance.interceptors.request.use(
 );
 axiosInstance.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response) {
-      const status = error.response.status;
+  async (error: AxiosError) => {
+    if (!error.response) {
+      return Promise.reject(error);
+    }
 
-      if (status === 401) {
-        console.warn("Unauthorized – redirect to login");
-        // window.location.href = "/login";
+    const status = error.response.status;
+    const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
+
+    const requestUrl = originalRequest?.url || "";
+    const isAuthRequest =
+      requestUrl.includes("/auth/login") || requestUrl.includes("/auth/refresh");
+
+    if (status === 401 && !originalRequest?._retry && !isAuthRequest) {
+      const refreshToken = getRefreshToken();
+      if (!refreshToken) {
+        clearAuthStorage();
+        window.location.assign("/login");
+        return Promise.reject(error);
       }
 
-      if (status === 403) {
-        alert("Bạn không có quyền truy cập chức năng này");
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          refreshQueue.push((token) => {
+            if (!token) {
+              reject(error);
+              return;
+            }
+            if (originalRequest.headers) {
+              originalRequest.headers.Authorization = `Bearer ${token}`;
+            }
+            resolve(axiosInstance(originalRequest));
+          });
+        });
       }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        const refreshResponse = await refreshClient.post(
+          "/auth/refresh",
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${refreshToken}`,
+            },
+          },
+        );
+
+        const { accessToken, refreshToken: newRefreshToken } = refreshResponse.data.data as {
+          accessToken: string;
+          refreshToken: string;
+        };
+
+        setTokens(accessToken, newRefreshToken);
+        axiosInstance.defaults.headers.Authorization = `Bearer ${accessToken}`;
+        resolveRefreshQueue(accessToken);
+
+        if (originalRequest.headers) {
+          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+        }
+        return axiosInstance(originalRequest);
+      } catch (refreshError) {
+        resolveRefreshQueue(null);
+        clearAuthStorage();
+        window.location.assign("/login");
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
+      }
+    }
+
+    if (status === 403) {
+      alert("Bạn không có quyền truy cập chức năng này");
     }
 
     return Promise.reject(error);
