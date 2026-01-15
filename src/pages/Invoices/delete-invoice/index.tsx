@@ -1,12 +1,12 @@
 import PopConfirm from "@/components/common/PopConfirm";
 import { useDeleteInvoice } from "@/hooks/data/useInvoices";
-import type { Invoice } from "@/types/invoice";
+import type { Invoice, InvoiceDetail } from "@/types/invoice";
 import { toast } from "sonner";
 
 interface DeleteInvoiceProps {
   open: boolean;
   setOpen: (value: boolean) => void;
-  seclectedInvoice: Invoice | undefined;
+  seclectedInvoice: Invoice | undefined | InvoiceDetail;
 }
 
 const DeleteInvoice = ({ open, setOpen, seclectedInvoice }: DeleteInvoiceProps) => {

@@ -12,6 +12,7 @@ import DetailBlockPage from "@/pages/Blocks/detail-block";
 import DetailApartmentPage from "@/pages/Apartments/detail-apartment";
 import ApartmentsPage from "@/pages/Apartments/view-apartments";
 import InvoicesPage from "@/pages/Invoices/view-invoices";
+import DetailInvoicePage from "@/pages/Invoices/detail-invoice";
 
 const Assets = lazy(() => import("@/pages/Assets/view-assets"));
 const Notifications = lazy(() => import("@/pages/Notifications/view-notifications"));
@@ -48,7 +49,7 @@ export const routes = createBrowserRouter([
       { path: "apartments/:id", element: <DetailApartmentPage /> },
       { path: "apartments", element: <ApartmentsPage /> },
       { path: "invoices", element: <InvoicesPage /> },
-      // { path: "invoices/:id", element: <Detail /> },
+      { path: "invoices/:id", element: <DetailInvoicePage /> },
     ],
   },
 ]);

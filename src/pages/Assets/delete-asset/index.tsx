@@ -1,12 +1,12 @@
 import PopConfirm from "@/components/common/PopConfirm";
 import { useDeleteAsset } from "@/hooks/data/useAssests";
-import type { Asset } from "@/types/asset";
+import type { Asset, AssetDetail } from "@/types/asset";
 import { toast } from "sonner";
 
 interface DeleteAssetProps {
   open: boolean;
   setOpen: (value: boolean) => void;
-  seclectedAsset: Asset | undefined;
+  seclectedAsset: Asset | undefined | AssetDetail;
 }
 
 const DeleteAsset = ({ open, setOpen, seclectedAsset }: DeleteAssetProps) => {

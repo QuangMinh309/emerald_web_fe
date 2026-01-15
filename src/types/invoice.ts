@@ -27,6 +27,6 @@ export interface InvoiceDetail {
     feeTypeName: string;
     amount: string;
     totalPrice: string;
-    calculationBreakdown: CalculationBreakdown;
+    calculationBreakdown: CalculationBreakdown | null;
   }[];
 }

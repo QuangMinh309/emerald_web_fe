@@ -3,11 +3,17 @@ import PageHeader from "@/components/common/PageHeader";
 import { SearchBar } from "@/components/common/SearchBar";
 import Spinner from "@/components/common/Spinner";
 import StatusBadge from "@/components/common/StatusBadge";
+import { Button } from "@/components/ui/button";
 import { useGetAssetById } from "@/hooks/data/useAssests";
 import { useMaintenances } from "@/hooks/data/useMaintenance";
+import DeleteAsset from "@/pages/Assets/delete-asset";
 import { maintenanceColumns } from "@/pages/Assets/detail-asset/columns";
+import UpdateAssetModal from "@/pages/Assets/update-asset";
+import DeleteInvoice from "@/pages/Invoices/delete-invoice";
+import UpdateInvoiceModal from "@/pages/Invoices/update-invoice";
 import type { Maintenance } from "@/types/maintenance";
 import { normalizeString } from "@/utils/string";
+import { Edit, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 const statusMap: Record<
@@ -20,6 +26,8 @@ const statusMap: Record<
   BROKEN: { label: "Hư hỏng", type: "error" },
 };
 const DetailAssetPage = () => {
+  const [isUpdateOpen, setIsUpdateOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const { id } = useParams();
   const { data: asset, isLoading: isAssetLoading } = useGetAssetById(Number(id));
   const cfg = statusMap[asset?.status ?? ""] || {
@@ -57,107 +65,123 @@ const DetailAssetPage = () => {
       </div>
     );
   }
+  const headerActions = (
+    <div className="flex items-center gap-2">
+      <Button
+        className="h-9 px-3 bg-red-600 text-white border-red-200 hover:bg-red-700"
+        onClick={() => setIsDeleteOpen(true)}
+      >
+        <Trash2 size={16} className="mr-2" /> Xóa
+      </Button>
+      <Button
+        className="h-9 px-4 bg-[#1F4E3D] hover:bg-[#16382b] text-white shadow-sm"
+        onClick={() => setIsUpdateOpen(true)}
+      >
+        <Edit size={16} className="mr-2" /> Chỉnh sửa
+      </Button>
+    </div>
+  );
   return (
-    <div className="p-1.5 pt-0 space-y-4">
-      <PageHeader
-        title={asset?.name ?? "Chi tiết dịch vụ"}
-        // subtitle="Quản lý  danh sách các dịch vụ của chung cư"
-        showBack
-      />
-      <div className="bg-white p-4 pt-6 pb-6 rounded-sm border border-gray-200 shadow-sm space-y-6">
-        <div className="flex justify-between items-center">
-          <h2 className="title-text">Thông tin chung</h2>
-          <StatusBadge label={cfg.label} type={cfg.type} />
-        </div>
-        <div className="space-y-2">
-          {/* 4 cột thông tin */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
-            <div>
-              <h3 className="display-label">Loại thiết bị</h3>
-              <p className="display-text">{asset?.type.name}</p>
-            </div>
+    <>
+      <div className="p-1.5 pt-0 space-y-4">
+        <PageHeader title={asset?.name ?? "Chi tiết dịch vụ"} actions={headerActions} showBack />
+        <div className="bg-white p-4 pt-6 pb-6 rounded-sm border border-gray-200 shadow-sm space-y-6">
+          <div className="flex justify-between items-center">
+            <h2 className="title-text">Thông tin chung</h2>
+            <StatusBadge label={cfg.label} type={cfg.type} />
+          </div>
+          <div className="space-y-2">
+            {/* 4 cột thông tin */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+              <div>
+                <h3 className="display-label">Loại thiết bị</h3>
+                <p className="display-text">{asset?.type.name}</p>
+              </div>
 
-            <div>
-              <h3 className="display-label">Tòa</h3>
-              <p className="display-text">{asset?.location.blockName}</p>
-            </div>
+              <div>
+                <h3 className="display-label">Tòa</h3>
+                <p className="display-text">{asset?.location.blockName}</p>
+              </div>
 
-            <div>
-              <h3 className="display-label">Tầng</h3>
-              <p className="display-text">{asset?.location.floorDisplay}</p>
-            </div>
+              <div>
+                <h3 className="display-label">Tầng</h3>
+                <p className="display-text">{asset?.location.floorDisplay}</p>
+              </div>
 
+              <div>
+                <h3 className="display-label">Mô tả chi tiết</h3>
+                <p className="display-text">{asset?.description}</p>
+              </div>
+            </div>
             <div>
-              <h3 className="display-label">Mô tả chi tiết</h3>
-              <p className="display-text">{asset?.description}</p>
+              <h3 className="display-label">Ghi chú</h3>
+              <p className="display-text">{asset?.note}</p>
             </div>
           </div>
+
           <div>
-            <h3 className="display-label">Ghi chú</h3>
-            <p className="display-text">{asset?.note}</p>
+            <h2 className="title-text">Thông tin thời gian</h2>
           </div>
-        </div>
+          <div className="space-y-2">
+            {/* 4 cột thông tin */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+              <div>
+                <h3 className="display-label">Ngày lắp đặt</h3>
+                <p className="display-text">{asset?.timeline.installationDate}</p>
+              </div>
 
-        <div>
-          <h2 className="title-text">Thông tin thời gian</h2>
-        </div>
-        <div className="space-y-2">
-          {/* 4 cột thông tin */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-            <div>
-              <h3 className="display-label">Ngày lắp đặt</h3>
-              <p className="display-text">{asset?.timeline.installationDate}</p>
-            </div>
+              <div>
+                <h3 className="display-label">Bảo trì gần nhất</h3>
+                <p className="display-text">
+                  {asset?.timeline.lastMaintenanceDate || "Chưa từng bảo trì"}
+                </p>
+              </div>
 
-            <div>
-              <h3 className="display-label">Bảo trì gần nhất</h3>
-              <p className="display-text">
-                {asset?.timeline.lastMaintenanceDate || "Chưa từng bảo trì"}
-              </p>
-            </div>
-
-            <div>
-              <h3 className="display-label">Bảo trì tiếp theo</h3>
-              <p className="display-text">{asset?.timeline.nextMaintenanceDate || "Chưa có"}</p>
+              <div>
+                <h3 className="display-label">Bảo trì tiếp theo</h3>
+                <p className="display-text">{asset?.timeline.nextMaintenanceDate || "Chưa có"}</p>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div>
-          <h2 className="title-text">Lịch sử bảo trì, sửa chữa</h2>
-        </div>
-        <div className="bg-white p-4 rounded border shadow-sm">
-          <SearchBar
-            placeholder="Tìm theo tiêu đề, loại bảo trì, kỹ thuật viên..."
-            onSearch={setSearch}
-          />
-        </div>
-
-        <div>
-          {isLoading ? (
-            <div className="bg-white p-12 text-center text-gray-500 border rounded">
-              Đang tải dữ liệu...
-            </div>
-          ) : isError ? (
-            <div className="bg-red-50 border p-8 rounded text-center">
-              Không thể tải dữ liệu
-              <button
-                onClick={() => refetch()}
-                className="block mx-auto mt-3 px-4 py-2 bg-red-600 text-white rounded"
-              >
-                Thử lại
-              </button>
-            </div>
-          ) : (
-            <CustomTable
-              data={filtered as Maintenance[]}
-              columns={maintenanceColumns}
-              defaultPageSize={10}
+          <div>
+            <h2 className="title-text">Lịch sử bảo trì, sửa chữa</h2>
+          </div>
+          <div className="bg-white p-4 rounded border shadow-sm">
+            <SearchBar
+              placeholder="Tìm theo tiêu đề, loại bảo trì, kỹ thuật viên..."
+              onSearch={setSearch}
             />
-          )}
+          </div>
+
+          <div>
+            {isLoading ? (
+              <div className="bg-white p-12 text-center text-gray-500 border rounded">
+                Đang tải dữ liệu...
+              </div>
+            ) : isError ? (
+              <div className="bg-red-50 border p-8 rounded text-center">
+                Không thể tải dữ liệu
+                <button
+                  onClick={() => refetch()}
+                  className="block mx-auto mt-3 px-4 py-2 bg-red-600 text-white rounded"
+                >
+                  Thử lại
+                </button>
+              </div>
+            ) : (
+              <CustomTable
+                data={filtered as Maintenance[]}
+                columns={maintenanceColumns}
+                defaultPageSize={10}
+              />
+            )}
+          </div>
         </div>
       </div>
-    </div>
+      <DeleteAsset seclectedAsset={asset} open={isDeleteOpen} setOpen={setIsDeleteOpen} />
+      <UpdateAssetModal open={isUpdateOpen} setOpen={setIsUpdateOpen} assetId={Number(id)} />
+    </>
   );
 };
 export default DetailAssetPage;
