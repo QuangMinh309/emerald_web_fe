@@ -16,8 +16,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ApartmentTypeOptions } from "@/constants/apartmentType";
+import { BlockStatusOption } from "@/constants/blockStatus";
 import { useGetBlockById } from "@/hooks/data/useBlocks";
-import { apartmentTypeOptions } from "@/pages/Blocks/create-block/StepOne";
 import { hasResidentsInBlock } from "@/services/blocks.service";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
@@ -210,13 +211,11 @@ const StepOne = ({ setStep, blockId }: StepOneProps) => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="OPERATING">Hoạt động (Operating)</SelectItem>
-                        <SelectItem value="UNDER_CONSTRUCTION">
-                          Đang xây dựng (Under Construction)
-                        </SelectItem>
-                        <SelectItem value="UNDER_MAINTENANCE">
-                          Đang bảo trì (Under Maintenance)
-                        </SelectItem>
+                        {BlockStatusOption?.map((status) => (
+                          <SelectItem key={status.value} value={status.value}>
+                            {status.label}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -333,7 +332,7 @@ const StepOne = ({ setStep, blockId }: StepOneProps) => {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {apartmentTypeOptions?.map((type) => (
+                          {ApartmentTypeOptions?.map((type) => (
                             <SelectItem key={type.value} value={type.value}>
                               {type.label}
                             </SelectItem>

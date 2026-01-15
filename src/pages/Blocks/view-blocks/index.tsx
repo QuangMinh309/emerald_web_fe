@@ -1,18 +1,12 @@
 import PageHeader from "@/components/common/PageHeader";
 import StatusBadge from "@/components/common/StatusBadge";
 import { Button } from "@/components/ui/button";
+import { BlockStatusMap } from "@/constants/blockStatus";
 import { useBlocks } from "@/hooks/data/useBlocks";
 import type { Block } from "@/types/block";
 import { Edit, Plus, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-const statusMap: Record<
-  string,
-  { label: string; type: "success" | "warning" | "error" | "default" }
-> = {
-  ACTIVE: { label: "Đang vận hành", type: "success" },
-  INACTIVE: { label: "Đang xây dựng", type: "default" },
-  MAINTENANCE: { label: "Đang bảo trì", type: "warning" },
-};
+
 const BlocksPage = () => {
   const router = useNavigate();
   const { data: blocks, isLoading, isError, error, refetch } = useBlocks();
@@ -68,9 +62,9 @@ interface BlockCardProps {
 }
 export const BlockCard = ({ block, action = false }: BlockCardProps) => {
   const router = useNavigate();
-  const cfg = statusMap[block?.status ?? ""] || {
-    label: block?.status ?? "Unknown",
-    type: "success",
+  const config = BlockStatusMap[block.status] ?? {
+    label: "Không xác định",
+    type: "default",
   };
   return (
     <div className="border rounded-lg shadow-sm p-4 bg-white w-[400px]">
@@ -103,7 +97,7 @@ export const BlockCard = ({ block, action = false }: BlockCardProps) => {
           </>
         )}
       </div>
-      <StatusBadge className="mt-2 mb-4" label={cfg.label} type={cfg.type} />
+      <StatusBadge className="mt-2 mb-4" label={config.label} type={config.type} />
       <div className="w-full flex items-center justify-between">
         <p className="display-label">Số tầng</p>
         <p className="display-text"> {block.totalFloors}</p>

@@ -37,6 +37,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { BlockStatus } from "@/constants/blockStatus";
 const RELATIONSHIP_OPTIONS = [
   { value: "PARTNER", label: "Vợ/Chồng" },
   { value: "CHILD", label: "Con" },
@@ -170,7 +171,6 @@ const CreateApartmentModal = ({ open, setOpen }: ModalProps) => {
     form.reset();
     setSelectedResidents([]);
   };
-
   return (
     <Modal
       open={open}
