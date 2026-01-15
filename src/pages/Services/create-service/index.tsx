@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Modal } from "@/components/common/Modal";
 import {
   Form,
@@ -27,7 +27,8 @@ import { toast } from "sonner";
 
 import { useCreateService } from "@/hooks/data/useServices";
 import type { ServiceType } from "@/types/service";
-import { formatVND } from "@/utils/money";
+import { UploadImages } from "@/components/common/UploadImages";
+import { useUploadImage } from "@/hooks/useUploadImage";
 
 const formatVNDInput = (v: string) => {
   if (!v) return "";
@@ -64,6 +65,8 @@ type ServiceFormValues = z.infer<typeof CreateServiceSchema>;
 
 const CreateServiceModal = ({ open, setOpen }: ModalProps) => {
   const { mutate: createService, isPending } = useCreateService();
+  const [image, setImage] = useState<File[]>([]);
+  const { mutateAsync: uploadImage, isPending: isUploading } = useUploadImage();
 
   const form = useForm<ServiceFormValues>({
     resolver: zodResolver(CreateServiceSchema),
@@ -74,10 +77,9 @@ const CreateServiceModal = ({ open, setOpen }: ModalProps) => {
       unitTimeBlock: "60",
       openHour: "06:00",
       closeHour: "17:00",
-      totalSlot: "1",
+      totalSlot: "",
       type: "NORMAL",
-      status: "",
-      // imageUrl: "",
+      status: "active",
     },
   });
 
@@ -111,35 +113,51 @@ const CreateServiceModal = ({ open, setOpen }: ModalProps) => {
     [],
   );
 
+  useEffect(() => {
+    if (open) {
+      setImage([]);
+    }
+  }, [open]);
+
   const handleClose = () => {
     setOpen(false);
     form.reset();
+    setImage([]);
   };
 
-  function onSubmit(values: ServiceFormValues) {
-    createService(
-      {
-        name: values.name,
-        description: values.description,
-        unitPrice: Number(values.unitPrice),
-        unitTimeBlock: Number(values.unitTimeBlock),
-        openHour: values.openHour,
-        closeHour: values.closeHour,
-        totalSlot: Number(values.totalSlot),
-        // imageUrl: values.imageUrl ?? "",
-        type: (values.type ?? "NORMAL") as ServiceType,
-        status: values.status,
-      } as any,
-      {
-        onSuccess: () => {
-          toast.success("Dịch vụ đã được tạo thành công");
-          handleClose();
+  async function onSubmit(values: ServiceFormValues) {
+    try {
+      let imageUrl = "";
+      if (image.length > 0) {
+        imageUrl = await uploadImage(image[0]);
+      }
+
+      createService(
+        {
+          name: values.name,
+          description: values.description,
+          unitPrice: Number(values.unitPrice),
+          unitTimeBlock: Number(values.unitTimeBlock),
+          openHour: values.openHour,
+          closeHour: values.closeHour,
+          totalSlot: Number(values.totalSlot),
+          imageUrl,
+          type: (values.type ?? "NORMAL") as ServiceType,
+          status: values.status,
+        } as any,
+        {
+          onSuccess: () => {
+            toast.success("Dịch vụ đã được tạo thành công");
+            handleClose();
+          },
+          onError: (error: any) => {
+            toast.error(`${error?.message ?? "Có lỗi xảy ra"}`);
+          },
         },
-        onError: (error: any) => {
-          toast.error(`${error?.message ?? "Có lỗi xảy ra"}`);
-        },
-      },
-    );
+      );
+    } catch (error: any) {
+      toast.error(`${error?.message ?? "Không thể tải ảnh lên"}`);
+    }
   }
 
   return (
@@ -149,6 +167,7 @@ const CreateServiceModal = ({ open, setOpen }: ModalProps) => {
       title="Thêm dịch vụ mới"
       submitText="Tạo mới"
       onSubmit={form.handleSubmit(onSubmit)}
+      onLoading={isPending || isUploading}
     >
       <Form {...form}>
         <form className="space-y-4">
@@ -336,20 +355,12 @@ const CreateServiceModal = ({ open, setOpen }: ModalProps) => {
             />
           </div>
 
-          {/* <FormField
-            disabled={isPending}
-            control={form.control}
-            name="imageUrl"
-            render={({ field }) => (
-              <FormItem className="space-y-1.5">
-                <FormLabel>Ảnh (URL)</FormLabel>
-                <FormControl>
-                  <Input placeholder="https://..." {...field} />
-                </FormControl>
-                <FormMessage className="text-xs" />
-              </FormItem>
-            )}
-          /> */}
+          {/* Image */}
+          <UploadImages
+            files={image}
+            onChange={setImage}
+            maxImages={1}
+          />
         </form>
       </Form>
     </Modal>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Modal } from "@/components/common/Modal";
 import {
   Form,
@@ -22,11 +22,14 @@ import {
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { set, z } from "zod";
 import { toast } from "sonner";
 
 import type { ServiceType } from "@/types/service";
 import { useGetServiceById, useUpdateService } from "@/hooks/data/useServices";
+
+import { UploadImages } from "@/components/common/UploadImages";
+import { useUploadImage } from "@/hooks/useUploadImage";
 
 interface UpdateModalProps {
   open: boolean;
@@ -64,6 +67,11 @@ const UpdateServiceModal = ({ open, setOpen, serviceId }: UpdateModalProps) => {
   const { data: service } = useGetServiceById(serviceId);
   const { mutate: updateService, isPending } = useUpdateService();
 
+  const [image, setImage] = useState<File[]>([]);
+  const [existingImageUrl, setExistingImageUrl] = useState("");
+  const [removeExistingImage, setRemoveExistingImage] = useState(false);
+  const { mutateAsync: uploadImage, isPending: isUploading } = useUploadImage();
+
   const form = useForm<ServiceFormValues>({
     resolver: zodResolver(UpdateServiceSchema),
     defaultValues: {
@@ -79,6 +87,14 @@ const UpdateServiceModal = ({ open, setOpen, serviceId }: UpdateModalProps) => {
       // imageUrl: "",
     },
   });
+
+  useEffect(() => {
+    if (open) {
+      setImage([]);
+      setExistingImageUrl(service?.imageUrl ?? "");
+      setRemoveExistingImage(false);
+    }
+  }, [open, service?.imageUrl]);
 
   const hourOptions = useMemo(() => {
     const options: { value: string; label: string }[] = [];
@@ -129,24 +145,31 @@ const UpdateServiceModal = ({ open, setOpen, serviceId }: UpdateModalProps) => {
     }
   }, [open, service, form]);
 
-  function onSubmit(values: ServiceFormValues) {
+  async function onSubmit(values: ServiceFormValues) {
     if (!serviceId) return;
+
+    const payload: any = {
+      name: values.name,
+      description: values.description,
+      unitPrice: Number(values.unitPrice),
+      unitTimeBlock: Number(values.unitTimeBlock),
+      openHour: values.openHour,
+      closeHour: values.closeHour,
+      totalSlot: Number(values.totalSlot),
+      type: (values.type ?? "NORMAL") as ServiceType,
+      status: values.status,
+    };
+
+    if (image.length > 0) {
+      payload.imageUrl = await uploadImage(image[0]);
+    } else if (removeExistingImage) {
+      payload.imageUrl = "";
+    }
 
     updateService(
       {
         id: serviceId,
-        payload: {
-          name: values.name,
-          description: values.description,
-          unitPrice: Number(values.unitPrice),
-          unitTimeBlock: Number(values.unitTimeBlock),
-          openHour: values.openHour,
-          closeHour: values.closeHour,
-          totalSlot: Number(values.totalSlot),
-          // imageUrl: values.imageUrl,
-          type: (values.type ?? "NORMAL") as ServiceType,
-          status: values.status,
-        },
+        payload,
       } as any,
       {
         onSuccess: () => {
@@ -167,7 +190,7 @@ const UpdateServiceModal = ({ open, setOpen, serviceId }: UpdateModalProps) => {
       title="Chỉnh sửa dịch vụ"
       submitText="Lưu thay đổi"
       onSubmit={form.handleSubmit(onSubmit)}
-      onLoading={isPending}
+      onLoading={isPending || isUploading}
     >
       <Form {...form}>
         <form className="space-y-4">
@@ -384,20 +407,20 @@ const UpdateServiceModal = ({ open, setOpen, serviceId }: UpdateModalProps) => {
           </div>
 
           {/* Image URL */}
-          {/* <FormField
-            disabled={isPending}
-            control={form.control}
-            name="imageUrl"
-            render={({ field }) => (
-              <FormItem className="space-y-1.5">
-                <FormLabel>Ảnh (URL)</FormLabel>
-                <FormControl>
-                  <Input placeholder="https://..." {...field} />
-                </FormControl>
-                <FormMessage className="text-xs" />
-              </FormItem>
-            )}
-          /> */}
+          <UploadImages
+            files={image}
+            onChange={(files) => {
+              setImage(files);
+              if (files.length > 0) {
+                setRemoveExistingImage(true);
+              }
+            }}
+            existingUrls={
+              existingImageUrl && !removeExistingImage ? [existingImageUrl] : []
+            }
+            onRemoveExisting={() => setRemoveExistingImage(true)}
+            maxImages={1}
+          />
         </form>
       </Form>
     </Modal>
