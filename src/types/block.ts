@@ -19,7 +19,7 @@ export interface Block {
 export interface BlockDetail {
   id: number;
   buildingName: string;
-  status: string;
+  status: BlockStatusType;
   totalFloors: number;
   managerName: string;
   managerPhone: string;
