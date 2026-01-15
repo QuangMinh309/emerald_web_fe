@@ -1,5 +1,5 @@
 import { lazy } from "react";
-import { createBrowserRouter } from "react-router-dom";
+import { Navigate, createBrowserRouter } from "react-router-dom";
 import MainLayout from "@components/layout/MainLayout";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import DetailAssetPage from "@/pages/Assets/detail-asset";
@@ -36,6 +36,7 @@ export const routes = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
+      { index: true, element: <Navigate to="/blocks" replace /> },
       { path: "assets", element: <Assets /> },
       { path: "notifications", element: <Notifications /> },
       { path: "notifications/:id", element: <DetailNotificationPage /> },
