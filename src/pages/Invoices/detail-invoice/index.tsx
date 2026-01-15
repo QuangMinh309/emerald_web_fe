@@ -147,7 +147,7 @@ const DetailInvoicePage = () => {
 
 /* ================= SMALL COMPONENT ================= */
 
-const Info = ({
+export const Info = ({
   label,
   value,
   highlight,
