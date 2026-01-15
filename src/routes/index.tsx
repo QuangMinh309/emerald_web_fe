@@ -1,6 +1,7 @@
 import { lazy } from "react";
 import { createBrowserRouter } from "react-router-dom";
 import MainLayout from "@components/layout/MainLayout";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import DetailAssetPage from "@/pages/Assets/detail-asset";
 import ResidentsPage from "@/pages/Residents/view-residents";
 import DetailResidentPage from "@/pages/Residents/detail-resident";
@@ -24,7 +25,11 @@ export const routes = createBrowserRouter([
   { path: "/reset-password", element: <ResetPassword /> },
   {
     path: "/",
-    element: <MainLayout />,
+    element: (
+      <ProtectedRoute>
+        <MainLayout />
+      </ProtectedRoute>
+    ),
     children: [
       { path: "assets", element: <Assets /> },
       { path: "notifications", element: <Notifications /> },
