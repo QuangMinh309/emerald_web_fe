@@ -37,17 +37,14 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { RelationshipTypeOptions } from "@/constants/relationshipType";
+import { ApartmentTypeOptions } from "@/constants/apartmentType";
 interface UpdateModalProps {
   open: boolean;
   setOpen: (value: boolean) => void;
   apartmentId?: number | undefined;
 }
-const RELATIONSHIP_OPTIONS = [
-  { value: "PARTNER", label: "Vợ/Chồng" },
-  { value: "CHILD", label: "Con" },
-  { value: "PARENT", label: "Bố/Mẹ" },
-  { value: "MEMBER", label: "Thành viên khác" },
-];
+
 const UpdateApartmentSchema = z.object({
   roomName: z.string().min(1, "Vui lòng nhập mã căn hộ"),
   type: z.string().min(1, "Vui lòng chọn loại căn hộ"),
@@ -233,11 +230,11 @@ const UpdateApartmentModal = ({ open, setOpen, apartmentId }: UpdateModalProps) 
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="STUDIO">Studio</SelectItem>
-                      <SelectItem value="ONE_BEDROOM">1 phòng ngủ</SelectItem>
-                      <SelectItem value="TWO_BEDROOM">2 phòng ngủ</SelectItem>
-                      <SelectItem value="THREE_BEDROOM">3 phòng ngủ</SelectItem>
-                      <SelectItem value="PENTHOUSE">Penthouse</SelectItem>
+                      {ApartmentTypeOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <FormMessage className="text-xs" />
@@ -413,7 +410,7 @@ const UpdateApartmentModal = ({ open, setOpen, apartmentId }: UpdateModalProps) 
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {RELATIONSHIP_OPTIONS.map((option) => (
+                          {RelationshipTypeOptions.map((option) => (
                             <SelectItem key={option.value} value={option.value}>
                               {option.label}
                             </SelectItem>

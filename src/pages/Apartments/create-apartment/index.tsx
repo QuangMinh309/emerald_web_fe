@@ -38,12 +38,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { ApartmentTypeOptions } from "@/constants/apartmentType";
-const RELATIONSHIP_OPTIONS = [
-  { value: "PARTNER", label: "Vợ/Chồng" },
-  { value: "CHILD", label: "Con" },
-  { value: "PARENT", label: "Bố/Mẹ" },
-  { value: "MEMBER", label: "Thành viên khác" },
-];
+import { RelationshipTypeOptions } from "@/constants/relationshipType";
 interface ModalProps {
   open: boolean;
   setOpen: (value: boolean) => void;
@@ -415,7 +410,7 @@ const CreateApartmentModal = ({ open, setOpen }: ModalProps) => {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {RELATIONSHIP_OPTIONS.map((option) => (
+                          {RelationshipTypeOptions.map((option) => (
                             <SelectItem key={option.value} value={option.value}>
                               {option.label}
                             </SelectItem>
