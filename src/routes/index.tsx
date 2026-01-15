@@ -7,6 +7,11 @@ import ResidentsPage from "@/pages/Residents/view-residents";
 import DetailResidentPage from "@/pages/Residents/detail-resident";
 import BlocksPage from "@/pages/Blocks/view-blocks";
 import CreateBlockPage from "@/pages/Blocks/create-block";
+import UpdateBlockPage from "@/pages/Blocks/update-block";
+import DetailNotificationPage from "@/pages/Notifications/detail-notification";
+import DetailBlockPage from "@/pages/Blocks/detail-block";
+import DetailApartmentPage from "@/pages/Apartments/detail-apartment";
+import ApartmentsPage from "@/pages/Apartments/view-apartments";
 
 const Assets = lazy(() => import("@/pages/Assets/view-assets"));
 const Notifications = lazy(() => import("@/pages/Notifications/view-notifications"));
@@ -33,6 +38,7 @@ export const routes = createBrowserRouter([
     children: [
       { path: "assets", element: <Assets /> },
       { path: "notifications", element: <Notifications /> },
+      { path: "notifications/:id", element: <DetailNotificationPage /> },
       { path: "assets/:id", element: <DetailAssetPage /> },
       { path: "residents", element: <ResidentsPage /> },
       { path: "residents/:id", element: <DetailResidentPage /> },
@@ -40,7 +46,11 @@ export const routes = createBrowserRouter([
       { path: "services/:id", element: <DetailServicePage /> },
       { path: "reports", element: <Report /> },
       { path: "blocks", element: <BlocksPage /> },
+      { path: "blocks/:id", element: <DetailBlockPage /> },
       { path: "blocks/create", element: <CreateBlockPage /> },
+      { path: "blocks/update/:id", element: <UpdateBlockPage /> },
+      { path: "apartments/:id", element: <DetailApartmentPage /> },
+      { path: "apartments", element: <ApartmentsPage /> },
     ],
   },
 ]);

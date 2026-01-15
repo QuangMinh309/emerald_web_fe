@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 // màu cơ bản
-type StatusType = "success" | "warning" | "error" | "info" | "default";
+export type StatusType = "success" | "warning" | "error" | "info" | "default";
 
 interface StatusBadgeProps {
   label: string;

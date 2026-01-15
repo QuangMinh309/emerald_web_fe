@@ -10,7 +10,7 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const from = (location.state as { from?: Location })?.from?.pathname || "/blocks";
+  const from = "/blocks";
 
   useEffect(() => {
     if (!isAuthenticated) return;

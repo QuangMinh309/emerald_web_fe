@@ -1,6 +1,7 @@
 import CustomTable from "@/components/common/CustomTable";
 import PageHeader from "@/components/common/PageHeader";
 import { SearchBar } from "@/components/common/SearchBar";
+import Spinner from "@/components/common/Spinner";
 import StatusBadge from "@/components/common/StatusBadge";
 import { useGetAssetById } from "@/hooks/data/useAssests";
 import { useMaintenances } from "@/hooks/data/useMaintenance";
@@ -20,7 +21,7 @@ const statusMap: Record<
 };
 const DetailAssetPage = () => {
   const { id } = useParams();
-  const { data: asset } = useGetAssetById(Number(id));
+  const { data: asset, isLoading: isAssetLoading } = useGetAssetById(Number(id));
   const cfg = statusMap[asset?.status ?? ""] || {
     label: asset?.status ?? "Unknown",
     type: "default",
@@ -39,6 +40,23 @@ const DetailAssetPage = () => {
         normalizeString(m.technicianName).includes(s),
     );
   }, [data, search]);
+  if (!id) {
+    return (
+      <div className="p-1.5 pt-0 space-y-4">
+        <div className="bg-red-50 border border-red-200 p-8 rounded text-center text-red-600">
+          Không tìm thấy ID tài sản
+        </div>
+      </div>
+    );
+  }
+  // bắt buộc phải có loading, nếu không lúc mà fetch data lâu nó sẽ lỗi
+  if (isAssetLoading) {
+    return (
+      <div className="flex justify-center items-center h-[500px] ">
+        <Spinner />
+      </div>
+    );
+  }
   return (
     <div className="p-1.5 pt-0 space-y-4">
       <PageHeader

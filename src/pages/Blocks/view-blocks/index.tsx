@@ -1,18 +1,12 @@
 import PageHeader from "@/components/common/PageHeader";
 import StatusBadge from "@/components/common/StatusBadge";
 import { Button } from "@/components/ui/button";
+import { BlockStatusMap } from "@/constants/blockStatus";
 import { useBlocks } from "@/hooks/data/useBlocks";
 import type { Block } from "@/types/block";
 import { Edit, Plus, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-const statusMap: Record<
-  string,
-  { label: string; type: "success" | "warning" | "error" | "default" }
-> = {
-  ACTIVE: { label: "Đang vận hành", type: "success" },
-  INACTIVE: { label: "Đang xây dựng", type: "default" },
-  MAINTENANCE: { label: "Đang bảo trì", type: "warning" },
-};
+
 const BlocksPage = () => {
   const router = useNavigate();
   const { data: blocks, isLoading, isError, error, refetch } = useBlocks();
@@ -54,7 +48,7 @@ const BlocksPage = () => {
         ) : (
           <div className="grid grid-cols-3 gap-10">
             {blocks?.map((block) => (
-              <BlockCard key={block.id} {...block} />
+              <BlockCard key={block.id} block={block} action={true} />
             ))}
           </div>
         )}
@@ -62,31 +56,48 @@ const BlocksPage = () => {
     </div>
   );
 };
-const BlockCard = (block: Block) => {
-  const cfg = statusMap[block?.status ?? ""] || {
-    label: block?.status ?? "Unknown",
-    type: "success",
+interface BlockCardProps {
+  block: Block;
+  action?: boolean;
+}
+export const BlockCard = ({ block, action = false }: BlockCardProps) => {
+  const router = useNavigate();
+  const config = BlockStatusMap[block.status] ?? {
+    label: "Không xác định",
+    type: "default",
   };
   return (
     <div className="border rounded-lg shadow-sm p-4 bg-white w-[400px]">
       <div className="flex items-center justify-between">
-        <h3 className="font-bold text-[18px]">{block.buildingName}</h3>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="ml-auto h-8 w-8 text-gray-500 hover:text-blue-600 hover:bg-blue-50"
+        <h3
+          className="font-bold text-[18px] hover:underline cursor-pointer hover:text-main  decoration-main"
+          onClick={() => {
+            if (action) router(`/blocks/${block.id}`);
+          }}
         >
-          <Edit className="w-4 h-4 stroke-[2]" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 text-gray-500 hover:text-red-600 hover:bg-red-50"
-        >
-          <Trash2 className="w-4 h-4 stroke-[2]" />
-        </Button>
+          {block.buildingName}
+        </h3>
+        {action && (
+          <>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="ml-auto h-8 w-8 text-gray-500 hover:text-blue-600 hover:bg-blue-50"
+              onClick={() => router(`/blocks/update/${block.id}`)}
+            >
+              <Edit className="w-4 h-4 stroke-[2]" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-gray-500 hover:text-red-600 hover:bg-red-50"
+            >
+              <Trash2 className="w-4 h-4 stroke-[2]" />
+            </Button>
+          </>
+        )}
       </div>
-      <StatusBadge className="mt-2 mb-4" label={cfg.label} type={cfg.type} />
+      <StatusBadge className="mt-2 mb-4" label={config.label} type={config.type} />
       <div className="w-full flex items-center justify-between">
         <p className="display-label">Số tầng</p>
         <p className="display-text"> {block.totalFloors}</p>
@@ -111,7 +122,7 @@ const BlockCard = (block: Block) => {
           {block.roomDetails.oneBedroom > 0 && (
             <div className="flex justify-between relative">
               <span className="absolute -left-4 top-1/2 w-3 border-t  border-gray-300" />
-              <p className="display-label text-sm text-gray-600">Căn hộ 1 phòng ngủ</p>
+              <p className="display-label ">Căn hộ 1 phòng ngủ</p>
               <p className="display-text">{block.roomDetails.oneBedroom}</p>
             </div>
           )}
@@ -119,7 +130,7 @@ const BlockCard = (block: Block) => {
           {block.roomDetails.twoBedroom > 0 && (
             <div className="flex justify-between relative">
               <span className="absolute -left-4 top-1/2 w-3 border-t border-gray-300" />
-              <p className="display-label text-sm text-gray-600">Căn hộ 2 phòng ngủ</p>
+              <p className="display-label ">Căn hộ 2 phòng ngủ</p>
               <p className="display-text">{block.roomDetails.twoBedroom}</p>
             </div>
           )}
@@ -127,7 +138,7 @@ const BlockCard = (block: Block) => {
           {block.roomDetails.studio > 0 && (
             <div className="flex justify-between relative">
               <span className="absolute -left-4 top-1/2 w-3 border-t border-gray-300" />
-              <p className="display-label text-sm text-gray-600">Căn hộ studio</p>
+              <p className="display-label ">Căn hộ studio</p>
               <p className="display-text">{block.roomDetails.studio}</p>
             </div>
           )}
@@ -135,7 +146,7 @@ const BlockCard = (block: Block) => {
           {block.roomDetails.penthouse > 0 && (
             <div className="flex justify-between relative">
               <span className="absolute -left-4 top-1/2 w-3 border-t border-gray-300" />
-              <p className="display-label text-sm text-gray-600">Căn hộ penthouse</p>
+              <p className="display-label ">Căn hộ penthouse</p>
               <p className="display-text">{block.roomDetails.penthouse}</p>
             </div>
           )}
