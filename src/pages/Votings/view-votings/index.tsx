@@ -4,7 +4,6 @@ import { useState, useMemo } from "react";
 import { Plus, Printer, FileDown, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { isPast } from "date-fns";
 
 import PageHeader from "@/components/common/PageHeader";
 import ActionDropdown from "@/components/common/ActionDropdown";
@@ -12,101 +11,86 @@ import CustomTable from "@/components/common/CustomTable";
 import { SearchBar } from "@/components/common/SearchBar";
 import { TabNavigation } from "@/components/common/TabNavigation";
 
-import CreateNotificationModal from "@/pages/Notifications/create-notification";
-import UpdateNotificationModal from "@/pages/Notifications/update-notification";
-import DeleteNotification from "@/pages/Notifications/delete-notification";
-import DeleteManyNotificationModal from "@/pages/Notifications/multiple-delete-notifications";
+import DeleteVotingModal from "@/pages/Votings/delete-voting";
+import DeleteManyVotingModal from "@/pages/Votings/multiple-delete-votings";
 
-import { useNotifications } from "@/hooks/data/useNotifications";
-import { notificationColumns } from "./columns";
+import { useVotings } from "@/hooks/data/useVotings";
+import { votingColumns } from "./columns";
 import { normalizeString } from "@/utils/string";
-import type { NotificationData } from "@/types/notification";
+import type { VotingData } from "@/types/voting";
 import type { ActionOption, TabItem } from "@/types";
 
-const NotificationsPage = () => {
+const VotingsPage = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("ALL");
 
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [isUpdateOpen, setIsUpdateOpen] = useState(false);
-  const [editingId, setEditingId] = useState<number | undefined>();
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const [deletingItem, setDeletingItem] = useState<NotificationData | null>(null);
+  const [deletingItem, setDeletingItem] = useState<VotingData | null>(null);
 
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isDeleteManyOpen, setIsDeleteManyOpen] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
-  const { data: notifications = [], isLoading, isError, error, refetch } = useNotifications();
+  const { data: votings = [], isLoading, isError, refetch } = useVotings();
 
-  // đã gửi = thời gian đăng (publishedAt) trong quá khứ
-  const isSent = (item: NotificationData) => {
-    if (!item.publishedAt) return false;
-
-    const date = new Date(item.publishedAt);
-    if (isNaN(date.getTime())) return false;
-
-    return isPast(date);
-  };
+  const safeVotings = useMemo(() => {
+    return Array.isArray(votings) ? votings : [];
+  }, [votings]);
 
   const filteredData = useMemo(() => {
-    let result = [...notifications];
-
-    // lọc theo tab
+    let result = [...safeVotings];
     if (activeTab !== "ALL") {
-      result = result.filter((item) => item.type === activeTab);
+      result = result.filter((item) => item.status === activeTab);
     }
-
-    // lọc theo search
     if (searchTerm.trim()) {
       const search = normalizeString(searchTerm);
       result = result.filter((item) => normalizeString(item.title).includes(search));
     }
-
     return result;
-  }, [notifications, searchTerm, activeTab]);
+  }, [safeVotings, searchTerm, activeTab]);
 
-  // tab
   const tabs: TabItem[] = useMemo(() => {
-    const getCount = (type: string) => notifications.filter((n) => n.type === type).length;
+    const getCount = (status: string) => safeVotings.filter((v) => v.status === status).length;
     return [
-      { id: "ALL", label: "Tất cả", count: notifications.length },
-      { id: "GENERAL", label: "Thông báo chung", count: getCount("GENERAL") },
-      { id: "MAINTENANCE", label: "Bảo trì", count: getCount("MAINTENANCE") },
-      { id: "WARNING", label: "Cảnh báo", count: getCount("WARNING") },
-      { id: "POLICY", label: "Chính sách", count: getCount("POLICY") },
+      { id: "ALL", label: "Tất cả", count: safeVotings.length },
+      { id: "UPCOMING", label: "Sắp diễn ra", count: getCount("UPCOMING") },
+      { id: "ONGOING", label: "Đang diễn ra", count: getCount("ONGOING") },
+      { id: "ENDED", label: "Đã kết thúc", count: getCount("ENDED") },
     ];
-  }, [notifications]);
+  }, [safeVotings]);
 
   const handleSelectionChange = (ids: string[]) => setSelectedIds(ids);
 
-  const handleEdit = (item: NotificationData) => {
-    if (isSent(item)) {
-      toast.error("Không thể chỉnh sửa thông báo đã được gửi đi!");
+  const handleEdit = (item: VotingData) => {
+    if (item.status !== "UPCOMING") {
+      toast.error("Không thể chỉnh sửa cuộc biểu quyết đã diễn ra hoặc kết thúc!");
       return;
     }
-    setEditingId(item.id);
-    setIsUpdateOpen(true);
+    navigate(`update/${item.id}`);
   };
 
-  const handleDelete = (item: NotificationData) => {
-    if (isSent(item)) {
-      toast.error("Không thể xóa thông báo đã được gửi đi!");
+  const handleDelete = (item: VotingData) => {
+    if (item.status !== "UPCOMING") {
+      toast.error("Không thể xóa cuộc biểu quyết đã diễn ra hoặc kết thúc!");
       return;
     }
     setDeletingItem(item);
     setIsDeleteOpen(true);
   };
 
-  // check logic multiple delete
+  const handleView = (item: VotingData) => {
+    navigate(`${item.id}`);
+  };
+
   const handleBulkDeleteClick = () => {
-    const selectedItems = notifications.filter((n) =>
-      selectedIds.some((id) => String(id) === String(n.id)),
+    const selectedItems = safeVotings.filter((v) =>
+      selectedIds.some((id) => String(id) === String(v.id)),
     );
 
-    const hasSentItems = selectedItems.some((item) => isSent(item));
-    if (hasSentItems) {
-      toast.error("Chỉ được xóa các thông báo ở trạng thái 'Chưa thông báo'!");
+    const hasInvalidStatus = selectedItems.some((v) => v.status !== "UPCOMING");
+
+    if (hasInvalidStatus) {
+      toast.error("Chỉ được xóa các cuộc biểu quyết ở trạng thái 'Sắp diễn ra'!");
       return;
     }
 
@@ -120,7 +104,7 @@ const NotificationsPage = () => {
         label: "In danh sách",
         icon: <Printer className="w-4 h-4" />,
         onClick: () => window.print(),
-        disabled: notifications.length === 0,
+        disabled: safeVotings.length === 0,
       },
       {
         id: "export",
@@ -129,15 +113,15 @@ const NotificationsPage = () => {
         onClick: () => console.log("Exporting..."),
       },
     ],
-    [notifications.length],
+    [safeVotings.length],
   );
 
   return (
     <>
       <div className="p-1.5 pt-0 space-y-4">
         <PageHeader
-          title="Thông báo cư dân"
-          subtitle="Quản lý tin tức, sự kiện và thông báo bảo trì"
+          title="Biểu quyết"
+          subtitle="Quản lý các cuộc biểu quyết và kết quả biểu quyết từ cư dân"
           actions={
             <div className="flex items-center gap-2">
               {selectedIds.length > 0 ? (
@@ -150,11 +134,11 @@ const NotificationsPage = () => {
                 </button>
               ) : (
                 <button
-                  onClick={() => setIsCreateOpen(true)}
-                  className="flex items-center gap-2 bg-main text-white px-4 py-2 rounded-lg hover:bg-main/90 transition-colors text-sm font-medium shadow-sm"
+                  onClick={() => navigate("create")}
+                  className="flex items-center gap-2 bg-[#244B35] text-white px-4 py-2 rounded-lg hover:bg-[#1e3f2d] transition-colors text-sm font-medium shadow-sm"
                 >
                   <Plus className="w-4 h-4" />
-                  Tạo thông báo
+                  Tạo biểu quyết
                 </button>
               )}
               <ActionDropdown options={actions} />
@@ -172,18 +156,17 @@ const NotificationsPage = () => {
               setSelectedIds([]);
             }}
           />
-          <SearchBar placeholder="Tìm kiếm theo tiêu đề,..." onSearch={setSearchTerm} />
+          <SearchBar placeholder="Tìm kiếm theo tiêu đề..." onSearch={setSearchTerm} />
         </div>
 
         <div className="min-h-[400px]">
           {isLoading ? (
             <div className="bg-white p-12 text-center text-gray-500 border rounded shadow-sm">
-              Đang tải dữ liệu thông báo...
+              Đang tải dữ liệu biểu quyết...
             </div>
           ) : isError ? (
             <div className="bg-red-50 border border-red-200 p-8 rounded text-center space-y-3 text-red-600">
               <p className="font-medium">Không thể tải dữ liệu!</p>
-              <p className="text-sm">{(error as any)?.message || "Lỗi không xác định"}</p>
               <button
                 onClick={() => refetch()}
                 className="px-4 py-2 bg-red-600 text-white rounded-md text-sm hover:bg-red-700"
@@ -194,42 +177,29 @@ const NotificationsPage = () => {
           ) : (
             <CustomTable
               data={filteredData}
-              columns={notificationColumns}
+              columns={votingColumns}
               defaultPageSize={10}
               onSelectionChange={handleSelectionChange}
               selection={selectedIds}
               onEdit={handleEdit}
               onDelete={handleDelete}
-              onView={(row) => navigate(`/notifications/${row.id}`)}
-              isEditable={(item) => !isSent(item)}
+              onView={handleView}
+              isEditable={(item) => item.status === "UPCOMING"}
             />
           )}
         </div>
       </div>
 
-      <CreateNotificationModal open={isCreateOpen} setOpen={setIsCreateOpen} />
-
-      {!!editingId && (
-        <UpdateNotificationModal
-          open={isUpdateOpen}
-          setOpen={(v) => {
-            setIsUpdateOpen(v);
-            if (!v) setEditingId(undefined);
-          }}
-          notificationId={editingId}
-        />
-      )}
-
-      <DeleteNotification
+      <DeleteVotingModal
         open={isDeleteOpen}
         setOpen={(val) => {
           setIsDeleteOpen(val);
           if (!val) setDeletingItem(null);
         }}
-        selectedNotification={deletingItem}
+        selectedItem={deletingItem}
       />
 
-      <DeleteManyNotificationModal
+      <DeleteManyVotingModal
         open={isDeleteManyOpen}
         setOpen={setIsDeleteManyOpen}
         selectedIds={selectedIds}
@@ -239,4 +209,4 @@ const NotificationsPage = () => {
   );
 };
 
-export default NotificationsPage;
+export default VotingsPage;

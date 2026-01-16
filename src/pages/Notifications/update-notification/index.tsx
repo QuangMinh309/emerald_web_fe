@@ -13,6 +13,7 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
+import { addMinutes } from "date-fns";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,9 +21,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { useNotification, useUpdateNotification } from "@/hooks/data/useNotifications";
 import { Label } from "@/components/ui/label";
-import { FileText } from "lucide-react";
+import FileAttachmentItem from "@/components/common/FileAttachmentItem";
 import { ScopeSelector } from "@/components/common/ScopeSelector";
 import { UploadFiles } from "@/components/common/UploadFiles";
+import { DateTimePicker } from "@/components/common/DateTimePicker";
 
 interface UpdateModalProps {
   open: boolean;
@@ -40,6 +42,7 @@ const typeMap: Record<string, { label: string; className: string }> = {
 
 const UpdateSchema = z.object({
   title: z.string().min(1, "Vui lòng nhập tiêu đề"),
+  publishedAt: z.date({ message: "Vui lòng chọn ngày đăng" }),
   type: z.string().min(1, "Vui lòng chọn loại tin"),
   content: z.string().min(1, "Vui lòng nhập nội dung"),
   isUrgent: z.string(),
@@ -89,6 +92,7 @@ const UpdateNotificationModal = ({ open, setOpen, notificationId }: UpdateModalP
 
       form.reset({
         title: notification.title,
+        publishedAt: notification.publishedAt ? new Date(notification.publishedAt) : new Date(),
         type: notification.type,
         content: notification.content,
         isUrgent: notification.isUrgent ? "true" : "false",
@@ -132,6 +136,7 @@ const UpdateNotificationModal = ({ open, setOpen, notificationId }: UpdateModalP
 
     const payload = {
       title: values.title,
+      publishedAt: values.publishedAt,
       type: values.type,
       content: values.content,
       isUrgent: values.isUrgent === "true",
@@ -154,10 +159,13 @@ const UpdateNotificationModal = ({ open, setOpen, notificationId }: UpdateModalP
           handleClose();
         },
         onError: (err: any) => {
-          console.error("API Update Error:", err.response?.data);
-          const msgs = err.response?.data?.message;
-          const msg = Array.isArray(msgs) ? msgs[0] : err.message;
-          toast.error(msg || "Lỗi cập nhật thông báo");
+          const apiMessage = err?.response?.data?.message;
+
+          if (apiMessage) {
+            toast.error(Array.isArray(apiMessage) ? apiMessage[0] : apiMessage);
+          } else {
+            toast.error("Lỗi tạo thông báo");
+          }
         },
       },
     );
@@ -182,6 +190,25 @@ const UpdateNotificationModal = ({ open, setOpen, notificationId }: UpdateModalP
                 <FormLabel isRequired>Tiêu đề</FormLabel>
                 <FormControl>
                   <Input placeholder="Ví dụ: Thông báo bảo trì..." {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="publishedAt"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel isRequired>Ngày đăng</FormLabel>
+                <FormControl>
+                  <DateTimePicker
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder="Chọn thời gian đăng tin"
+                    minDate={addMinutes(new Date(), 15)}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -240,7 +267,7 @@ const UpdateNotificationModal = ({ open, setOpen, notificationId }: UpdateModalP
                       <FormControl>
                         <SelectTrigger>
                           {isUrgent ? (
-                            <span className="text-red-600">Khẩn cấp</span>
+                            <span className="text-red-600">Thông báo khẩn</span>
                           ) : (
                             <span className="text-sm">Bình thường</span>
                           )}
@@ -251,7 +278,7 @@ const UpdateNotificationModal = ({ open, setOpen, notificationId }: UpdateModalP
                           <span>Bình thường</span>
                         </SelectItem>
                         <SelectItem value="true">
-                          <span className="text-red-600">Khẩn cấp</span>
+                          <span className="text-red-600">Thông báo khẩn</span>
                         </SelectItem>
                       </SelectContent>
                     </Select>
@@ -276,47 +303,19 @@ const UpdateNotificationModal = ({ open, setOpen, notificationId }: UpdateModalP
             )}
           />
 
-          <div className="space-y-3">
+          <div className="space-y-4">
             {notification?.fileUrls && notification.fileUrls.length > 0 && (
               <div className="space-y-3">
                 <Label className="text-sm font-semibold text-gray-700">
                   Tài liệu hiện có ({notification.fileUrls.length})
                 </Label>
 
-                <div className="flex flex-col gap-2">
+                <div className="grid grid-cols-1 gap-2">
                   {notification.fileUrls.map((url: string, idx: number) => {
                     const rawFileName = url.split("/").pop() || `Tài liệu ${idx + 1}`;
                     const fileName = decodeURIComponent(rawFileName.split("?")[0]);
 
-                    return (
-                      <div
-                        key={idx}
-                        className="group flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg shadow-sm hover:border-orange-400/50"
-                      >
-                        <div className="flex items-center gap-3 overflow-hidden min-w-0">
-                          <div className="p-2 bg-orange-100 text-orange-600 rounded-md shrink-0">
-                            <FileText size={18} />
-                          </div>
-
-                          <div className="flex flex-col min-w-0">
-                            <span
-                              className="text-sm font-medium text-gray-700 truncate"
-                              title={fileName}
-                            >
-                              {fileName}
-                            </span>
-                            <a
-                              href={url}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="text-xs text-gray-400 hover:text-secondary hover:underline flex items-center gap-1 mt-0.5 transition-colors"
-                            >
-                              Xem tài liệu
-                            </a>
-                          </div>
-                        </div>
-                      </div>
-                    );
+                    return <FileAttachmentItem key={idx} url={url} fileName={fileName} />;
                   })}
                 </div>
               </div>
@@ -326,10 +325,10 @@ const UpdateNotificationModal = ({ open, setOpen, notificationId }: UpdateModalP
               <UploadFiles
                 files={newFiles}
                 onChange={setNewFiles}
-                label="Chọn file để tải thêm"
+                label={notification?.fileUrls?.length ? "Tải thêm tài liệu" : "Tài liệu đính kèm"}
                 maxFiles={10 - (notification?.fileUrls?.length || 0)}
               />
-              <p className="text-[10px] text-muted-foreground italic">
+              <p className="text-[12px] text-gray-500 italic">
                 * Các tài liệu mới sẽ được thêm vào danh sách hiện có.
               </p>
             </div>

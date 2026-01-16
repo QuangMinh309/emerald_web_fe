@@ -35,8 +35,7 @@ export default function LoginPage() {
       }
       navigate(from, { replace: true });
     } catch (error: any) {
-      const message =
-        error?.response?.data?.message || error?.message || "Đăng nhập thất bại";
+      const message = error?.response?.data?.message || error?.message || "Đăng nhập thất bại";
       toast.error(message);
     } finally {
       setIsSubmitting(false);

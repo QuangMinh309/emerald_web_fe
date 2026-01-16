@@ -2,7 +2,7 @@ import { Info } from "lucide-react";
 import type { TableColumn } from "@/types";
 import StatusBadge from "@/components/common/StatusBadge";
 import type { NotificationData } from "@/types/notification";
-import { format } from "date-fns";
+import { format, isPast } from "date-fns";
 
 const typeMap: Record<string, { label: string; className: string }> = {
   MAINTENANCE: {
@@ -32,20 +32,19 @@ export const notificationColumns: TableColumn<NotificationData>[] = [
   {
     key: "title",
     label: "Tiêu đề",
-    width: "25%",
+    width: "20%",
     filterable: true,
-
-    filterAccessor: (row) => (row.isUrgent ? "Khẩn cấp" : "Thường"),
-
+    sortable: true,
+    filterAccessor: (row) => (row.isUrgent ? "Thông báo khẩn" : "Thường"),
     render: (row) => (
       <div className="flex flex-col gap-1">
         <span className="font-medium text-gray-900 line-clamp-2" title={row.title}>
           {row.title}
         </span>
         {row.isUrgent && (
-          <div className="flex items-center gap-1 text-[11px] text-orange-600 font-bold">
+          <div className="flex items-center gap-1 text-[12px] text-orange-600">
             <Info className="w-3 h-3" />
-            <span>Khẩn cấp</span>
+            <span>Thông báo khẩn</span>
           </div>
         )}
       </div>
@@ -83,36 +82,47 @@ export const notificationColumns: TableColumn<NotificationData>[] = [
     },
   },
   {
-    key: "createdAt",
-    label: "Ngày gửi",
+    key: "publishedAt",
+    label: "Thời gian đăng",
     sortable: true,
     align: "center",
     render: (row) => {
-      try {
-        return <span>{format(new Date(row.createdAt), "dd/MM/yyyy")}</span>;
-      } catch {
-        return <span>-</span>;
-      }
+      if (!row.publishedAt) return <span>-</span>;
+
+      const date = new Date(row.publishedAt);
+      if (isNaN(date.getTime())) return <span>-</span>;
+
+      return <span>{format(date, "dd/MM/yyyy HH:mm")}</span>;
     },
   },
   {
-    key: "updatedAt",
-    label: "Ngày cập nhật",
-    sortable: true,
+    key: "status",
+    label: "Trạng thái",
     align: "center",
+    width: "20%",
+    filterable: true,
+
+    filterAccessor: (row) => {
+      const isSent = isPast(new Date(row.publishedAt));
+      return isSent ? "Đã thông báo" : "Chưa thông báo";
+    },
+
     render: (row) => {
-      try {
-        return <span>{format(new Date(row.updatedAt), "dd/MM/yyyy")}</span>;
-      } catch {
-        return <span>-</span>;
-      }
+      const publishDate = new Date(row.publishedAt);
+      const isSent = isPast(publishDate);
+
+      return (
+        <span className={`font-medium ${isSent ? "text-green-600" : "text-purple-600"}`}>
+          {isSent ? "Đã thông báo" : "Chưa thông báo"}
+        </span>
+      );
     },
   },
   {
     key: "type",
     label: "Loại thông báo",
     align: "center",
-    width: "180px",
+    width: "20%",
     filterable: true,
     filterAccessor: (row) => typeMap[row.type]?.label || "Khác",
     render: (row) => {

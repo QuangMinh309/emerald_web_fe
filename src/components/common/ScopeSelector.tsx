@@ -15,6 +15,7 @@ interface ScopeSelectorProps {
   onScopeChange: (val: "ALL" | "BLOCK" | "FLOOR") => void;
   selectedBlocks: BlockConfig[];
   onChangeBlocks: (configs: BlockConfig[]) => void;
+  label?: String;
 }
 
 export const ScopeSelector = ({
@@ -22,12 +23,13 @@ export const ScopeSelector = ({
   onScopeChange,
   selectedBlocks,
   onChangeBlocks,
+  label = "Đối tượng nhận thông báo",
 }: ScopeSelectorProps) => {
   const { data: blocks } = useBlocks();
 
   // chỉ lấy các block đang vận hành
   const activeBlocks = useMemo(() => {
-    return blocks?.filter((b) => b.status === "Đang vận hành") || [];
+    return blocks?.filter((b) => b.status === "OPERATING") || [];
   }, [blocks]);
 
   const isBlockSelected = (id: string) => selectedBlocks.some((b) => b.blockId === id);
@@ -57,7 +59,7 @@ export const ScopeSelector = ({
 
   return (
     <div className="space-y-3">
-      <RequiredLabel isRequired>Đối tượng nhận thông báo</RequiredLabel>
+      <RequiredLabel isRequired>{label}</RequiredLabel>
 
       <RadioGroup
         value={targetScope}

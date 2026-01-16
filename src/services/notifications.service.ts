@@ -14,6 +14,9 @@ const buildFormData = (data: NotificationPayload) => {
   formData.append("type", data.type);
   formData.append("isUrgent", String(data.isUrgent));
   formData.append("targetScope", data.targetScope);
+  if (data.publishedAt) {
+    formData.append("publishedAt", data.publishedAt.toISOString());
+  }
 
   // channels
   if (data.channels?.length) {
