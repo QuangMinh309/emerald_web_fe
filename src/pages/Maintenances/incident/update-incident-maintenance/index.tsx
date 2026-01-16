@@ -21,11 +21,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { TicketPriority, TicketPriorityOptions } from "@/constants/ticketPriority";
-import { Textarea } from "@/components/ui/textarea";
-import { useCreateIncidentTicket } from "@/hooks/data/useMaintenance";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Check } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { useMaintenanceTicketDetail, useUpdateIncidentTicket } from "@/hooks/data/useMaintenance";
+import { TicketPriority, TicketPriorityOptions } from "@/constants/ticketPriority";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Command,
   CommandEmpty,
@@ -34,28 +36,34 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { Check } from "lucide-react";
 import { useAssets } from "@/hooks/data/useAssests";
 
-interface ModalProps {
+interface UpdateModalProps {
   open: boolean;
   setOpen: (value: boolean) => void;
+  ticketId?: number;
 }
 
-const CreateIncidentMaintenanceSchema = z.object({
+const UpdateIncidentMaintenanceSchema = z.object({
   title: z.string().min(1, "Vui lòng nhập tiêu đề"),
   description: z.string().optional(),
   priority: z.string().optional(),
   assetId: z.string().min(1, "Vui lòng chọn tài sản"),
 });
 
-type IncidentMaintenanceFormValues = z.infer<typeof CreateIncidentMaintenanceSchema>;
+type IncidentMaintenanceFormValues = z.infer<typeof UpdateIncidentMaintenanceSchema>;
 
-const CreateIncidentMaintenanceModal = ({ open, setOpen }: ModalProps) => {
-  const { mutate: createTicket, isPending } = useCreateIncidentTicket();
+/* =======================
+   Component
+======================= */
+
+const UpdateIncidentMaintenanceModal = ({ open, setOpen, ticketId }: UpdateModalProps) => {
+  const { data: ticket } = useMaintenanceTicketDetail(ticketId!);
   const { data: assets } = useAssets();
+  const { mutate: updateTicket, isPending } = useUpdateIncidentTicket();
+
   const form = useForm<IncidentMaintenanceFormValues>({
-    resolver: zodResolver(CreateIncidentMaintenanceSchema),
+    resolver: zodResolver(UpdateIncidentMaintenanceSchema),
     defaultValues: {
       title: "",
       description: "",
@@ -63,74 +71,108 @@ const CreateIncidentMaintenanceModal = ({ open, setOpen }: ModalProps) => {
       assetId: "",
     },
   });
-  const residentOptions = assets?.map((asset) => ({
+
+  /* =======================
+     Init data
+  ======================= */
+
+  useEffect(() => {
+    if (ticket && open) {
+      form.reset({
+        title: ticket.title,
+        description: ticket.description || "",
+        priority: ticket.priority || "",
+        assetId: ticket.assetId?.toString() || "",
+      });
+    }
+  }, [ticket, open, form]);
+
+  const assetOptions = assets?.map((asset) => ({
     value: asset.id.toString(),
     label: `${asset.name} - Toà ${asset.blockName} - Tầng ${asset.floor}`,
   }));
-  function onSubmit(values: IncidentMaintenanceFormValues) {
-    createTicket(
-      {
-        title: values.title,
-        description: values.description,
-        assetId: parseInt(values.assetId),
-        priority: values.priority as TicketPriority | undefined,
-        type: "INCIDENT",
-      },
-      {
-        onSuccess: () => {
-          toast.success("Yêu cầu bảo trì đã được tạo thành công");
-          handleClose();
-        },
-        onError: (error) => {
-          toast.error(`Lỗi: ${error.message}`);
-        },
-      },
-    );
-  }
+
+  /* =======================
+     Checklist handlers
+  ======================= */
 
   const handleClose = () => {
     setOpen(false);
     form.reset();
   };
 
+  /* =======================
+     Submit
+  ======================= */
+
+  function onSubmit(values: IncidentMaintenanceFormValues) {
+    if (!ticketId) return;
+
+    updateTicket(
+      {
+        id: ticketId,
+        data: {
+          title: values.title,
+          description: values.description,
+          priority: values.priority as TicketPriority | undefined,
+          assetId: Number(values.assetId),
+        },
+      },
+      {
+        onSuccess: () => {
+          toast.success("Cập nhật yêu cầu bảo trì thành công");
+          handleClose();
+        },
+        onError: (error: any) => {
+          toast.error(`Lỗi cập nhật: ${error.message}`);
+        },
+      },
+    );
+  }
+
+  /* =======================
+     Render
+  ======================= */
+
   return (
     <Modal
       open={open}
       setOpen={setOpen}
-      title="Tạo yêu cầu bảo trì do sự cố"
-      submitText="Tạo mới"
-      onLoading={isPending}
+      title="Chỉnh sửa yêu cầu bảo trì do sự cố"
+      submitText="Lưu thay đổi"
       onSubmit={form.handleSubmit(onSubmit)}
+      onLoading={isPending}
     >
       <Form {...form}>
         <form className="space-y-4">
-          <div className="grid grid-cols-2 gap-x-4 gap-y-4">
+          <div className="grid grid-cols-2 gap-4">
             {/* Tiêu đề */}
             <FormField
               disabled={isPending}
               control={form.control}
               name="title"
               render={({ field }) => (
-                <FormItem className="space-y-1.5 col-span-2">
+                <FormItem className="col-span-2 space-y-1.5">
                   <FormLabel isRequired>Tiêu đề</FormLabel>
                   <FormControl>
-                    <Input placeholder="Nhập tiêu đề yêu cầu" {...field} />
+                    <Input placeholder="Nhập tiêu đề" {...field} />
                   </FormControl>
                   <FormMessage className="text-xs" />
                 </FormItem>
               )}
             />
+
+            {/* Tài sản */}
             <FormField
               disabled={isPending}
               control={form.control}
               name="assetId"
               render={({ field }) => {
-                const selectedAsset = residentOptions?.find((r) => r.value === field.value);
+                const selectedAsset = assetOptions?.find((a) => a.value === field.value);
 
                 return (
-                  <FormItem className="space-y-1.5  col-span-2">
+                  <FormItem className="col-span-2 space-y-1.5">
                     <FormLabel isRequired>Tài sản liên quan</FormLabel>
-
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -148,18 +190,16 @@ const CreateIncidentMaintenanceModal = ({ open, setOpen }: ModalProps) => {
                         <Command>
                           <CommandInput placeholder="Tìm tài sản..." />
                           <CommandList>
-                            <CommandEmpty>Không tìm tài sản</CommandEmpty>
+                            <CommandEmpty>Không tìm thấy tài sản</CommandEmpty>
                             <CommandGroup>
-                              {residentOptions?.map((resident) => (
+                              {assetOptions?.map((asset) => (
                                 <CommandItem
-                                  key={resident.value}
-                                  value={resident.value}
-                                  onSelect={(val) => {
-                                    field.onChange(val);
-                                  }}
+                                  key={asset.value}
+                                  value={asset.value}
+                                  onSelect={(val) => field.onChange(val)}
                                 >
-                                  {resident.label}
-                                  {field.value === resident.value && (
+                                  {asset.label}
+                                  {field.value === asset.value && (
                                     <Check className="ml-auto h-4 w-4 opacity-50" />
                                   )}
                                 </CommandItem>
@@ -169,27 +209,28 @@ const CreateIncidentMaintenanceModal = ({ open, setOpen }: ModalProps) => {
                         </Command>
                       </PopoverContent>
                     </Popover>
-
                     <FormMessage className="text-xs" />
                   </FormItem>
                 );
               }}
             />
+
             {/* Mô tả */}
             <FormField
               disabled={isPending}
               control={form.control}
               name="description"
               render={({ field }) => (
-                <FormItem className="space-y-1.5 col-span-2">
+                <FormItem className="col-span-2 space-y-1.5">
                   <FormLabel>Mô tả chi tiết</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Nhập mô tả chi tiết (nếu có)" rows={3} {...field} />
+                    <Textarea rows={3} {...field} />
                   </FormControl>
                   <FormMessage className="text-xs" />
                 </FormItem>
               )}
             />
+
             {/* Độ ưu tiên */}
             <FormField
               disabled={isPending}
@@ -198,7 +239,7 @@ const CreateIncidentMaintenanceModal = ({ open, setOpen }: ModalProps) => {
               render={({ field }) => (
                 <FormItem className="space-y-1.5">
                   <FormLabel>Độ ưu tiên</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Chọn độ ưu tiên" />
@@ -223,4 +264,4 @@ const CreateIncidentMaintenanceModal = ({ open, setOpen }: ModalProps) => {
   );
 };
 
-export default CreateIncidentMaintenanceModal;
+export default UpdateIncidentMaintenanceModal;

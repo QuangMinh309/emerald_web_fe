@@ -15,6 +15,7 @@ import type { MaintenanceTicketListItem } from "@/types/maintenance";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import CreateIncidentMaintenanceModal from "@/pages/Maintenances/incident/create-incident-maintenance";
+import UpdateIncidentMaintenanceModal from "@/pages/Maintenances/incident/update-incident-maintenance";
 
 const MaintenancesPage = () => {
   const navigate = useNavigate();
@@ -171,9 +172,15 @@ const MaintenancesPage = () => {
         open={isDeleteOpen}
         setOpen={setIsDeleteOpen}
       />
+      {/* Incident Modals */}
       <CreateIncidentMaintenanceModal
         open={isCreateIncidentModalOpen}
         setOpen={setIsCreateIncidentModalOpen}
+      />
+      <UpdateIncidentMaintenanceModal
+        open={isUpdateIncidentOpen}
+        setOpen={setIsUpdateIncidentOpen}
+        ticketId={updateIncidentId!}
       />
       {/* Modals */}
       {/* <CreateMaintenanceModal
