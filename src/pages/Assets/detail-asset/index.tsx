@@ -5,13 +5,10 @@ import Spinner from "@/components/common/Spinner";
 import StatusBadge from "@/components/common/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { useGetAssetById } from "@/hooks/data/useAssests";
-import { useMaintenances } from "@/hooks/data/useMaintenance";
+import { useGetMaintenanceTicketById } from "@/hooks/data/useMaintenance";
 import DeleteAsset from "@/pages/Assets/delete-asset";
 import { maintenanceColumns } from "@/pages/Assets/detail-asset/columns";
 import UpdateAssetModal from "@/pages/Assets/update-asset";
-import DeleteInvoice from "@/pages/Invoices/delete-invoice";
-import UpdateInvoiceModal from "@/pages/Invoices/update-invoice";
-import type { Maintenance } from "@/types/maintenance";
 import { normalizeString } from "@/utils/string";
 import { Edit, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -36,18 +33,20 @@ const DetailAssetPage = () => {
   };
   const [search, setSearch] = useState("");
 
-  const { data = [], isLoading, isError, refetch } = useMaintenances();
+  // const { data, isLoading, isError, refetch } = useGetMaintenanceTicketById(
+  //   Number(id)
+  // );
 
-  const filtered = useMemo(() => {
-    if (!search.trim()) return data;
-    const s = normalizeString(search);
-    return data.filter(
-      (m) =>
-        normalizeString(m.title).includes(s) ||
-        normalizeString(m.maintenanceType).includes(s) ||
-        normalizeString(m.technicianName).includes(s),
-    );
-  }, [data, search]);
+  // const filtered = useMemo(() => {
+  //   if (!search.trim()) return data;
+  //   const s = normalizeString(search);
+  //   return data?.filter(
+  //     (m) =>
+  //       normalizeString(m.title).includes(s) ||
+  //       normalizeString(m.type).includes(s) ||
+  //       normalizeString(m.technicianName).includes(s)
+  //   );
+  // }, [data, search]);
   if (!id) {
     return (
       <div className="p-1.5 pt-0 space-y-4">
@@ -147,7 +146,7 @@ const DetailAssetPage = () => {
           <div>
             <h2 className="title-text">Lịch sử bảo trì, sửa chữa</h2>
           </div>
-          <div className="bg-white p-4 rounded border shadow-sm">
+          {/* <div className="bg-white p-4 rounded border shadow-sm">
             <SearchBar
               placeholder="Tìm theo tiêu đề, loại bảo trì, kỹ thuật viên..."
               onSearch={setSearch}
@@ -176,7 +175,7 @@ const DetailAssetPage = () => {
                 defaultPageSize={10}
               />
             )}
-          </div>
+          </div> */}
         </div>
       </div>
       <DeleteAsset seclectedAsset={asset} open={isDeleteOpen} setOpen={setIsDeleteOpen} />

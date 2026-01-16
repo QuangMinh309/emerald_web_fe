@@ -14,6 +14,8 @@ import DetailApartmentPage from "@/pages/Apartments/detail-apartment";
 import ApartmentsPage from "@/pages/Apartments/view-apartments";
 import InvoicesPage from "@/pages/Invoices/view-invoices";
 import DetailInvoicePage from "@/pages/Invoices/detail-invoice";
+import MaintenancesPage from "@/pages/Maintenances/view-maintenances";
+import DetailMaintenancePage from "@/pages/Maintenances/detail-maintenance";
 
 const Assets = lazy(() => import("@/pages/Assets/view-assets"));
 const Notifications = lazy(() => import("@/pages/Notifications/view-notifications"));
@@ -56,6 +58,8 @@ export const routes = createBrowserRouter([
       { path: "apartments", element: <ApartmentsPage /> },
       { path: "invoices", element: <InvoicesPage /> },
       { path: "invoices/:id", element: <DetailInvoicePage /> },
+      { path: "maintenances", element: <MaintenancesPage /> },
+      { path: "maintenances/:id", element: <DetailMaintenancePage /> },
     ],
   },
 ]);
