@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import CreateIncidentMaintenanceModal from "@/pages/Maintenances/incident/create-incident-maintenance";
 import UpdateIncidentMaintenanceModal from "@/pages/Maintenances/incident/update-incident-maintenance";
 import CreateScheduledMaintenanceModal from "@/pages/Maintenances/scheduled/create-scheduled-maintenance";
+import UpdateScheduledMaintenanceModal from "@/pages/Maintenances/scheduled/update-scheduled-maintenace";
 
 const MaintenancesPage = () => {
   const navigate = useNavigate();
@@ -202,6 +203,11 @@ const MaintenancesPage = () => {
       <CreateScheduledMaintenanceModal
         open={isCreateScheduledModalOpen}
         setOpen={setIsCreateScheduledModalOpen}
+      />
+      <UpdateScheduledMaintenanceModal
+        open={isUpdateScheduledOpen}
+        setOpen={setIsUpdateScheduledOpen}
+        ticketId={updateScheduledId!}
       />
       {/* Modals */}
       {/* <CreateMaintenanceModal
