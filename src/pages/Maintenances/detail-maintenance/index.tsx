@@ -7,7 +7,6 @@ import PageHeader from "@/components/common/PageHeader";
 import Spinner from "@/components/common/Spinner";
 import StatusBadge from "@/components/common/StatusBadge";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 
 import { TicketStatusMap } from "@/constants/ticketStatus";
 import { TicketTypeOptions } from "@/constants/ticketType";
@@ -25,6 +24,7 @@ import AssignTechnicianModal from "@/pages/Maintenances/assign-technician";
 import type { MaintenanceChecklistItem } from "@/types/maintenance";
 import CompleteScheduledMaintenanceModal from "@/pages/Maintenances/scheduled/complete-scheduled-maintenance";
 import CompleteIncidentMaintenanceModal from "@/pages/Maintenances/incident/complete-incident-maintenance";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const DetailMaintenancePage = () => {
   const { id } = useParams<{ id: string }>();
