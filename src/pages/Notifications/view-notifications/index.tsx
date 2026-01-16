@@ -4,19 +4,20 @@ import { useState, useMemo } from "react";
 import { Plus, Printer, FileDown, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { isPast } from "date-fns";
 
 import PageHeader from "@/components/common/PageHeader";
 import ActionDropdown from "@/components/common/ActionDropdown";
 import CustomTable from "@/components/common/CustomTable";
 import { SearchBar } from "@/components/common/SearchBar";
-import PopConfirm from "@/components/common/PopConfirm";
 import { TabNavigation } from "@/components/common/TabNavigation";
 
 import CreateNotificationModal from "@/pages/Notifications/create-notification";
 import UpdateNotificationModal from "@/pages/Notifications/update-notification";
 import DeleteNotification from "@/pages/Notifications/delete-notification";
+import DeleteManyNotificationModal from "@/pages/Notifications/multiple-delete-notifications";
 
-import { useNotifications, useDeleteManyNotifications } from "@/hooks/data/useNotifications";
+import { useNotifications } from "@/hooks/data/useNotifications";
 import { notificationColumns } from "./columns";
 import { normalizeString } from "@/utils/string";
 import type { NotificationData } from "@/types/notification";
@@ -38,7 +39,15 @@ const NotificationsPage = () => {
 
   const { data: notifications = [], isLoading, isError, error, refetch } = useNotifications();
 
-  const { mutate: deleteMany, isPending: isDeletingMany } = useDeleteManyNotifications();
+  // đã gửi = thời gian đăng (publishedAt) trong quá khứ
+  const isSent = (item: NotificationData) => {
+    if (!item.publishedAt) return false;
+
+    const date = new Date(item.publishedAt);
+    if (isNaN(date.getTime())) return false;
+
+    return isPast(date);
+  };
 
   const filteredData = useMemo(() => {
     let result = [...notifications];
@@ -69,35 +78,39 @@ const NotificationsPage = () => {
     ];
   }, [notifications]);
 
-  const handleSelectionChange = (ids: string[]) => {
-    setSelectedIds(ids);
-  };
+  const handleSelectionChange = (ids: string[]) => setSelectedIds(ids);
 
   const handleEdit = (item: NotificationData) => {
+    if (isSent(item)) {
+      toast.error("Không thể chỉnh sửa thông báo đã được gửi đi!");
+      return;
+    }
     setEditingId(item.id);
     setIsUpdateOpen(true);
   };
 
   const handleDelete = (item: NotificationData) => {
+    if (isSent(item)) {
+      toast.error("Không thể xóa thông báo đã được gửi đi!");
+      return;
+    }
     setDeletingItem(item);
     setIsDeleteOpen(true);
   };
 
-  const handleConfirmDeleteMany = () => {
-    if (selectedIds.length === 0) return;
-    const idsNumeric = selectedIds.map(Number);
+  // check logic multiple delete
+  const handleBulkDeleteClick = () => {
+    const selectedItems = notifications.filter((n) =>
+      selectedIds.some((id) => String(id) === String(n.id)),
+    );
 
-    deleteMany(idsNumeric, {
-      onSuccess: () => {
-        toast.success(`Đã xóa ${selectedIds.length} thông báo`);
-        setSelectedIds([]);
-        setIsDeleteManyOpen(false);
-      },
-      onError: () => {
-        toast.error("Lỗi khi xóa nhiều thông báo");
-        setIsDeleteManyOpen(false);
-      },
-    });
+    const hasSentItems = selectedItems.some((item) => isSent(item));
+    if (hasSentItems) {
+      toast.error("Chỉ được xóa các thông báo ở trạng thái 'Chưa thông báo'!");
+      return;
+    }
+
+    setIsDeleteManyOpen(true);
   };
 
   const actions: ActionOption[] = useMemo(
@@ -129,7 +142,7 @@ const NotificationsPage = () => {
             <div className="flex items-center gap-2">
               {selectedIds.length > 0 ? (
                 <button
-                  onClick={() => setIsDeleteManyOpen(true)}
+                  onClick={handleBulkDeleteClick}
                   className="flex items-center gap-2 bg-destructive text-destructive-foreground px-4 py-2 rounded-lg hover:bg-destructive/90 transition-colors text-sm font-medium animate-in fade-in zoom-in-95 shadow-sm"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -156,10 +169,9 @@ const NotificationsPage = () => {
             onChange={(tabId) => {
               setActiveTab(tabId);
               setSearchTerm("");
+              setSelectedIds([]);
             }}
-            size="md"
           />
-
           <SearchBar placeholder="Tìm kiếm theo tiêu đề,..." onSearch={setSearchTerm} />
         </div>
 
@@ -189,6 +201,7 @@ const NotificationsPage = () => {
               onEdit={handleEdit}
               onDelete={handleDelete}
               onView={(row) => navigate(`/notifications/${row.id}`)}
+              isEditable={(item) => !isSent(item)}
             />
           )}
         </div>
@@ -216,23 +229,12 @@ const NotificationsPage = () => {
         selectedNotification={deletingItem}
       />
 
-      <PopConfirm
+      <DeleteManyNotificationModal
         open={isDeleteManyOpen}
         setOpen={setIsDeleteManyOpen}
-        title="Xóa nhiều thông báo"
-        handleConfirm={handleConfirmDeleteMany}
-        onLoading={isDeletingMany}
-      >
-        <p>
-          Bạn có chắc chắn muốn xóa{" "}
-          <span className="font-bold text-red-600 text-base">{selectedIds.length}</span> thông báo
-          đã chọn không?
-          <br />
-          <span className="italic text-sm text-gray-500 mt-1 block">
-            Hành động này không thể hoàn tác. Dữ liệu sẽ bị xóa vĩnh viễn.
-          </span>
-        </p>
-      </PopConfirm>
+        selectedIds={selectedIds}
+        onSuccess={() => setSelectedIds([])}
+      />
     </>
   );
 };

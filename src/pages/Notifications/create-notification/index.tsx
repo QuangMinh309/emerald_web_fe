@@ -13,6 +13,7 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
+import { addMinutes } from "date-fns";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
@@ -21,6 +22,7 @@ import { toast } from "sonner";
 import { useCreateNotification } from "@/hooks/data/useNotifications";
 import { ScopeSelector } from "@/components/common/ScopeSelector";
 import { UploadFiles } from "@/components/common/UploadFiles";
+import { DateTimePicker } from "@/components/common/DateTimePicker";
 
 interface ModalProps {
   open: boolean;
@@ -57,6 +59,7 @@ const CreateSchema = z.object({
   content: z.string().min(1, "Vui lòng nhập nội dung"),
   isUrgent: z.string(),
   targetScope: z.enum(["ALL", "BLOCK", "FLOOR"]),
+  publishedAt: z.date({ message: "Vui lòng chọn ngày đăng" }),
   targetBlocks: z.array(
     z.object({
       blockId: z.string(),
@@ -114,6 +117,7 @@ const CreateNotificationModal = ({ open, setOpen }: ModalProps) => {
 
     const payload = {
       title: values.title,
+      publishedAt: values.publishedAt,
       type: values.type,
       content: values.content,
       isUrgent: values.isUrgent === "true",
@@ -131,7 +135,7 @@ const CreateNotificationModal = ({ open, setOpen }: ModalProps) => {
         handleClose();
       },
       onError: (err: any) => {
-        console.error("Lỗi API Create:", err.response?.data);
+        // console.error("Lỗi API Create:", err.response?.data);
         const msgs = err.response?.data?.message;
         const msg = Array.isArray(msgs) ? msgs[0] : err.message;
         toast.error(msg || "Lỗi tạo thông báo");
@@ -158,6 +162,25 @@ const CreateNotificationModal = ({ open, setOpen }: ModalProps) => {
                 <FormLabel isRequired>Tiêu đề</FormLabel>
                 <FormControl>
                   <Input placeholder="Ví dụ: Thông báo bảo trì..." {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="publishedAt"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel isRequired>Ngày đăng</FormLabel>
+                <FormControl>
+                  <DateTimePicker
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder="Chọn thời gian đăng tin"
+                    minDate={addMinutes(new Date(), 15)}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -218,7 +241,7 @@ const CreateNotificationModal = ({ open, setOpen }: ModalProps) => {
                       <FormControl>
                         <SelectTrigger>
                           {isUrgent ? (
-                            <span className="text-red-600">Khẩn cấp</span>
+                            <span className="text-red-600">Thông báo khẩn</span>
                           ) : (
                             <span className="text-sm">Bình thường</span>
                           )}
@@ -231,7 +254,7 @@ const CreateNotificationModal = ({ open, setOpen }: ModalProps) => {
                         </SelectItem>
 
                         <SelectItem value="true">
-                          <span className="text-red-600">Khẩn cấp</span>
+                          <span className="text-red-600">Thông báo khẩn</span>
                         </SelectItem>
                       </SelectContent>
                     </Select>

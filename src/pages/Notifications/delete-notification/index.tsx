@@ -34,7 +34,6 @@ const DeleteNotification = ({
       },
       onError: (error: any) => {
         toast.error(`Lỗi: ${error?.message || "Không thể xóa thông báo"}`);
-        setOpen(false);
       },
     });
   };
