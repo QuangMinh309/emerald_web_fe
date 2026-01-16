@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { format } from "date-fns";
-import { FileText, Download, Edit, Trash2 } from "lucide-react";
+import { format, isPast } from "date-fns";
+import { Edit, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import PageHeader from "@/components/common/PageHeader";
+import FileAttachmentItem from "@/components/common/FileAttachmentItem";
+import Spinner from "@/components/common/Spinner";
 
 import UpdateNotificationModal from "@/pages/Notifications/update-notification";
 import DeleteNotification from "@/pages/Notifications/delete-notification";
@@ -12,26 +14,11 @@ import DeleteNotification from "@/pages/Notifications/delete-notification";
 import { useNotification } from "@/hooks/data/useNotifications";
 
 const typeMap: Record<string, { label: string; className: string }> = {
-  POLICY: {
-    label: "Chính sách",
-    className: "text-purple-700",
-  },
-  MAINTENANCE: {
-    label: "Bảo trì",
-    className: "text-emerald-700",
-  },
-  WARNING: {
-    label: "Cảnh báo",
-    className: "text-orange-700",
-  },
-  GENERAL: {
-    label: "Thông báo chung",
-    className: "text-blue-700",
-  },
-  default: {
-    label: "Khác",
-    className: "text-muted-foreground",
-  },
+  POLICY: { label: "Chính sách", className: "text-purple-700" },
+  MAINTENANCE: { label: "Bảo trì", className: "text-emerald-700" },
+  WARNING: { label: "Cảnh báo", className: "text-orange-700" },
+  GENERAL: { label: "Thông báo chung", className: "text-blue-700" },
+  default: { label: "Khác", className: "text-muted-foreground" },
 };
 
 const scopeMap: Record<string, string> = {
@@ -65,8 +52,11 @@ const DetailNotificationPage = () => {
     }
   };
 
-  // xóa + chỉnh sửa
-  const headerActions = (
+  // check đã gửi hay chưa
+  const isSent = notification?.publishedAt ? isPast(new Date(notification.publishedAt)) : false;
+
+  // hiển thị nút sửa/xóa nếu chưa gửi
+  const headerActions = !isSent ? (
     <div className="flex items-center gap-2">
       <Button
         className="h-9 px-3 bg-red-600 text-white border-red-200 hover:bg-red-700"
@@ -81,10 +71,14 @@ const DetailNotificationPage = () => {
         <Edit size={16} className="mr-2" /> Chỉnh sửa
       </Button>
     </div>
-  );
+  ) : null;
 
   if (isLoading) {
-    return <div className="flex h-64 items-center justify-center text-gray-500">Đang tải...</div>;
+    return (
+      <div className="flex justify-center items-center h-[500px] ">
+        <Spinner />
+      </div>
+    );
   }
 
   if (!notification) {
@@ -107,9 +101,15 @@ const DetailNotificationPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12">
             <div className="space-y-6">
               <div>
-                <h3 className="display-label">Ngày gửi</h3>
+                <h3 className="display-label">Ngày tạo</h3>
                 <p className="display-text">{formatDate(notification.createdAt)}</p>
               </div>
+
+              <div>
+                <h3 className="display-label">Thời gian đăng</h3>
+                <p className="display-text">{formatDate(notification.publishedAt)}</p>
+              </div>
+
               <div>
                 <h3 className="display-label">Loại nội dung</h3>
                 <p className={`display-text ${typeCfg.className}`}>{typeCfg.label}</p>
@@ -121,14 +121,18 @@ const DetailNotificationPage = () => {
                 <h3 className="display-label">Ngày cập nhật</h3>
                 <p className="display-text">{formatDate(notification.updatedAt)}</p>
               </div>
+
+              <div>
+                <h3 className="display-label">Trạng thái</h3>
+                <p className={`display-text ${isSent ? "text-green-600" : "text-purple-600"}`}>
+                  {isSent ? "Đã thông báo" : "Chưa thông báo"}
+                </p>
+              </div>
+
               <div>
                 <h3 className="display-label">Mức độ ưu tiên</h3>
-                <p
-                  className={`display-text ${
-                    notification.isUrgent ? "text-red-600 font-bold" : ""
-                  }`}
-                >
-                  {notification.isUrgent ? "Khẩn cấp" : "Bình thường"}
+                <p className={`display-text ${notification.isUrgent ? "text-red-600" : ""}`}>
+                  {notification.isUrgent ? "Thông báo khẩn" : "Bình thường"}
                 </p>
               </div>
             </div>
@@ -138,7 +142,7 @@ const DetailNotificationPage = () => {
 
           <div>
             <h2 className="title-text mb-3">Nội dung</h2>
-            <div className="display-text">{notification.content}</div>
+            <div className="display-text whitespace-pre-wrap">{notification.content}</div>
           </div>
 
           {notification.fileUrls && notification.fileUrls.length > 0 && (
@@ -149,28 +153,7 @@ const DetailNotificationPage = () => {
                   const rawFileName = url.split("/").pop() || `File ${index + 1}`;
                   const cleanFileName = rawFileName.split("?")[0];
                   const fileName = decodeURIComponent(cleanFileName);
-
-                  return (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between px-4 py-3 border border-gray-200 rounded-md hover:border-green-600/50 transition-colors group bg-white"
-                    >
-                      <div className="flex items-center gap-3 overflow-hidden min-w-0">
-                        <FileText className="w-5 h-5 text-orange-500 shrink-0" />
-                        <span className="display-text truncate" title={fileName}>
-                          {fileName}
-                        </span>
-                      </div>
-                      <a
-                        href={url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-gray-400 hover:text-green-700 ml-4 shrink-0"
-                      >
-                        <Download size={18} />
-                      </a>
-                    </div>
-                  );
+                  return <FileAttachmentItem key={index} url={url} fileName={fileName} />;
                 })}
               </div>
             </div>
@@ -236,7 +219,7 @@ const DetailNotificationPage = () => {
                 <div className="flex flex-col gap-2">
                   {notification.channels?.map((ch: string) => (
                     <span key={ch} className="display-text">
-                      {channelMap[ch] || ch}
+                      • {channelMap[ch] || ch}
                     </span>
                   ))}
                 </div>

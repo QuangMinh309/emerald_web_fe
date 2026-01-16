@@ -12,8 +12,15 @@ import DetailNotificationPage from "@/pages/Notifications/detail-notification";
 import DetailBlockPage from "@/pages/Blocks/detail-block";
 import DetailApartmentPage from "@/pages/Apartments/detail-apartment";
 import ApartmentsPage from "@/pages/Apartments/view-apartments";
+import CreateVotingPage from "@/pages/Votings/create-voting";
+import UpdateVotingPage from "@/pages/Votings/update-voting";
+import DetailVotingPage from "@/pages/Votings/detail-voting";
 import InvoicesPage from "@/pages/Invoices/view-invoices";
 import DetailInvoicePage from "@/pages/Invoices/detail-invoice";
+import TechniciansPage from "@/pages/Technicians/view-technicians";
+import DetailTechnicianPage from "@/pages/Technicians/detail-technician";
+import MaintenancesPage from "@/pages/Maintenances/view-maintenances";
+import DetailMaintenancePage from "@/pages/Maintenances/detail-maintenance";
 
 const Assets = lazy(() => import("@/pages/Assets/view-assets"));
 const Notifications = lazy(() => import("@/pages/Notifications/view-notifications"));
@@ -24,6 +31,7 @@ const Login = lazy(() => import("@/pages/Login"));
 const ForgotPassword = lazy(() => import("@/pages/ForgotPassword"));
 const VerifyEmail = lazy(() => import("@/pages/VerifyEmail"));
 const ResetPassword = lazy(() => import("@/pages/ResetPassword"));
+const VotingsPage = lazy(() => import("@/pages/Votings/view-votings"));
 
 export const routes = createBrowserRouter([
   { path: "/login", element: <Login /> },
@@ -54,8 +62,16 @@ export const routes = createBrowserRouter([
       { path: "blocks/update/:id", element: <UpdateBlockPage /> },
       { path: "apartments/:id", element: <DetailApartmentPage /> },
       { path: "apartments", element: <ApartmentsPage /> },
+      { path: "votings", element: <VotingsPage /> },
+      { path: "votings/create", element: <CreateVotingPage /> },
+      { path: "votings/update/:id", element: <UpdateVotingPage /> },
+      { path: "votings/:id", element: <DetailVotingPage /> },
       { path: "invoices", element: <InvoicesPage /> },
       { path: "invoices/:id", element: <DetailInvoicePage /> },
+      { path: "technicians", element: <TechniciansPage /> },
+      { path: "technicians/:id", element: <DetailTechnicianPage /> },
+      { path: "maintenances", element: <MaintenancesPage /> },
+      { path: "maintenances/:id", element: <DetailMaintenancePage /> },
     ],
   },
 ]);

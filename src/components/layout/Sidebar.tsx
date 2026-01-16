@@ -13,23 +13,24 @@ import {
   MessageSquare,
   TrendingUp,
   UserCog,
+  UtilityPole,
 } from "lucide-react";
 import Logo from "@assets/logo.svg";
 
 const Sidebar: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-
   const menuItems = [
     { id: "blocks", icon: Building2, label: "Quản lý tòa nhà" },
     { id: "apartments", icon: Home, label: "Căn hộ" },
     { id: "invoices", icon: CircleDollarSign, label: "Công nợ" },
     { id: "residents", icon: Users, label: "Cư dân" },
+    { id: "technicians", icon: UtilityPole, label: "Kỹ thuật viên" },
     { id: "assets", icon: Armchair, label: "Tài sản, thiết bị" },
     { id: "services", icon: Store, label: "Dịch vụ" },
     { id: "feedback", icon: Info, label: "Phản ánh, yêu cầu" },
-    { id: "maintenance", icon: Wrench, label: "Bảo trì" },
-    { id: "voting", icon: Vote, label: "Biểu quyết" },
+    { id: "votings", icon: Vote, label: "Biểu quyết" },
+    { id: "maintenances", icon: Wrench, label: "Bảo trì" },
     { id: "notifications", icon: MessageSquare, label: "Thông báo" },
     { id: "reports", icon: TrendingUp, label: "Báo cáo thống kê" },
     { id: "permissions", icon: UserCog, label: "Phân quyền" },

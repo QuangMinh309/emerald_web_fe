@@ -13,7 +13,7 @@ interface UploadFilesProps {
 export const UploadFiles = ({
   files,
   onChange,
-  label = "Tài liệu đính kèm",
+  label = "Tài liệu đính kèm (nếu có)",
   maxFiles = 10,
 }: UploadFilesProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -47,7 +47,7 @@ export const UploadFiles = ({
   return (
     <div className="space-y-3 w-full">
       <div className="flex items-center justify-between">
-        <Label className="text-sm font-medium leading-none">
+        <Label className="text-sm font-meidum leading-none">
           {label}{" "}
           <span className="text-muted-foreground font-normal ml-1">
             ({files.length}/{maxFiles})
