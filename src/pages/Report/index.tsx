@@ -5,7 +5,7 @@ import type { ActionOption } from "@/types";
 import ServicesBarChart, { type BarPoint } from "./components/ServiceBarChart";
 import AssetStatusSummary from "./components/AssetStatus";
 import RevenueExpenseChart, { type Point } from "./components/RevenueChart";
-import StatCard from "./components/StatCard";
+import StatCard from "../../components/common/StatCard";
 import { TabNavigation } from "@/components/common/TabNavigation";
 import { MonthPicker } from "./components/MonthPicker";
 import { YearPicker } from "./components/YearPicker";
@@ -75,14 +75,12 @@ const ReportPage = () => {
   const dateRange = useMemo(() => {
     if (periodTab === "month") {
       const [y, m] = monthValue.split("-").map(Number);
-      const from = new Date(y, (m ?? 1) - 1, 1)
+      const from = new Date(y, (m ?? 1) - 1, 1);
       return { from: from, to: endOfMonth(from), label: `Tháng ${m}-${y}` };
-    }
-    else if (periodTab === "year") {
+    } else if (periodTab === "year") {
       const y = Number(yearValue);
       return { from: startOfYear(y), to: endOfYear(y), label: `Năm ${y}` };
-    }
-    else {
+    } else {
       const label =
         allFrom && allTo
           ? `${allFrom.toLocaleDateString()} - ${allTo.toLocaleDateString()}`
@@ -117,16 +115,13 @@ const ReportPage = () => {
               activeTab={periodTab}
               onChange={(tab) => setPeriodTab(tab as any)}
             />
-
           </div>
         }
       />
 
       <div className="space-y-4">
         <div className="flex justify-end">
-          {periodTab === "month" && (
-            <MonthPicker value={monthValue} onChange={setMonthValue} />
-          )}
+          {periodTab === "month" && <MonthPicker value={monthValue} onChange={setMonthValue} />}
           {periodTab === "year" && (
             <YearPicker value={Number(yearValue)} onChange={(year) => setYearValue(String(year))} />
           )}
@@ -184,12 +179,11 @@ const ReportPage = () => {
             <span className="text-sm text-neutral-500">{dateRange.label}</span>
           </div>
           {hasData ? (
-            <RevenueExpenseChart
-              revenue={mockRevenue} expense={mockExpense}
-            />
+            <RevenueExpenseChart revenue={mockRevenue} expense={mockExpense} />
           ) : (
             <div className="rounded-xl border border-dashed border-neutral-200 p-6 text-sm text-neutral-600">
-              Không có dữ liệu trong khoảng <b>{dateRange.label}</b>. Hãy thử chọn tháng/năm khác hoặc chuyển sang “Tất cả”.
+              Không có dữ liệu trong khoảng <b>{dateRange.label}</b>. Hãy thử chọn tháng/năm khác
+              hoặc chuyển sang “Tất cả”.
             </div>
           )}
         </div>
@@ -198,7 +192,11 @@ const ReportPage = () => {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
             <h3 className="mb-3 text-sm font-semibold">Dịch vụ (lượt)</h3>
-            {hasData ? <ServicesBarChart data={mockServices} /> : <div className="text-sm text-neutral-600">Chưa có dữ liệu.</div>}
+            {hasData ? (
+              <ServicesBarChart data={mockServices} />
+            ) : (
+              <div className="text-sm text-neutral-600">Chưa có dữ liệu.</div>
+            )}
           </div>
 
           <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">

@@ -29,7 +29,7 @@ const Sidebar: React.FC = () => {
     { id: "services", icon: Store, label: "Dịch vụ" },
     { id: "feedback", icon: Info, label: "Phản ánh, yêu cầu" },
     { id: "maintenance", icon: Wrench, label: "Bảo trì" },
-    { id: "voting", icon: Vote, label: "Biểu quyết" },
+    { id: "votings", icon: Vote, label: "Biểu quyết" },
     { id: "notifications", icon: MessageSquare, label: "Thông báo" },
     { id: "reports", icon: TrendingUp, label: "Báo cáo thống kê" },
     { id: "permissions", icon: UserCog, label: "Phân quyền" },
