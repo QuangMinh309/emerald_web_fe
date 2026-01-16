@@ -141,9 +141,9 @@ const CreateServiceModal = ({ open, setOpen }: ModalProps) => {
           openHour: values.openHour,
           closeHour: values.closeHour,
           totalSlot: Number(values.totalSlot),
-          imageUrl,
+          image: imageUrl,
           type: (values.type ?? "NORMAL") as ServiceType,
-          status: values.status,
+          // status: values.status,
         } as any,
         {
           onSuccess: () => {

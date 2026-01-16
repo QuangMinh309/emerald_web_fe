@@ -2,7 +2,7 @@
 import axiosInstance from "@/lib/axios";
 import type { Service } from "@/types/service";
 
-const USE_MOCK = true;
+const USE_MOCK = false;
 
 const mockServices: Service[] = [
   {
@@ -42,6 +42,7 @@ export const getServices = async (): Promise<Service[]> => {
   }
 
   const res = await axiosInstance.get("/services");
+  console.log(res.data.data);
   return res.data.data as Service[];
 };
 
@@ -77,7 +78,7 @@ export const createService = async (payload: CreateServiceInput): Promise<Servic
 };
 
 // Payload update: partial
-export type UpdateServiceInput = Partial<CreateServiceInput>;
+export type UpdateServiceInput = Partial<CreateServiceInput> | FormData;
 
 export const updateService = async (args: {
   id: number;
@@ -87,11 +88,24 @@ export const updateService = async (args: {
     await sleep(200);
     const idx = mockServices.findIndex((s) => s.id === args.id);
     if (idx === -1) throw new Error("Service not found");
+
+    // mock: nếu payload là FormData thì bạn có thể bỏ qua phần này hoặc tự parse
+    if (args.payload instanceof FormData) return mockServices[idx];
+
     mockServices[idx] = { ...mockServices[idx], ...args.payload };
     return mockServices[idx];
   }
+  console.log("args.payload", args.payload);
+  const isFormData =
+    typeof FormData !== "undefined" && args.payload instanceof FormData;
 
-  const res = await axiosInstance.patch(`/services/${args.id}`, args.payload);
+  const res = await axiosInstance.patch(`/services/${args.id}`, args.payload, {
+    // QUAN TRỌNG:
+    // - Nếu payload là FormData: ĐỪNG set Content-Type thủ công (axios sẽ tự thêm boundary)
+    // - Nếu axiosInstance có default headers application/json, ta override về undefined
+    headers: isFormData ? { "Content-Type": undefined as any } : undefined,
+  });
+
   return res.data.data as Service;
 };
 

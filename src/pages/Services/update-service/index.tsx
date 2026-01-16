@@ -56,9 +56,7 @@ const UpdateServiceSchema = z.object({
     .refine((v) => Number(v) > 0, "Sức chứa phải lớn hơn 0"),
 
   type: z.string().optional(),
-  status: z.string().min(1, "Vui lòng chọn trạng thái"),
-
-  // imageUrl: z.string().optional(),
+  // status: z.string().min(1, "Vui lòng chọn trạng thái"),
 });
 
 type ServiceFormValues = z.infer<typeof UpdateServiceSchema>;
@@ -68,9 +66,8 @@ const UpdateServiceModal = ({ open, setOpen, serviceId }: UpdateModalProps) => {
   const { mutate: updateService, isPending } = useUpdateService();
 
   const [image, setImage] = useState<File[]>([]);
-  const [existingImageUrl, setExistingImageUrl] = useState("");
+  const [existingImageUrl, setExistingImageUrl] = useState(service?.imageUrl ?? "");
   const [removeExistingImage, setRemoveExistingImage] = useState(false);
-  const { mutateAsync: uploadImage, isPending: isUploading } = useUploadImage();
 
   const form = useForm<ServiceFormValues>({
     resolver: zodResolver(UpdateServiceSchema),
@@ -83,7 +80,7 @@ const UpdateServiceModal = ({ open, setOpen, serviceId }: UpdateModalProps) => {
       closeHour: "17:00",
       totalSlot: "1",
       type: "NORMAL",
-      status: "active",
+      // status: "active",
       // imageUrl: "",
     },
   });
@@ -117,6 +114,7 @@ const UpdateServiceModal = ({ open, setOpen, serviceId }: UpdateModalProps) => {
   const typeOptions = useMemo(() => {
     const opts: { value: ServiceType; label: string }[] = [
       { value: "NORMAL", label: "Bình thường" },
+      { value: "COMMUNITY", label: "Cộng đồng" },
     ];
     return opts;
   }, []);
@@ -129,7 +127,6 @@ const UpdateServiceModal = ({ open, setOpen, serviceId }: UpdateModalProps) => {
   useEffect(() => {
     if (open && service) {
       const normalizeTime = (t?: string) => (t ? t.slice(0, 5) : "");
-
       form.reset({
         name: service.name ?? "",
         description: service.description ?? "",
@@ -139,8 +136,8 @@ const UpdateServiceModal = ({ open, setOpen, serviceId }: UpdateModalProps) => {
         closeHour: normalizeTime(service.closeHour) || "17:00",
         totalSlot: String(service.totalSlot ?? "1"),
         type: (service.type ?? "NORMAL") as ServiceType,
-        status: service.status ?? "active",
-        // imageUrl: service.imageUrl ?? "",
+        // status: "active",
+        // image: service.imageUrl ?? "",
       });
     }
   }, [open, service, form]);
@@ -148,28 +145,24 @@ const UpdateServiceModal = ({ open, setOpen, serviceId }: UpdateModalProps) => {
   async function onSubmit(values: ServiceFormValues) {
     if (!serviceId) return;
 
-    const payload: any = {
-      name: values.name,
-      description: values.description,
-      unitPrice: Number(values.unitPrice),
-      unitTimeBlock: Number(values.unitTimeBlock),
-      openHour: values.openHour,
-      closeHour: values.closeHour,
-      totalSlot: Number(values.totalSlot),
-      type: (values.type ?? "NORMAL") as ServiceType,
-      status: values.status,
-    };
+  const formData = new FormData();
 
-    if (image.length > 0) {
-      payload.imageUrl = await uploadImage(image[0]);
-    } else if (removeExistingImage) {
-      payload.imageUrl = "";
-    }
+  formData.append("name", values.name);
+  formData.append("description", values.description ?? "");
+  formData.append("openHour", values.openHour);
+  formData.append("closeHour", values.closeHour);
+  formData.append("unitPrice", values.unitPrice);
+  formData.append("unitTimeBlock", values.unitTimeBlock);
+  formData.append("totalSlot", values.totalSlot);
+  formData.append("type", values.type ?? "NORMAL");
 
+  if (image.length > 0) {
+    formData.append("image", image[0]);
+  }
     updateService(
       {
         id: serviceId,
-        payload,
+        payload: formData,
       } as any,
       {
         onSuccess: () => {
@@ -190,7 +183,7 @@ const UpdateServiceModal = ({ open, setOpen, serviceId }: UpdateModalProps) => {
       title="Chỉnh sửa dịch vụ"
       submitText="Lưu thay đổi"
       onSubmit={form.handleSubmit(onSubmit)}
-      onLoading={isPending || isUploading}
+      onLoading={isPending}
     >
       <Form {...form}>
         <form className="space-y-4">
@@ -260,7 +253,7 @@ const UpdateServiceModal = ({ open, setOpen, serviceId }: UpdateModalProps) => {
             />
 
             {/* Loại dịch vụ (AmenityType) */}
-            {/* <FormField
+            <FormField
               disabled={isPending}
               control={form.control}
               name="type"
@@ -284,7 +277,7 @@ const UpdateServiceModal = ({ open, setOpen, serviceId }: UpdateModalProps) => {
                   <FormMessage className="text-xs" />
                 </FormItem>
               )}
-            /> */}
+            />
           </div>
 
           {/* Mô tả */}
@@ -381,29 +374,6 @@ const UpdateServiceModal = ({ open, setOpen, serviceId }: UpdateModalProps) => {
               )}
             />
 
-            {/* Trạng thái */}
-            <FormField
-              disabled={isPending}
-              control={form.control}
-              name="status"
-              render={({ field }) => (
-                <FormItem className="space-y-1.5">
-                  <FormLabel isRequired>Trạng thái</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Chọn trạng thái" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="active">Hoạt động</SelectItem>
-                      <SelectItem value="inactive">Tạm ngừng</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage className="text-xs" />
-                </FormItem>
-              )}
-            />
           </div>
 
           {/* Image URL */}
