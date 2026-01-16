@@ -2,12 +2,12 @@ import PageHeader from "@/components/common/PageHeader";
 import Spinner from "@/components/common/Spinner";
 import StatusBadge from "@/components/common/StatusBadge";
 import { Button } from "@/components/ui/button";
-import { TicketStatusMap } from "@/constants/TicketStatus";
+import { TicketStatusMap } from "@/constants/ticketStatus";
 import {
-  useGetMaintenanceTicketById,
   useStartMaintenanceWork,
   useCancelMaintenanceTicket,
   useUpdateMaintenanceProgress,
+  useMaintenanceTicketDetail,
 } from "@/hooks/data/useMaintenance";
 import DeleteMaintenanceModal from "@/pages/Maintenances/delete-maintenance";
 import UpdateMaintenanceModal from "@/pages/Maintenances/update-maintenance";
@@ -33,7 +33,7 @@ const DetailMaintenancePage = () => {
   const [cancelReason, setCancelReason] = useState("");
 
   const { id } = useParams();
-  const { data: ticket, isLoading } = useGetMaintenanceTicketById(Number(id));
+  const { data: ticket, isLoading } = useMaintenanceTicketDetail(Number(id));
   const { mutate: startWork, isPending: isStarting } = useStartMaintenanceWork();
   const { mutate: cancelTicket } = useCancelMaintenanceTicket();
   const { mutate: updateProgress, isPending: isUpdatingProgress } = useUpdateMaintenanceProgress();

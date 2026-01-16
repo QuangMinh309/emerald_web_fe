@@ -10,28 +10,24 @@ import { maintenanceColumns } from "./columns";
 import type { ActionOption } from "@/types";
 import { normalizeString } from "@/utils/string";
 import { useMaintenanceTickets } from "@/hooks/data/useMaintenance";
-import CreateMaintenanceModal from "@/pages/Maintenances/create-maintenance";
 import DeleteMaintenanceModal from "@/pages/Maintenances/delete-maintenance";
-import UpdateMaintenanceModal from "@/pages/Maintenances/update-maintenance";
-import AssignTechnicianModal from "@/pages/Maintenances/assign-technician";
-import CompleteMaintenanceModal from "@/pages/Maintenances/complete-maintenance";
 import type { MaintenanceTicketListItem } from "@/types/maintenance";
 import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import CreateIncidentMaintenanceModal from "@/pages/Maintenances/incident/create-incident-maintenance";
 
 const MaintenancesPage = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("incident");
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Modal states
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  // Incident modals state
+  const [isCreateIncidentModalOpen, setIsCreateIncidentModalOpen] = useState(false);
+  const [isUpdateIncidentOpen, setIsUpdateIncidentOpen] = useState(false);
+  const [updateIncidentId, setUpdateIncidentId] = useState<number>();
+  // delete
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const [isUpdateOpen, setIsUpdateOpen] = useState(false);
-  const [isAssignOpen, setIsAssignOpen] = useState(false);
-  const [isCompleteOpen, setIsCompleteOpen] = useState(false);
-
-  const [selectedTicket, setSelectedTicket] = useState<MaintenanceTicketListItem>();
-  const [selectedTicketId, setSelectedTicketId] = useState<number>();
+  const [deletedTicket, setDeletedTicket] = useState<MaintenanceTicketListItem>();
 
   // Lấy dữ liệu từ Hooks
   const { data: tickets = [], isLoading, isError, error, refetch } = useMaintenanceTickets();
@@ -99,13 +95,13 @@ const MaintenancesPage = () => {
           subtitle="Quản lý các yêu cầu bảo trì và sửa chữa trong chung cư"
           actions={
             <div className="flex items-center gap-2">
-              <button
-                onClick={() => setIsCreateModalOpen(true)}
+              <Button
+                onClick={() => setIsCreateIncidentModalOpen(true)}
                 className="flex items-center gap-2 bg-main text-white px-4 py-2 rounded-lg hover:bg-main/90 transition-colors text-sm font-medium"
               >
                 <Plus className="w-4 h-4" />
                 Tạo yêu cầu
-              </button>
+              </Button>
 
               <ActionDropdown
                 options={actions}
@@ -158,26 +154,33 @@ const MaintenancesPage = () => {
               columns={maintenanceColumns}
               defaultPageSize={10}
               onEdit={(row) => {
-                setIsUpdateOpen(true);
-                setSelectedTicketId((row as MaintenanceTicketListItem).id);
+                setIsUpdateIncidentOpen(true);
+                setUpdateIncidentId((row as MaintenanceTicketListItem).id);
               }}
               onDelete={(row) => {
                 setIsDeleteOpen(true);
-                setSelectedTicket(row as MaintenanceTicketListItem);
+                setDeletedTicket(row as MaintenanceTicketListItem);
               }}
               onView={(row) => navigate(`/maintenances/${row.id}`)}
             />
           )}
         </div>
       </div>
-
-      {/* Modals */}
-      <CreateMaintenanceModal open={isCreateModalOpen} setOpen={setIsCreateModalOpen} />
       <DeleteMaintenanceModal
-        selectedTicket={selectedTicket}
+        selectedTicket={deletedTicket}
         open={isDeleteOpen}
         setOpen={setIsDeleteOpen}
       />
+      <CreateIncidentMaintenanceModal
+        open={isCreateIncidentModalOpen}
+        setOpen={setIsCreateIncidentModalOpen}
+      />
+      {/* Modals */}
+      {/* <CreateMaintenanceModal
+        open={isCreateModalOpen}
+        setOpen={setIsCreateModalOpen}
+      />
+
       <UpdateMaintenanceModal
         open={isUpdateOpen}
         setOpen={setIsUpdateOpen}
@@ -192,7 +195,7 @@ const MaintenancesPage = () => {
         open={isCompleteOpen}
         setOpen={setIsCompleteOpen}
         ticketId={selectedTicketId!}
-      />
+      /> */}
     </>
   );
 };

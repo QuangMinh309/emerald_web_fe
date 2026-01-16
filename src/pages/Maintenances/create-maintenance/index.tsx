@@ -20,7 +20,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useCreateMaintenanceTicket } from "@/hooks/data/useMaintenance";
 import { useBlocks } from "@/hooks/data/useBlocks";
 import { toast } from "sonner";
 import { useEffect, useMemo, useState } from "react";
@@ -31,6 +30,7 @@ import { TicketTypeOptions } from "@/constants/ticketType";
 import { TicketPriorityOptions } from "@/constants/ticketPriority";
 import { Textarea } from "@/components/ui/textarea";
 import type { MaintenanceChecklistItem } from "@/types/maintenance";
+import { useCreateIncidentTicket } from "@/hooks/data/useMaintenance";
 
 interface ModalProps {
   open: boolean;
@@ -52,7 +52,7 @@ type MaintenanceFormValues = z.infer<typeof CreateMaintenanceSchema>;
 
 const CreateMaintenanceModal = ({ open, setOpen }: ModalProps) => {
   const { data: blocks } = useBlocks();
-  const { mutate: createTicket, isPending } = useCreateMaintenanceTicket();
+  const { mutate: createTicket, isPending } = useCreateIncidentTicket();
 
   const [checklistItems, setChecklistItems] = useState<MaintenanceChecklistItem[]>([]);
   const [newTask, setNewTask] = useState("");

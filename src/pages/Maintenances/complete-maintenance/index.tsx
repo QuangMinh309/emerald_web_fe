@@ -20,12 +20,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useCompleteMaintenanceTicket } from "@/hooks/data/useMaintenance";
 import { toast } from "sonner";
 import { MaintenanceResultOptions } from "@/constants/maintenanceResult";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { useCompleteIncidentTicket } from "@/hooks/data/useMaintenance";
 
 interface ModalProps {
   open: boolean;
@@ -45,7 +45,7 @@ const CompleteMaintenanceSchema = z.object({
 type CompleteFormValues = z.infer<typeof CompleteMaintenanceSchema>;
 
 const CompleteMaintenanceModal = ({ open, setOpen, ticketId }: ModalProps) => {
-  const { mutate: completeTicket, isPending } = useCompleteMaintenanceTicket();
+  const { mutate: completeTicket, isPending } = useCompleteIncidentTicket();
 
   const form = useForm<CompleteFormValues>({
     resolver: zodResolver(CompleteMaintenanceSchema),

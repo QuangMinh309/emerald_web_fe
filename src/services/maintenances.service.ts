@@ -1,7 +1,7 @@
 import type { MaintenanceResult } from "@/constants/maintenanceResult";
 import type { TicketPriority } from "@/constants/ticketPriority";
+import type { TicketStatus } from "@/constants/ticketStatus";
 import type { TicketType } from "@/constants/ticketType";
-
 import axiosInstance from "@/lib/axios";
 import type {
   MaintenanceChecklistItem,
@@ -9,54 +9,53 @@ import type {
   MaintenanceTicketListItem,
 } from "@/types/maintenance";
 
-/* =======================
-   GET LIST
-======================= */
-
-// [ADMIN] Get all tickets
-export const getMaintenanceTickets = async () => {
-  const response = await axiosInstance.get("/maintenance-tickets");
-  return response.data.data as MaintenanceTicketListItem[];
+export const getMaintenanceTickets = async (params?: {
+  type?: TicketType;
+  status?: TicketStatus;
+  priority?: TicketPriority;
+  blockId?: number;
+  technicianId?: number;
+  assetId?: number;
+}) => {
+  const res = await axiosInstance.get("/maintenance-tickets", { params });
+  return res.data.data as MaintenanceTicketListItem[];
 };
-
-// Get tickets by asset
-export const getMaintenanceTicketsByAsset = async (assetId: number) => {
-  const response = await axiosInstance.get(`/maintenance-tickets/assets/${assetId}`);
-  return response.data.data as MaintenanceTicketListItem[];
+export const getMaintenanceTicketsByAsset = async (
+  assetId: number,
+  params?: {
+    type?: TicketType;
+    status?: TicketStatus;
+    priority?: TicketPriority;
+  },
+) => {
+  const res = await axiosInstance.get(`/maintenance-tickets/assets/${assetId}`, { params });
+  return res.data.data as MaintenanceTicketListItem[];
 };
-
-/* =======================
-   GET DETAIL
-======================= */
-
 export const getMaintenanceTicketDetail = async (id: number) => {
-  const response = await axiosInstance.get(`/maintenance-tickets/${id}`);
-  return response.data.data as MaintenanceTicketDetail;
+  const res = await axiosInstance.get(`/maintenance-tickets/${id}`);
+  return res.data.data as MaintenanceTicketDetail;
 };
-
-/* =======================
-   CREATE
-======================= */
-
-export const createMaintenanceTicket = async (data: {
+export const createIncidentTicket = async (data: {
   title: string;
   description?: string;
-  type: TicketType;
+  type: TicketType; // INCIDENT
   priority?: TicketPriority;
-  blockId: number;
-  floor: number;
-  apartmentId?: number;
-  assetId?: number;
-  checklistItems?: MaintenanceChecklistItem[];
+  assetId: number;
 }) => {
-  const response = await axiosInstance.post("/maintenance-tickets", data);
-  return response.data.data as MaintenanceTicketDetail;
+  const res = await axiosInstance.post("/maintenance-tickets/incident", data);
+  return res.data.data as MaintenanceTicketDetail;
 };
 
-/* =======================
-   ASSIGN TECHNICIAN
-======================= */
-
+export const createScheduledTicket = async (data: {
+  title: string;
+  description?: string;
+  type: TicketType; // MAINTENANCE
+  assetId: number;
+  checklistItems?: MaintenanceChecklistItem[];
+}) => {
+  const res = await axiosInstance.post("/maintenance-tickets/scheduled", data);
+  return res.data.data as MaintenanceTicketDetail;
+};
 export const assignTechnician = async ({
   id,
   data,
@@ -64,110 +63,87 @@ export const assignTechnician = async ({
   id: number;
   data: {
     technicianId: number;
-    priority?: TicketPriority;
-    assignedDate?: string; // ISO
+    estimatedCost?: number;
   };
 }) => {
-  const response = await axiosInstance.post(`/maintenance-tickets/${id}/assign`, data);
-  return response.data.data as MaintenanceTicketDetail;
+  const res = await axiosInstance.post(`/maintenance-tickets/${id}/assign`, data);
+  return res.data.data as MaintenanceTicketDetail;
 };
-
-/* =======================
-   START WORK
-======================= */
-
 export const startMaintenanceWork = async (id: number) => {
-  const response = await axiosInstance.post(`/maintenance-tickets/${id}/start`);
-  return response.data.data as MaintenanceTicketDetail;
+  const res = await axiosInstance.post(`/maintenance-tickets/${id}/start`);
+  return res.data.data as MaintenanceTicketDetail;
 };
 
-/* =======================
-   UPDATE PROGRESS
-======================= */
-
-export const updateMaintenanceProgress = async ({
-  id,
-  checklistItems,
-}: {
-  id: number;
-  checklistItems: MaintenanceChecklistItem[];
-}) => {
-  const response = await axiosInstance.post(`/maintenance-tickets/${id}/progress`, {
+export const updateMaintenanceProgress = async (
+  id: number,
+  checklistItems: MaintenanceChecklistItem[],
+) => {
+  const res = await axiosInstance.post(`/maintenance-tickets/${id}/progress`, {
     checklistItems,
   });
-  return response.data.data as MaintenanceTicketDetail;
+  return res.data.data as MaintenanceTicketDetail;
 };
-
-/* =======================
-   COMPLETE
-======================= */
-
-export const completeMaintenanceTicket = async ({
-  id,
-  data,
-}: {
-  id: number;
+export const completeIncidentTicket = async (id: number, data: FormData) => {
+  const res = await axiosInstance.post(`/maintenance-tickets/incident/${id}/complete`, data, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return res.data.data as MaintenanceTicketDetail;
+};
+export const completeScheduledTicket = async (
+  id: number,
   data: {
     result: MaintenanceResult;
     resultNote?: string;
     hasIssue?: boolean;
     issueDetail?: string;
-    materialCost?: number;
-    laborCost?: number;
-  };
-}) => {
-  const response = await axiosInstance.post(`/maintenance-tickets/${id}/complete`, data);
-  return response.data.data as MaintenanceTicketDetail;
+    actualCost?: number;
+  },
+) => {
+  const res = await axiosInstance.post(`/maintenance-tickets/scheduled/${id}/complete`, data);
+  return res.data.data as MaintenanceTicketDetail;
 };
-
-/* =======================
-   CANCEL
-======================= */
-
-export const cancelMaintenanceTicket = async ({ id, reason }: { id: number; reason: string }) => {
-  const response = await axiosInstance.post(`/maintenance-tickets/${id}/cancel`, { reason });
-  return response.data.data as MaintenanceTicketDetail;
-};
-
-/* =======================
-   UPDATE (PATCH)
-======================= */
-
-export const updateMaintenanceTicket = async ({
-  id,
-  data,
-}: {
-  id: number;
+export const updateIncidentTicket = async (
+  id: number,
   data: {
     title?: string;
     description?: string;
     priority?: TicketPriority;
-    blockId?: number;
-    floor?: number;
-    apartmentId?: number;
+    assetId?: number;
+  },
+) => {
+  const res = await axiosInstance.patch(`/maintenance-tickets/incident/${id}`, data);
+  return res.data.data as MaintenanceTicketDetail;
+};
+
+export const updateScheduledTicket = async (
+  id: number,
+  data: {
+    title?: string;
+    description?: string;
     assetId?: number;
     checklistItems?: MaintenanceChecklistItem[];
-  };
-}) => {
-  const response = await axiosInstance.patch(`/maintenance-tickets/${id}`, data);
-  return response.data.data as MaintenanceTicketDetail;
+  },
+) => {
+  const res = await axiosInstance.patch(`/maintenance-tickets/scheduled/${id}`, data);
+  return res.data.data as MaintenanceTicketDetail;
 };
-
-/* =======================
-   DELETE
-======================= */
+export const cancelMaintenanceTicket = async (id: number, reason: string) => {
+  const res = await axiosInstance.post(`/maintenance-tickets/${id}/cancel`, {
+    reason,
+  });
+  return res.data.data as MaintenanceTicketDetail;
+};
 
 export const deleteMaintenanceTicket = async (id: number) => {
-  const response = await axiosInstance.delete(`/maintenance-tickets/${id}`);
-  return response.data.data as { message: string };
+  const res = await axiosInstance.delete(`/maintenance-tickets/${id}`);
+  return res.data.data as { message: string };
 };
 
-// Delete many
 export const deleteManyMaintenanceTickets = async (ids: number[]) => {
-  const response = await axiosInstance.delete(`/maintenance-tickets/batch/delete`, {
+  const res = await axiosInstance.delete(`/maintenance-tickets/batch/delete`, {
     data: { ids },
   });
-  return response.data.data as {
+  return res.data.data as {
     message: string;
     deletedIds: number[];
   };

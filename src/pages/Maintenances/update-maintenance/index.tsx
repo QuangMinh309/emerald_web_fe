@@ -20,10 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  useGetMaintenanceTicketById,
-  useUpdateMaintenanceTicket,
-} from "@/hooks/data/useMaintenance";
+
 import { useBlocks } from "@/hooks/data/useBlocks";
 import { toast } from "sonner";
 import { useEffect, useMemo, useState } from "react";
@@ -33,6 +30,7 @@ import { Label } from "@/components/ui/label";
 import { TicketPriorityOptions } from "@/constants/ticketPriority";
 import { Textarea } from "@/components/ui/textarea";
 import type { MaintenanceChecklistItem } from "@/types/maintenance";
+import { useCompleteIncidentTicket, useMaintenanceTicketDetail } from "@/hooks/data/useMaintenance";
 
 interface UpdateModalProps {
   open: boolean;
@@ -53,9 +51,9 @@ const UpdateMaintenanceSchema = z.object({
 type MaintenanceFormValues = z.infer<typeof UpdateMaintenanceSchema>;
 
 const UpdateMaintenanceModal = ({ open, setOpen, ticketId }: UpdateModalProps) => {
-  const { data: ticket } = useGetMaintenanceTicketById(ticketId!);
+  const { data: ticket } = useMaintenanceTicketDetail(ticketId!);
   const { data: blocks } = useBlocks();
-  const { mutate: updateTicket, isPending } = useUpdateMaintenanceTicket();
+  const { mutate: updateTicket, isPending } = useCompleteIncidentTicket();
 
   const [checklistItems, setChecklistItems] = useState<MaintenanceChecklistItem[]>([]);
   const [newTask, setNewTask] = useState("");

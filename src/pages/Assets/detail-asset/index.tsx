@@ -5,7 +5,6 @@ import Spinner from "@/components/common/Spinner";
 import StatusBadge from "@/components/common/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { useGetAssetById } from "@/hooks/data/useAssests";
-import { useGetMaintenanceTicketById } from "@/hooks/data/useMaintenance";
 import DeleteAsset from "@/pages/Assets/delete-asset";
 import { maintenanceColumns } from "@/pages/Assets/detail-asset/columns";
 import UpdateAssetModal from "@/pages/Assets/update-asset";
