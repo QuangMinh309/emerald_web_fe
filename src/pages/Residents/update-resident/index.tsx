@@ -26,6 +26,7 @@ import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import { address } from "@/lib/address";
 import { Label } from "@/components/ui/label";
+import { GenderTypeOptions } from "@/constants/genderType";
 
 interface UpdateModalProps {
   open: boolean;
@@ -254,9 +255,11 @@ const UpdateResidentModal = ({ open, setOpen, residentId }: UpdateModalProps) =>
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="MALE">Nam</SelectItem>
-                      <SelectItem value="FEMALE">Nữ</SelectItem>
-                      <SelectItem value="OTHER">Khác</SelectItem>
+                      {GenderTypeOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <FormMessage className="text-xs" />

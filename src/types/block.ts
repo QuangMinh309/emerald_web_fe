@@ -1,7 +1,9 @@
+import type { BlockStatusType } from "@/constants/blockStatus";
+
 export interface Block {
   id: number;
   buildingName: string;
-  status: string;
+  status: BlockStatusType;
   totalFloors: number;
   managerName: string;
   managerPhone: string;
@@ -17,7 +19,7 @@ export interface Block {
 export interface BlockDetail {
   id: number;
   buildingName: string;
-  status: string;
+  status: BlockStatusType;
   totalFloors: number;
   managerName: string;
   managerPhone: string;

@@ -1,6 +1,5 @@
 import type { TableColumn } from "@/types";
 import type { Resident } from "@/types/resident";
-import StatusBadge from "@components/common/StatusBadge";
 
 export const residentColumns: TableColumn<Resident>[] = [
   { key: "id", label: "ID", align: "center", width: "60px" },
@@ -10,25 +9,28 @@ export const residentColumns: TableColumn<Resident>[] = [
     key: "dob",
     label: "Ngày sinh",
     sortable: true,
+    align: "center",
     render: (row) => new Date(row.dob).toLocaleDateString("vi-VN"),
   },
-  { key: "gender", label: "Giới tính", align: "center", width: "100px" },
-  { key: "phoneNumber", label: "Số điện thoại", sortable: true },
+  {
+    key: "gender",
+    label: "Giới tính",
+    align: "center",
+    render: (row) => {
+      if (row.gender === "FEMALE") return "Nữ";
+      if (row.gender === "MALE") return "Nam";
+      return "Khác";
+    },
+  },
+  {
+    key: "phoneNumber",
+    label: "Số điện thoại",
+    align: "center",
+    sortable: true,
+  },
   {
     key: "account",
     label: "Email",
     render: (row) => row.account.email,
-  },
-  {
-    key: "isActive",
-    label: "Trạng thái",
-    align: "center",
-    width: "150px",
-    render: (row) =>
-      row.isActive ? (
-        <StatusBadge label="Hoạt động" type="success" />
-      ) : (
-        <StatusBadge label="Ngưng hoạt động" type="error" />
-      ),
   },
 ];

@@ -4,6 +4,7 @@ import { SearchBar } from "@/components/common/SearchBar";
 import Spinner from "@/components/common/Spinner";
 import StatusBadge from "@/components/common/StatusBadge";
 import { Button } from "@/components/ui/button";
+import { ApartmentStatusMap } from "@/constants/apartmentStatus";
 import { useGetApartmentById } from "@/hooks/data/useApartments";
 import DeleteApartment from "@/pages/Apartments/delete-apartment";
 import UpdateApartmentModal from "@/pages/Apartments/update-apartment";
@@ -11,15 +12,6 @@ import { normalizeString } from "@/utils/string";
 import { Edit, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
-
-const statusMap: Record<
-  string,
-  { label: string; type: "success" | "warning" | "error" | "default" }
-> = {
-  "Đang ở": { label: "Đang ở", type: "success" },
-  Trống: { label: "Trống", type: "default" },
-  "Đang sửa chữa": { label: "Đang sửa chữa", type: "warning" },
-};
 
 const residentColumns = [
   { key: "id", label: "ID", align: "center" as const, width: "60px" },
@@ -34,10 +26,6 @@ const DetailApartmentPage = () => {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const { id } = useParams();
   const { data: apartment, isLoading } = useGetApartmentById(Number(id));
-  const cfg = statusMap[apartment?.generalInfo.status ?? ""] || {
-    label: apartment?.generalInfo.status ?? "Unknown",
-    type: "default",
-  };
   const [search, setSearch] = useState("");
 
   const filteredResidents = useMemo(() => {
@@ -83,6 +71,10 @@ const DetailApartmentPage = () => {
       </div>
     );
   }
+  const config = ApartmentStatusMap[apartment?.generalInfo.status!] ?? {
+    label: "Không xác định",
+    type: "default",
+  };
   return (
     <>
       <div className="p-1.5 pt-0 space-y-4">
@@ -94,7 +86,7 @@ const DetailApartmentPage = () => {
         <div className="bg-white p-4 pt-6 pb-6 rounded-sm border border-gray-200 shadow-sm space-y-6">
           <div className="flex justify-between items-center">
             <h2 className="title-text">Thông tin chung</h2>
-            <StatusBadge label={cfg.label} type={cfg.type} />
+            <StatusBadge label={config.label} type={config.type} />
           </div>
           <div className="space-y-2">
             {/* 4 cột thông tin */}
@@ -177,7 +169,7 @@ const DetailApartmentPage = () => {
           floor: apartment?.generalInfo.floor || 0,
           area: apartment?.generalInfo.area || "",
           owner: apartment?.owner.fullName || "",
-          status: apartment?.generalInfo.status || "",
+          status: apartment?.generalInfo.status || "Trống",
         }}
       />
       <UpdateApartmentModal

@@ -16,6 +16,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ApartmentTypeOptions } from "@/constants/apartmentType";
+import { BlockStatusOption } from "@/constants/blockStatus";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { handleStepOne } from "@/store/slices/actionBlockSlice";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,12 +25,6 @@ import { FileDown } from "lucide-react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import z from "zod";
-export const apartmentTypeOptions = [
-  { value: "STUDIO", label: "Studio" },
-  { value: "ONE_BEDROOM", label: "Căn hộ 1 phòng ngủ" },
-  { value: "TWO_BEDROOM", label: "Căn hộ 2 phòng ngủ" },
-  { value: "PENTHOUSE", label: "Penthouse" },
-];
 const StepOneSchema = z.object({
   buildingName: z.string().min(1, "Vui lòng nhập tên khối nhà"),
   managerName: z.string().min(1, "Vui lòng nhập tên quản lý"),
@@ -116,13 +112,11 @@ const StepOne = ({ setStep }: StepOneProps) => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="OPERATING">Hoạt động (Operating)</SelectItem>
-                        <SelectItem value="UNDER_CONSTRUCTION">
-                          Đang xây dựng (Under Construction)
-                        </SelectItem>
-                        <SelectItem value="UNDER_MAINTENANCE">
-                          Đang bảo trì (Under Maintenance)
-                        </SelectItem>
+                        {BlockStatusOption.map((status) => (
+                          <SelectItem key={status.value} value={status.value}>
+                            {status.label}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -235,7 +229,7 @@ const StepOne = ({ setStep }: StepOneProps) => {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {apartmentTypeOptions?.map((type) => (
+                          {ApartmentTypeOptions?.map((type) => (
                             <SelectItem key={type.value} value={type.value}>
                               {type.label}
                             </SelectItem>

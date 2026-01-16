@@ -1,19 +1,7 @@
+import { ApartmentStatusMap } from "@/constants/apartmentStatus";
 import type { TableColumn } from "@/types";
 import type { Apartment } from "@/types/apartment";
 import StatusBadge from "@components/common/StatusBadge";
-
-const statusMap: Record<
-  string,
-  {
-    label: string;
-    type?: "success" | "warning" | "error" | "default";
-    className?: string;
-  }
-> = {
-  "Đang ở": { label: "Đang ở", type: "success" },
-  Trống: { label: "Trống", type: "default" },
-  "Đang sửa chữa": { label: "Đang sửa chữa", type: "warning" },
-};
 
 export const apartmentColumns: TableColumn<Apartment>[] = [
   { key: "id", label: "ID", align: "center", width: "60px" },
@@ -47,11 +35,11 @@ export const apartmentColumns: TableColumn<Apartment>[] = [
     align: "center",
     width: "150px",
     render: (row) => {
-      const config = statusMap[row.status] || {
-        label: row.status,
+      const config = ApartmentStatusMap[row?.status!] ?? {
+        label: "Không xác định",
         type: "default",
       };
-      return <StatusBadge label={config.label} type={config.type} className={config.className} />;
+      return <StatusBadge label={config.label} type={config.type} />;
     },
   },
 ];

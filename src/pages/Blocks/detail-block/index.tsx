@@ -1,6 +1,8 @@
 import PageHeader from "@/components/common/PageHeader";
 import Spinner from "@/components/common/Spinner";
+import StatusBadge from "@/components/common/StatusBadge";
 import { Button } from "@/components/ui/button";
+import { BlockStatusMap } from "@/constants/blockStatus";
 import { useGetBlockById } from "@/hooks/data/useBlocks";
 import DeleteBlock from "@/pages/Blocks/delete-block";
 import { DetailApartmentMatrix } from "@/pages/Blocks/detail-block/DetailApartmentMatrix";
@@ -46,7 +48,10 @@ const DetailBlockPage = () => {
       </div>
     );
   }
-
+  const config = BlockStatusMap[blockData?.status!] ?? {
+    label: "Không xác định",
+    type: "default",
+  };
   return (
     <>
       <div className="p-1.5 pt-0 space-y-4">
@@ -55,7 +60,12 @@ const DetailBlockPage = () => {
           showBack
           actions={headerActions}
         />
-        <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm space-y-6">
+        <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm space-y-6 relative">
+          <StatusBadge
+            className="mt-2 mb-4 absolute right-6"
+            label={config.label}
+            type={config.type}
+          />
           <div className=" flex gap-5">
             <DisplayCard label="Tên tòa nhà" value={blockData?.buildingName || ""} />
             <DisplayCard label="Tên quản lý" value={blockData?.managerName || ""} />

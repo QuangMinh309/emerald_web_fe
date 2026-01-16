@@ -1,6 +1,7 @@
 import { lazy } from "react";
-import { createBrowserRouter } from "react-router-dom";
+import { Navigate, createBrowserRouter } from "react-router-dom";
 import MainLayout from "@components/layout/MainLayout";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import DetailAssetPage from "@/pages/Assets/detail-asset";
 import ResidentsPage from "@/pages/Residents/view-residents";
 import DetailResidentPage from "@/pages/Residents/detail-resident";
@@ -14,6 +15,12 @@ import ApartmentsPage from "@/pages/Apartments/view-apartments";
 import CreateVotingPage from "@/pages/Votings/create-voting";
 import UpdateVotingPage from "@/pages/Votings/update-voting";
 import DetailVotingPage from "@/pages/Votings/detail-voting";
+import InvoicesPage from "@/pages/Invoices/view-invoices";
+import DetailInvoicePage from "@/pages/Invoices/detail-invoice";
+import TechniciansPage from "@/pages/Technicians/view-technicians";
+import DetailTechnicianPage from "@/pages/Technicians/detail-technician";
+import MaintenancesPage from "@/pages/Maintenances/view-maintenances";
+import DetailMaintenancePage from "@/pages/Maintenances/detail-maintenance";
 
 const Assets = lazy(() => import("@/pages/Assets/view-assets"));
 const Notifications = lazy(() => import("@/pages/Notifications/view-notifications"));
@@ -33,8 +40,13 @@ export const routes = createBrowserRouter([
   { path: "/reset-password", element: <ResetPassword /> },
   {
     path: "/",
-    element: <MainLayout />,
+    element: (
+      <ProtectedRoute>
+        <MainLayout />
+      </ProtectedRoute>
+    ),
     children: [
+      { index: true, element: <Navigate to="/blocks" replace /> },
       { path: "assets", element: <Assets /> },
       { path: "notifications", element: <Notifications /> },
       { path: "notifications/:id", element: <DetailNotificationPage /> },
@@ -54,6 +66,12 @@ export const routes = createBrowserRouter([
       { path: "votings/create", element: <CreateVotingPage /> },
       { path: "votings/update/:id", element: <UpdateVotingPage /> },
       { path: "votings/:id", element: <DetailVotingPage /> },
+      { path: "invoices", element: <InvoicesPage /> },
+      { path: "invoices/:id", element: <DetailInvoicePage /> },
+      { path: "technicians", element: <TechniciansPage /> },
+      { path: "technicians/:id", element: <DetailTechnicianPage /> },
+      { path: "maintenances", element: <MaintenancesPage /> },
+      { path: "maintenances/:id", element: <DetailMaintenancePage /> },
     ],
   },
 ]);
