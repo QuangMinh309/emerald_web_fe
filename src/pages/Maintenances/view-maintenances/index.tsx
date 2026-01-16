@@ -16,6 +16,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import CreateIncidentMaintenanceModal from "@/pages/Maintenances/incident/create-incident-maintenance";
 import UpdateIncidentMaintenanceModal from "@/pages/Maintenances/incident/update-incident-maintenance";
+import CreateScheduledMaintenanceModal from "@/pages/Maintenances/scheduled/create-scheduled-maintenance";
 
 const MaintenancesPage = () => {
   const navigate = useNavigate();
@@ -26,6 +27,10 @@ const MaintenancesPage = () => {
   const [isCreateIncidentModalOpen, setIsCreateIncidentModalOpen] = useState(false);
   const [isUpdateIncidentOpen, setIsUpdateIncidentOpen] = useState(false);
   const [updateIncidentId, setUpdateIncidentId] = useState<number>();
+  // Scheduled modals state
+  const [isCreateScheduledModalOpen, setIsCreateScheduledModalOpen] = useState(false);
+  const [isUpdateScheduledOpen, setIsUpdateScheduledOpen] = useState(false);
+  const [updateScheduledId, setUpdateScheduledId] = useState<number>();
   // delete
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [deletedTicket, setDeletedTicket] = useState<MaintenanceTicketListItem>();
@@ -97,11 +102,17 @@ const MaintenancesPage = () => {
           actions={
             <div className="flex items-center gap-2">
               <Button
-                onClick={() => setIsCreateIncidentModalOpen(true)}
+                onClick={() => {
+                  if (activeTab === "incident") {
+                    setIsCreateIncidentModalOpen(true);
+                  } else {
+                    setIsCreateScheduledModalOpen(true);
+                  }
+                }}
                 className="flex items-center gap-2 bg-main text-white px-4 py-2 rounded-lg hover:bg-main/90 transition-colors text-sm font-medium"
               >
                 <Plus className="w-4 h-4" />
-                Tạo yêu cầu
+                {activeTab === "incident" ? "Tạo yêu cầu phản ánh" : "Tạo bảo trì định kỳ"}
               </Button>
 
               <ActionDropdown
@@ -155,8 +166,13 @@ const MaintenancesPage = () => {
               columns={maintenanceColumns}
               defaultPageSize={10}
               onEdit={(row) => {
-                setIsUpdateIncidentOpen(true);
-                setUpdateIncidentId((row as MaintenanceTicketListItem).id);
+                if (row.type === "INCIDENT") {
+                  setIsUpdateIncidentOpen(true);
+                  setUpdateIncidentId(row.id);
+                } else {
+                  setIsUpdateScheduledOpen(true);
+                  setUpdateScheduledId(row.id);
+                }
               }}
               onDelete={(row) => {
                 setIsDeleteOpen(true);
@@ -181,6 +197,11 @@ const MaintenancesPage = () => {
         open={isUpdateIncidentOpen}
         setOpen={setIsUpdateIncidentOpen}
         ticketId={updateIncidentId!}
+      />
+      {/* Scheduled Modals */}
+      <CreateScheduledMaintenanceModal
+        open={isCreateScheduledModalOpen}
+        setOpen={setIsCreateScheduledModalOpen}
       />
       {/* Modals */}
       {/* <CreateMaintenanceModal

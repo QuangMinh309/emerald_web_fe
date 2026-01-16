@@ -63,7 +63,7 @@ const CreateIncidentMaintenanceModal = ({ open, setOpen }: ModalProps) => {
       assetId: "",
     },
   });
-  const residentOptions = assets?.map((asset) => ({
+  const assetOptions = assets?.map((asset) => ({
     value: asset.id.toString(),
     label: `${asset.name} - Toà ${asset.blockName} - Tầng ${asset.floor}`,
   }));
@@ -125,7 +125,7 @@ const CreateIncidentMaintenanceModal = ({ open, setOpen }: ModalProps) => {
               control={form.control}
               name="assetId"
               render={({ field }) => {
-                const selectedAsset = residentOptions?.find((r) => r.value === field.value);
+                const selectedAsset = assetOptions?.find((r) => r.value === field.value);
 
                 return (
                   <FormItem className="space-y-1.5  col-span-2">
@@ -150,7 +150,7 @@ const CreateIncidentMaintenanceModal = ({ open, setOpen }: ModalProps) => {
                           <CommandList>
                             <CommandEmpty>Không tìm tài sản</CommandEmpty>
                             <CommandGroup>
-                              {residentOptions?.map((resident) => (
+                              {assetOptions?.map((resident) => (
                                 <CommandItem
                                   key={resident.value}
                                   value={resident.value}
