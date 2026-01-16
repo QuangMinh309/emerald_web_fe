@@ -83,7 +83,32 @@ export const updateMaintenanceProgress = async (
   });
   return res.data.data as MaintenanceTicketDetail;
 };
-export const completeIncidentTicket = async (id: number, data: FormData) => {
+export const completeIncidentTicket = async (
+  id: number,
+  data: {
+    result: MaintenanceResult;
+    actualCost: number;
+    resultNote?: string;
+    images?: File[];
+    videos?: File[];
+  },
+) => {
+  const formData = new FormData();
+  formData.append("result", data.result);
+  formData.append("actualCost", data.actualCost.toString());
+  if (data.resultNote) {
+    formData.append("resultNote", data.resultNote);
+  }
+  if (data.images && data.images.length > 0) {
+    data.images.forEach((image) => {
+      formData.append("images", image);
+    });
+  }
+  if (data.videos && data.videos.length > 0) {
+    data.videos.forEach((video) => {
+      formData.append("videos", video);
+    });
+  }
   const res = await axiosInstance.post(`/maintenance-tickets/incident/${id}/complete`, data, {
     headers: { "Content-Type": "multipart/form-data" },
   });
@@ -96,7 +121,7 @@ export const completeScheduledTicket = async (
     resultNote?: string;
     hasIssue?: boolean;
     issueDetail?: string;
-    actualCost?: number;
+    actualCost: number;
   },
 ) => {
   const res = await axiosInstance.post(`/maintenance-tickets/scheduled/${id}/complete`, data);

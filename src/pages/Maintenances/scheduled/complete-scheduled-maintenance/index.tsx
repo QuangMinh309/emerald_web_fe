@@ -20,12 +20,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { toast } from "sonner";
-import { MaintenanceResultOptions } from "@/constants/maintenanceResult";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { useCompleteIncidentTicket } from "@/hooks/data/useMaintenance";
+import { toast } from "sonner";
+
+import { MaintenanceResultOptions } from "@/constants/maintenanceResult";
+import { useCompleteScheduledTicket } from "@/hooks/data/useMaintenance";
 
 interface ModalProps {
   open: boolean;
@@ -33,35 +34,39 @@ interface ModalProps {
   ticketId?: number;
 }
 
-const CompleteMaintenanceSchema = z.object({
+/* =====================
+   Schema
+===================== */
+const CompleteScheduledMaintenanceSchema = z.object({
   result: z.string().min(1, "Vui lòng chọn kết quả"),
   resultNote: z.string().optional(),
   hasIssue: z.boolean(),
   issueDetail: z.string().optional(),
-  materialCost: z.number().optional(),
-  laborCost: z.number().optional(),
+  actualCost: z.number(),
 });
 
-type CompleteFormValues = z.infer<typeof CompleteMaintenanceSchema>;
+type CompleteFormValues = z.infer<typeof CompleteScheduledMaintenanceSchema>;
 
-const CompleteMaintenanceModal = ({ open, setOpen, ticketId }: ModalProps) => {
-  const { mutate: completeTicket, isPending } = useCompleteIncidentTicket();
+const CompleteScheduledMaintenanceModal = ({ open, setOpen, ticketId }: ModalProps) => {
+  const { mutate: completeTicket, isPending } = useCompleteScheduledTicket();
 
   const form = useForm<CompleteFormValues>({
-    resolver: zodResolver(CompleteMaintenanceSchema),
+    resolver: zodResolver(CompleteScheduledMaintenanceSchema),
     defaultValues: {
       result: "",
       resultNote: "",
       hasIssue: false,
       issueDetail: "",
-      materialCost: 0,
-      laborCost: 0,
+      actualCost: 0,
     },
   });
 
   const hasIssue = form.watch("hasIssue");
 
-  function onSubmit(values: CompleteFormValues) {
+  /* =====================
+     Submit
+  ===================== */
+  const onSubmit = (values: CompleteFormValues) => {
     if (!ticketId) return;
 
     completeTicket(
@@ -72,8 +77,7 @@ const CompleteMaintenanceModal = ({ open, setOpen, ticketId }: ModalProps) => {
           resultNote: values.resultNote,
           hasIssue: values.hasIssue,
           issueDetail: values.hasIssue ? values.issueDetail : undefined,
-          materialCost: values.materialCost,
-          laborCost: values.laborCost,
+          actualCost: values.actualCost || 0,
         },
       },
       {
@@ -81,18 +85,21 @@ const CompleteMaintenanceModal = ({ open, setOpen, ticketId }: ModalProps) => {
           toast.success("Đã hoàn thành yêu cầu bảo trì");
           handleClose();
         },
-        onError: (error) => {
-          toast.error(`Lỗi: ${error.message}`);
+        onError: (err) => {
+          toast.error(`Lỗi: ${err.message}`);
         },
       },
     );
-  }
+  };
 
   const handleClose = () => {
     setOpen(false);
     form.reset();
   };
 
+  /* =====================
+     Render
+  ===================== */
   return (
     <Modal
       open={open}
@@ -112,16 +119,16 @@ const CompleteMaintenanceModal = ({ open, setOpen, ticketId }: ModalProps) => {
             render={({ field }) => (
               <FormItem className="space-y-1.5">
                 <FormLabel isRequired>Kết quả bảo trì</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Chọn kết quả" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {MaintenanceResultOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
+                    {MaintenanceResultOptions.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -131,7 +138,7 @@ const CompleteMaintenanceModal = ({ open, setOpen, ticketId }: ModalProps) => {
             )}
           />
 
-          {/* Ghi chú kết quả */}
+          {/* Ghi chú */}
           <FormField
             disabled={isPending}
             control={form.control}
@@ -140,27 +147,27 @@ const CompleteMaintenanceModal = ({ open, setOpen, ticketId }: ModalProps) => {
               <FormItem className="space-y-1.5">
                 <FormLabel>Ghi chú kết quả</FormLabel>
                 <FormControl>
-                  <Textarea placeholder="Nhập ghi chú về kết quả (nếu có)" rows={3} {...field} />
+                  <Textarea rows={3} placeholder="Nhập ghi chú (nếu có)" {...field} />
                 </FormControl>
                 <FormMessage className="text-xs" />
               </FormItem>
             )}
           />
 
-          {/* Có vấn đề phát sinh */}
+          {/* Có vấn đề */}
           <FormField
             disabled={isPending}
             control={form.control}
             name="hasIssue"
             render={({ field }) => (
-              <FormItem className="space-y-1.5">
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="hasIssue" checked={field.value} onCheckedChange={field.onChange} />
-                  <Label htmlFor="hasIssue" className="cursor-pointer">
-                    Có vấn đề phát sinh
-                  </Label>
+              <FormItem>
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={(v) => field.onChange(Boolean(v))}
+                  />
+                  <Label className="cursor-pointer">Có vấn đề phát sinh</Label>
                 </div>
-                <FormMessage className="text-xs" />
               </FormItem>
             )}
           />
@@ -175,7 +182,7 @@ const CompleteMaintenanceModal = ({ open, setOpen, ticketId }: ModalProps) => {
                 <FormItem className="space-y-1.5">
                   <FormLabel>Chi tiết vấn đề</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Mô tả chi tiết vấn đề phát sinh" rows={3} {...field} />
+                    <Textarea rows={3} placeholder="Mô tả chi tiết vấn đề" {...field} />
                   </FormControl>
                   <FormMessage className="text-xs" />
                 </FormItem>
@@ -183,53 +190,32 @@ const CompleteMaintenanceModal = ({ open, setOpen, ticketId }: ModalProps) => {
             />
           )}
 
-          <div className="grid grid-cols-2 gap-4">
-            {/* Chi phí vật liệu */}
-            <FormField
-              disabled={isPending}
-              control={form.control}
-              name="materialCost"
-              render={({ field }) => (
-                <FormItem className="space-y-1.5">
-                  <FormLabel>Chi phí vật liệu (VNĐ)</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      placeholder="0"
-                      value={field.value ?? ""}
-                      onChange={(e) => field.onChange(Number(e.target.value))}
-                    />
-                  </FormControl>
-                  <FormMessage className="text-xs" />
-                </FormItem>
-              )}
-            />
-
-            {/* Chi phí nhân công */}
-            <FormField
-              disabled={isPending}
-              control={form.control}
-              name="laborCost"
-              render={({ field }) => (
-                <FormItem className="space-y-1.5">
-                  <FormLabel>Chi phí nhân công (VNĐ)</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      placeholder="0"
-                      value={field.value ?? ""}
-                      onChange={(e) => field.onChange(Number(e.target.value))}
-                    />
-                  </FormControl>
-                  <FormMessage className="text-xs" />
-                </FormItem>
-              )}
-            />
-          </div>
+          {/* Chi phí thực tế */}
+          <FormField
+            disabled={isPending}
+            control={form.control}
+            name="actualCost"
+            render={({ field }) => (
+              <FormItem className="space-y-1.5">
+                <FormLabel>Chi phí thực tế (VNĐ)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="0"
+                    value={field.value ?? ""}
+                    onChange={(e) =>
+                      field.onChange(e.target.value ? Number(e.target.value) : undefined)
+                    }
+                  />
+                </FormControl>
+                <FormMessage className="text-xs" />
+              </FormItem>
+            )}
+          />
         </form>
       </Form>
     </Modal>
   );
 };
 
-export default CompleteMaintenanceModal;
+export default CompleteScheduledMaintenanceModal;

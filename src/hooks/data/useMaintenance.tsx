@@ -135,7 +135,19 @@ export const useCompleteIncidentTicket = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: FormData }) => completeIncidentTicket(id, data),
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: number;
+      data: {
+        result: MaintenanceResult;
+        actualCost: number;
+        resultNote?: string;
+        images?: File[];
+        videos?: File[];
+      };
+    }) => completeIncidentTicket(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [MAINTENANCE_QUERY_KEY] });
     },
@@ -157,7 +169,7 @@ export const useCompleteScheduledTicket = () => {
         resultNote?: string;
         hasIssue?: boolean;
         issueDetail?: string;
-        actualCost?: number;
+        actualCost: number;
       };
     }) => completeScheduledTicket(id, data),
     onSuccess: () => {

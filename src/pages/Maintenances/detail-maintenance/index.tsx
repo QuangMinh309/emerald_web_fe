@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "sonner";
-import { UserCheck, Play, CheckCircle } from "lucide-react";
+import { UserCheck, Play, CheckCircle, Wrench, LoaderCircle } from "lucide-react";
 
 import PageHeader from "@/components/common/PageHeader";
 import Spinner from "@/components/common/Spinner";
@@ -11,7 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 import { TicketStatusMap } from "@/constants/ticketStatus";
 import { TicketTypeOptions } from "@/constants/ticketType";
-import { TicketPriorityOptions } from "@/constants/ticketPriority";
+import { TicketPriorityMap, TicketPriorityOptions } from "@/constants/ticketPriority";
 import { MaintenanceResultOptions } from "@/constants/maintenanceResult";
 
 import {
@@ -21,20 +21,22 @@ import {
 } from "@/hooks/data/useMaintenance";
 
 import AssignTechnicianModal from "@/pages/Maintenances/assign-technician";
-import CompleteMaintenanceModal from "@/pages/Maintenances/complete-maintenance";
 
 import type { MaintenanceChecklistItem } from "@/types/maintenance";
+import CompleteScheduledMaintenanceModal from "@/pages/Maintenances/scheduled/complete-scheduled-maintenance";
+import CompleteIncidentMaintenanceModal from "@/pages/Maintenances/incident/complete-incident-maintenance";
 
 const DetailMaintenancePage = () => {
   const { id } = useParams<{ id: string }>();
 
   const [isAssignOpen, setIsAssignOpen] = useState(false);
-  const [isCompleteOpen, setIsCompleteOpen] = useState(false);
+  const [isCompleteScheduledOpen, setIsCompleteScheduledOpen] = useState(false);
+  const [isCompleteIncidentOpen, setIsCompleteIncidentOpen] = useState(false);
   const [localChecklist, setLocalChecklist] = useState<MaintenanceChecklistItem[]>([]);
-
   const ticketId = Number(id);
 
   const { data: ticket, isLoading } = useMaintenanceTicketDetail(ticketId);
+  const finishedTask = ticket?.checklistItems?.filter((item) => item.isChecked).length || 0;
   const { mutate: startWork, isPending: isStarting } = useStartMaintenanceWork();
   const { mutate: updateProgress, isPending: isUpdatingProgress } = useUpdateMaintenanceProgress();
 
@@ -63,18 +65,18 @@ const DetailMaintenancePage = () => {
     const newChecklist = [...localChecklist];
     newChecklist[index] = { ...newChecklist[index], isChecked };
     setLocalChecklist(newChecklist);
-
-    if (ticket?.status === "IN_PROGRESS") {
-      updateProgress(
-        { id: ticketId, checklistItems: newChecklist },
-        {
-          onSuccess: () => toast.success("Đã cập nhật tiến độ"),
-          onError: (err) => toast.error(`Lỗi: ${err.message}`),
-        },
-      );
-    }
   };
+  const handleUpdateProgress = () => {
+    if (!ticketId) return;
 
+    updateProgress(
+      { id: ticketId, checklistItems: localChecklist },
+      {
+        onSuccess: () => toast.success("Đã cập nhật tiến độ"),
+        onError: (err) => toast.error(`Lỗi: ${err.message}`),
+      },
+    );
+  };
   /* =====================
      Loading & Guard
   ===================== */
@@ -108,19 +110,63 @@ const DetailMaintenancePage = () => {
     type: "default",
   };
 
+  const priorityConfig = TicketPriorityMap[ticket?.priority!] ?? {
+    label: "Không xác định",
+    type: "default",
+  };
+
   const canAssign = ticket?.status === "PENDING";
   const canStart = ticket?.status === "ASSIGNED";
   const canComplete = ticket?.status === "IN_PROGRESS";
-
+  const canUpdateProgress = canComplete && ticket.type === "MAINTENANCE";
   /* =====================
      Header Actions
   ===================== */
-  const headerActions = (
-    <div className="flex items-center gap-2">
+  const actions = (
+    <div className="flex items-center gap-2 w-full justify-end">
+      {canAssign && (
+        <Button
+          className="h-9 px-3 bg-main text-white hover:bg-main/90"
+          onClick={() => setIsAssignOpen(true)}
+        >
+          <UserCheck size={16} className="mr-2" />
+          Giao việc
+        </Button>
+      )}
+
+      {canStart && (
+        <Button
+          className="h-9 px-3 bg-main text-white hover:bg-main/90"
+          onClick={handleStartWork}
+          disabled={isStarting}
+        >
+          {isStarting && <LoaderCircle className="animate-spin mr-2 h-4 w-4" />}
+          <Play size={16} className="mr-2" />
+          Bắt đầu
+        </Button>
+      )}
+      {canUpdateProgress && (
+        <Button
+          disabled={isUpdatingProgress}
+          className="h-9 px-3 bg-main text-white hover:bg-main/90"
+          onClick={handleUpdateProgress}
+        >
+          {isUpdatingProgress && <LoaderCircle className="animate-spin mr-2 h-4 w-4" />}
+          <Wrench size={16} className="mr-2" />
+          Cập nhật tiến độ
+        </Button>
+      )}
       {canComplete && (
         <Button
-          className="h-9 px-3 bg-purple-600 text-white hover:bg-purple-700"
-          onClick={() => setIsCompleteOpen(true)}
+          disabled={isUpdatingProgress || (finishedTask === 0 && ticket.type === "MAINTENANCE")}
+          className="h-9 px-3 bg-main text-white hover:bg-main/90"
+          onClick={() => {
+            if (ticket?.type === "MAINTENANCE") {
+              setIsCompleteScheduledOpen(true);
+            } else {
+              setIsCompleteIncidentOpen(true);
+            }
+          }}
         >
           <CheckCircle size={16} className="mr-2" />
           Hoàn thành
@@ -135,11 +181,7 @@ const DetailMaintenancePage = () => {
   return (
     <>
       <div className="p-1.5 pt-0 space-y-4">
-        <PageHeader
-          title={ticket?.title ?? "Chi tiết yêu cầu bảo trì"}
-          showBack
-          actions={headerActions}
-        />
+        <PageHeader title={ticket?.title ?? "Chi tiết yêu cầu bảo trì"} showBack />
 
         <div className="bg-white p-6 rounded-sm border border-gray-200 shadow-sm space-y-6">
           {/* ===== Thông tin chung ===== */}
@@ -150,7 +192,10 @@ const DetailMaintenancePage = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
             <Info label="Loại yêu cầu" value={typeOption?.label || ticket?.type} />
-            <Info label="Độ ưu tiên" value={priorityOption?.label} />
+            <Info
+              label="Độ ưu tiên"
+              value={<StatusBadge label={priorityConfig.label} type={priorityConfig.type} />}
+            />
             <Info label="Tòa nhà" value={ticket?.blockName} />
             <Info label="Tầng" value={`Tầng ${ticket?.floor}`} />
             <Info label="Tài sản" value={ticket?.assetName || "Không có"} />
@@ -263,37 +308,19 @@ const DetailMaintenancePage = () => {
               )}
             </>
           )}
-
-          <div className="flex w-full justify-end gap-2 mt-4">
-            {canAssign && (
-              <Button
-                className="h-9 px-3 bg-main text-white hover:bg-main/90"
-                onClick={() => setIsAssignOpen(true)}
-              >
-                <UserCheck size={16} className="mr-2" />
-                Giao việc
-              </Button>
-            )}
-
-            {canStart && (
-              <Button
-                className="h-9 px-3 bg-main text-white hover:bg-main/90"
-                onClick={handleStartWork}
-                disabled={isStarting}
-              >
-                <Play size={16} className="mr-2" />
-                Bắt đầu
-              </Button>
-            )}
-          </div>
+          {actions}
         </div>
       </div>
 
       <AssignTechnicianModal open={isAssignOpen} setOpen={setIsAssignOpen} ticketId={ticketId} />
-
-      <CompleteMaintenanceModal
-        open={isCompleteOpen}
-        setOpen={setIsCompleteOpen}
+      <CompleteScheduledMaintenanceModal
+        open={isCompleteScheduledOpen}
+        setOpen={setIsCompleteScheduledOpen}
+        ticketId={ticketId}
+      />
+      <CompleteIncidentMaintenanceModal
+        open={isCompleteIncidentOpen}
+        setOpen={setIsCompleteIncidentOpen}
         ticketId={ticketId}
       />
     </>
@@ -305,7 +332,7 @@ export default DetailMaintenancePage;
 /* =====================
    Small UI helpers
 ===================== */
-const Info = ({ label, value }: { label: string; value?: string }) => (
+const Info = ({ label, value }: { label: string; value?: React.ReactNode }) => (
   <div>
     <h3 className="display-label">{label}</h3>
     <p className="display-text">{value || "—"}</p>
@@ -318,7 +345,7 @@ const InfoBlock = ({
   danger,
 }: {
   label: string;
-  value?: string;
+  value?: React.ReactNode;
   danger?: boolean;
 }) => (
   <div>
