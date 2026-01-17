@@ -131,7 +131,7 @@ const DetailNotificationPage = () => {
 
               <div>
                 <h3 className="display-label">Mức độ ưu tiên</h3>
-                <p className={`display-text ${notification.isUrgent ? "text-red-600" : ""}`}>
+                <p className={`display-text ${notification.isUrgent ? "text-orange-600" : ""}`}>
                   {notification.isUrgent ? "Thông báo khẩn" : "Bình thường"}
                 </p>
               </div>

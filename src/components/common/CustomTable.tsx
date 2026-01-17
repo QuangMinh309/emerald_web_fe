@@ -324,6 +324,7 @@ function CustomTable<T extends { id: string | number }>({
                               "h-8 w-8 text-gray-500 hover:text-blue-600 hover:bg-blue-50",
                               isEditable && !isEditable(row) && "hidden",
                             )}
+                            title="Sửa"
                           >
                             <Edit className="w-4 h-4 stroke-[2]" />
                           </Button>
@@ -337,6 +338,7 @@ function CustomTable<T extends { id: string | number }>({
                               "h-8 w-8 text-gray-500 hover:text-red-600 hover:bg-red-50",
                               isEditable && !isEditable(row) && "hidden",
                             )}
+                            title="Xóa"
                           >
                             <Trash2 className="w-4 h-4 stroke-[2]" />
                           </Button>
@@ -347,6 +349,7 @@ function CustomTable<T extends { id: string | number }>({
                             size="icon"
                             onClick={() => onView(row)}
                             className="h-8 w-8 text-gray-500 hover:text-main hover:bg-main/10"
+                            title="Xem"
                           >
                             <Eye className="w-4 h-4 stroke-[2]" />
                           </Button>
