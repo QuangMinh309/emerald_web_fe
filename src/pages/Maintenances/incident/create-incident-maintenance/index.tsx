@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { Modal } from "@/components/common/Modal";
 import {
   Form,
@@ -40,6 +41,11 @@ import { useAssets } from "@/hooks/data/useAssests";
 interface ModalProps {
   open: boolean;
   setOpen: (value: boolean) => void;
+  onSuccess?: (ticketId: number) => void;
+  initialData?: {
+    title?: string;
+    description?: string;
+  };
 }
 
 const CreateIncidentMaintenanceSchema = z.object({
@@ -51,7 +57,7 @@ const CreateIncidentMaintenanceSchema = z.object({
 
 type IncidentMaintenanceFormValues = z.infer<typeof CreateIncidentMaintenanceSchema>;
 
-const CreateIncidentMaintenanceModal = ({ open, setOpen }: ModalProps) => {
+const CreateIncidentMaintenanceModal = ({ open, setOpen, onSuccess, initialData }: ModalProps) => {
   const { mutate: createTicket, isPending } = useCreateIncidentTicket();
   const { data: assets } = useAssets();
   const form = useForm<IncidentMaintenanceFormValues>({
@@ -63,6 +69,27 @@ const CreateIncidentMaintenanceModal = ({ open, setOpen }: ModalProps) => {
       assetId: "",
     },
   });
+
+  useEffect(() => {
+    if (open) {
+      if (initialData) {
+        form.reset({
+          title: initialData.title || "",
+          description: initialData.description || "",
+          priority: "",
+          assetId: "",
+        });
+      } else {
+        form.reset({
+          title: "",
+          description: "",
+          priority: "",
+          assetId: "",
+        });
+      }
+    }
+  }, [open, initialData, form]);
+
   const assetOptions = assets?.map((asset) => ({
     value: asset.id.toString(),
     label: `${asset.name} - Toà ${asset.blockName} - Tầng ${asset.floor}`,
@@ -77,8 +104,14 @@ const CreateIncidentMaintenanceModal = ({ open, setOpen }: ModalProps) => {
         type: "INCIDENT",
       },
       {
-        onSuccess: () => {
+        onSuccess: (response: any) => {
           toast.success("Yêu cầu bảo trì đã được tạo thành công");
+          const newTicketId = response?.data?.id || response?.id;
+
+          if (onSuccess && newTicketId) {
+            onSuccess(newTicketId);
+          }
+
           handleClose();
         },
         onError: (error) => {

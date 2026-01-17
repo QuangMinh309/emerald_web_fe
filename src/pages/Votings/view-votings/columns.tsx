@@ -48,9 +48,7 @@ export const votingColumns: TableColumn<VotingData>[] = [
 
       return (
         <div className="flex flex-col gap-1.5">
-          <span className="font-medium text-gray-900 line-clamp-2" title={row.title}>
-            {row.title}
-          </span>
+          <span title={row.title}>{row.title}</span>
 
           {shouldShowBadge && (
             <div className="flex items-center gap-1 text-[12px] text-yellow-600">
@@ -73,7 +71,6 @@ export const votingColumns: TableColumn<VotingData>[] = [
     label: "Phạm vi biểu quyết",
     filterable: true,
     width: "12%",
-    render: (row) => <span className="text-gray-700 text-sm">{row.scopeDisplay}</span>,
   },
   {
     key: "startTime",

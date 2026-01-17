@@ -19,6 +19,8 @@ interface ModalProps {
   children: React.ReactNode;
   onLoading?: boolean;
   className?: string;
+  titleClassName?: string;
+  submitButtonClassName?: string;
 }
 
 export function Modal({
@@ -30,6 +32,8 @@ export function Modal({
   children,
   onLoading = false,
   className,
+  titleClassName,
+  submitButtonClassName,
 }: ModalProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -38,7 +42,7 @@ export function Modal({
       >
         <div className="p-4 pb-3 border-b border-gray-400">
           <DialogHeader>
-            <DialogTitle className="text-[#244B35] font-bold text-lg text-left">
+            <DialogTitle className={cn("font-bold text-lg text-left", "text-main", titleClassName)}>
               {title}
             </DialogTitle>
           </DialogHeader>
@@ -57,7 +61,7 @@ export function Modal({
               disabled={onLoading}
               onClick={onSubmit}
               type="submit"
-              className="bg-main hover:bg-main/90"
+              className={cn("bg-main hover:bg-main/90 text-white", submitButtonClassName)}
             >
               {onLoading && <LoaderCircle className="animate-spin mr-2 h-4 w-4" />}
               {submitText}

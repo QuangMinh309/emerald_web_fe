@@ -38,9 +38,7 @@ export const notificationColumns: TableColumn<NotificationData>[] = [
     filterAccessor: (row) => (row.isUrgent ? "Thông báo khẩn" : "Thường"),
     render: (row) => (
       <div className="flex flex-col gap-1">
-        <span className="font-medium text-gray-900 line-clamp-2" title={row.title}>
-          {row.title}
-        </span>
+        <span title={row.title}>{row.title}</span>
         {row.isUrgent && (
           <div className="flex items-center gap-1 text-[12px] text-orange-600">
             <Info className="w-3 h-3" />
@@ -71,11 +69,11 @@ export const notificationColumns: TableColumn<NotificationData>[] = [
     render: (row) => {
       switch (row.targetScope) {
         case "ALL":
-          return <span className="font-medium">Toàn chung cư</span>;
+          return <span>Toàn chung cư</span>;
         case "BLOCK":
-          return <span className="font-medium">Theo tòa</span>;
+          return <span>Theo tòa</span>;
         case "FLOOR":
-          return <span className="font-medium">Theo tầng</span>;
+          return <span>Theo tầng</span>;
         default:
           return null;
       }
@@ -120,7 +118,7 @@ export const notificationColumns: TableColumn<NotificationData>[] = [
   },
   {
     key: "type",
-    label: "Loại thông báo",
+    label: "Loại nội dung",
     align: "center",
     width: "20%",
     filterable: true,
