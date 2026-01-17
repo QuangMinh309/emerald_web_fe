@@ -4,15 +4,18 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { Provider } from "react-redux";
 import { store } from "@/store";
+import { SocketProvider } from "@/sockets/socket.provider";
 const queryClient = new QueryClient();
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Provider store={store}>
-        <AuthProvider>
-          <RouterProvider router={routes} />
-        </AuthProvider>
-      </Provider>
+      <AuthProvider>
+        <SocketProvider>
+          <Provider store={store}>
+            <RouterProvider router={routes} />
+          </Provider>
+        </SocketProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
