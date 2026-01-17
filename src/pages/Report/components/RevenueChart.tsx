@@ -1,4 +1,4 @@
-import { buildLinearScale, buildPoints } from "@/lib/chart";
+import { buildLinearScale, buildPoints, buildNiceTicks, niceDomain } from "@/lib/chart";
 
 export type Point = { label: string; value: number };
 
@@ -16,16 +16,15 @@ export default function RevenueExpenseChart({
   expense,
   width = 1200,
   height = 280,
-  yTicks = [0, 1000, 2000, 3000, 4000],
   ariaLabel = "Doanh thu và chi phí",
 }: Props) {
-  const padding = { l: 44, r: 18, t: 16, b: 42 };
+  const padding = { l: 54, r: 18, t: 16, b: 42 };
   const innerW = width - padding.l - padding.r;
   const innerH = height - padding.t - padding.b;
 
   const n = Math.max(revenue.length, expense.length);
 
-  // Empty state (chart render rỗng thay vì crash)
+  // chart render rỗng thay vì crash)
   if (n === 0) {
     return (
       <div className="rounded-xl border border-dashed border-neutral-200 p-6 text-sm text-neutral-600">
@@ -34,17 +33,19 @@ export default function RevenueExpenseChart({
     );
   }
 
-  // X scale dựa trên số điểm lớn nhất
   const x = buildLinearScale(0, Math.max(n - 1, 1), padding.l, padding.l + innerW);
-
-  // Y scale dựa trên max value thực tế (fallback 4000)
   const all = [...revenue, ...expense].map((p) => p.value);
-  const min = 0;
-  const max = Math.max(...all, 4000);
+  const rawMax = Math.max(...all, 0);
 
-  const y = buildLinearScale(min, max, padding.t + innerH, padding.t);
+  const maxWithPad = rawMax === 0 ? 1 : Math.ceil(rawMax * 1.1);
 
-  // Points: nếu mảng ngắn hơn, vẫn build theo length của nó
+  const ticks = buildNiceTicks(0, maxWithPad, 5, { multipleOf: 5 });
+
+
+
+  const yMax = ticks[ticks.length - 1] ?? maxWithPad;
+  const y = buildLinearScale(0, yMax, padding.t + innerH, padding.t);
+
   const revPts = buildPoints(revenue.map((d) => d.value), x, y);
   const expPts = buildPoints(expense.map((d) => d.value), x, y);
 
@@ -63,7 +64,7 @@ export default function RevenueExpenseChart({
         aria-label={ariaLabel}
       >
         {/* Grid + Y axis labels */}
-        {yTicks.map((t) => {
+        {ticks.map((t) => {
           const yy = y(t);
           return (
             <g key={t}>
@@ -73,6 +74,7 @@ export default function RevenueExpenseChart({
                 x2={width - padding.r}
                 y2={yy}
                 className="stroke-neutral-200"
+                strokeDasharray="4 4"
                 strokeWidth="1"
               />
               <text x={padding.l - 10} y={yy + 4} textAnchor="end" className="fill-neutral-500 text-[12px]">

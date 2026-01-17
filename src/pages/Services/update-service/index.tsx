@@ -29,7 +29,6 @@ import type { ServiceType } from "@/types/service";
 import { useGetServiceById, useUpdateService } from "@/hooks/data/useServices";
 
 import { UploadImages } from "@/components/common/UploadImages";
-import { useUploadImage } from "@/hooks/useUploadImage";
 
 interface UpdateModalProps {
   open: boolean;
@@ -56,7 +55,6 @@ const UpdateServiceSchema = z.object({
     .refine((v) => Number(v) > 0, "Sức chứa phải lớn hơn 0"),
 
   type: z.string().optional(),
-  // status: z.string().min(1, "Vui lòng chọn trạng thái"),
 });
 
 type ServiceFormValues = z.infer<typeof UpdateServiceSchema>;
@@ -78,10 +76,8 @@ const UpdateServiceModal = ({ open, setOpen, serviceId }: UpdateModalProps) => {
       unitTimeBlock: "60",
       openHour: "06:00",
       closeHour: "17:00",
-      totalSlot: "1",
+      totalSlot: "",
       type: "NORMAL",
-      // status: "active",
-      // imageUrl: "",
     },
   });
 
@@ -136,29 +132,25 @@ const UpdateServiceModal = ({ open, setOpen, serviceId }: UpdateModalProps) => {
         closeHour: normalizeTime(service.closeHour) || "17:00",
         totalSlot: String(service.totalSlot ?? "1"),
         type: (service.type ?? "NORMAL") as ServiceType,
-        // status: "active",
-        // image: service.imageUrl ?? "",
       });
     }
   }, [open, service, form]);
 
   async function onSubmit(values: ServiceFormValues) {
     if (!serviceId) return;
+    const formData = new FormData();
+    formData.append("name", values.name);
+    formData.append("description", values.description ?? "");
+    formData.append("openHour", values.openHour);
+    formData.append("closeHour", values.closeHour);
+    formData.append("unitPrice", values.unitPrice);
+    formData.append("unitTimeBlock", values.unitTimeBlock);
+    formData.append("totalSlot", values.totalSlot);
+    formData.append("type", values.type ?? "NORMAL");
 
-  const formData = new FormData();
-
-  formData.append("name", values.name);
-  formData.append("description", values.description ?? "");
-  formData.append("openHour", values.openHour);
-  formData.append("closeHour", values.closeHour);
-  formData.append("unitPrice", values.unitPrice);
-  formData.append("unitTimeBlock", values.unitTimeBlock);
-  formData.append("totalSlot", values.totalSlot);
-  formData.append("type", values.type ?? "NORMAL");
-
-  if (image.length > 0) {
-    formData.append("image", image[0]);
-  }
+    if (image.length > 0) {
+      formData.append("image", image[0]);
+    }
     updateService(
       {
         id: serviceId,
@@ -376,7 +368,7 @@ const UpdateServiceModal = ({ open, setOpen, serviceId }: UpdateModalProps) => {
 
           </div>
 
-          {/* Image URL */}
+          {/* Image */}
           <UploadImages
             files={image}
             onChange={(files) => {

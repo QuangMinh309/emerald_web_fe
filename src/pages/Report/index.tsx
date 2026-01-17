@@ -1,7 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { Plus, Printer, FileDown, Trash2 } from "lucide-react";
 import PageHeader from "@components/common/PageHeader";
-import type { ActionOption } from "@/types";
 import ServicesBarChart, { type BarPoint } from "./components/ServiceBarChart";
 import AssetStatusSummary from "./components/AssetStatus";
 import RevenueExpenseChart, { type Point } from "./components/RevenueChart";
@@ -10,11 +8,22 @@ import { TabNavigation } from "@/components/common/TabNavigation";
 import { MonthPicker } from "./components/MonthPicker";
 import { YearPicker } from "./components/YearPicker";
 import { DatePicker } from "@/components/common/DatePicker";
+import { useReports } from "@/hooks/data/useReport";
+import type { RangeType } from "@/types/report";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
-type PeriodType = "month" | "year" | "all";
-function startOfMonth(d: Date) {
-  return new Date(d.getFullYear(), d.getMonth(), 1);
+const DEFAULT_FROM = new Date(2000, 0, 1);
+const DEFAULT_TO = new Date();
+
+function toISODate(d?: Date) {
+  if (!d) return undefined;
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
 }
+
 function endOfMonth(d: Date) {
   return new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59, 999);
 }
@@ -24,51 +33,18 @@ function startOfYear(year: number) {
 function endOfYear(year: number) {
   return new Date(year, 11, 31, 23, 59, 59, 999);
 }
-const mockRevenue: Point[] = [
-  { label: "1 Oct", value: 1800 },
-  { label: "3 Oct", value: 2600 },
-  { label: "7 Oct", value: 2000 },
-  { label: "10 Oct", value: 2800 },
-  { label: "14 Oct", value: 3900 },
-  { label: "20 Oct", value: 1600 },
-  { label: "23 Oct", value: 600 },
-  { label: "27 Oct", value: 1800 },
-  { label: "30 Oct", value: 3800 },
-];
-
-const mockExpense: Point[] = [
-  { label: "1 Oct", value: 200 },
-  { label: "3 Oct", value: 1200 },
-  { label: "7 Oct", value: 1500 },
-  { label: "10 Oct", value: 800 },
-  { label: "14 Oct", value: 2900 },
-  { label: "20 Oct", value: 3800 },
-  { label: "23 Oct", value: 2900 },
-  { label: "27 Oct", value: 3600 },
-  { label: "30 Oct", value: 2000 },
-];
-
-const mockServices: BarPoint[] = [
-  { label: "Tennis", value: 360 },
-  { label: "BBQ", value: 240 },
-  { label: "Cầu lông", value: 180 },
-  { label: "Nhà SHC", value: 110 },
-];
 
 const ReportPage = () => {
-  const [periodTab, setPeriodTab] = useState<PeriodType>("month");
-
-  //monthValue: string format "yyyy-mm"
+  const navigate = useNavigate();
+  const [periodTab, setPeriodTab] = useState<RangeType>("month");
   const [monthValue, setMonthValue] = useState(() => {
     const now = new Date();
     const mm = String(now.getMonth() + 1).padStart(2, "0");
     return `${now.getFullYear()}-${mm}`;
   });
-
   const [yearValue, setYearValue] = useState(() => {
     return String(new Date().getFullYear());
   });
-
   const [allFrom, setAllFrom] = useState<Date | undefined>(undefined);
   const [allTo, setAllTo] = useState<Date | undefined>(undefined);
 
@@ -89,13 +65,52 @@ const ReportPage = () => {
     }
   }, [periodTab, monthValue, yearValue, allFrom, allTo]);
 
-  const chartData = [];
-  const hasData = mockRevenue.length > 0;
+  const reportParams = useMemo(() => {
+    if (periodTab === "month" || periodTab === "year") {
+      return {
+        rangeType: periodTab,
+        startDate: toISODate(dateRange.from),
+        endDate: toISODate(dateRange.to),
+      };
+    }
 
+    return {
+      rangeType: "custom" as const,
+      startDate: toISODate(allFrom),
+      endDate: toISODate(allTo),
+    };
+  }, [periodTab, dateRange.from, dateRange.to, allFrom, allTo]);
+  const { isLoading: authLoading, isAuthenticated } = useAuth();
+
+  const { data, isLoading } = useReports(reportParams, !authLoading && isAuthenticated);
+
+
+  const totalRevenue = data?.revenue?.totalRevenue || 0;
+  const percentageComparedToPreviousMonth = data?.revenue?.percentageComparedToPreviousMonth || 0;
+
+  const totalDebt = data?.debt?.totalDebt || 0;
+  const totalApartmentsOwing = data?.debt?.totalApartmentsOwing || 0;
+
+  const totalAssetsMaintenanced = data?.maintenance?.totalAssetsMaintenanced || 0;
+
+  const revenuePoints: Point[] =
+    data?.revenueExpenseChart?.map((d) => ({ label: d.label, value: d.revenue ?? 0 })) ?? [];
+
+  const expensePoints: Point[] =
+    data?.revenueExpenseChart?.map((d) => ({ label: d.label, value: d.expense ?? 0 })) ?? [];
+
+  const servicePoints: BarPoint[] =
+    data?.serviceBookingChart?.map((d) => ({ label: d.serviceName, value: d.bookingCount ?? 0 })) ?? [];
+
+  const assetStatus = data?.assetStatus;
+  // console.log("revenuePoints", revenuePoints);
+  const hasDataRevenue = data?.revenueExpenseChart && data.revenueExpenseChart.length > 0;
+  const hasDataService = data?.serviceBookingChart && data.serviceBookingChart.length > 0;
+  const hasDataAsset = assetStatus;
   useEffect(() => {
-    if (periodTab !== "all") {
-      setAllFrom(undefined);
-      setAllTo(undefined);
+    if (periodTab === "custom") {
+      setAllFrom((v) => v ?? DEFAULT_FROM);
+      setAllTo((v) => v ?? DEFAULT_TO);
     }
   }, [periodTab]);
 
@@ -110,7 +125,7 @@ const ReportPage = () => {
               tabs={[
                 { id: "month", label: "Theo tháng" },
                 { id: "year", label: "Theo năm" },
-                { id: "all", label: "Tất cả" },
+                { id: "custom", label: "Tất cả" },
               ]}
               activeTab={periodTab}
               onChange={(tab) => setPeriodTab(tab as any)}
@@ -125,7 +140,7 @@ const ReportPage = () => {
           {periodTab === "year" && (
             <YearPicker value={Number(yearValue)} onChange={(year) => setYearValue(String(year))} />
           )}
-          {periodTab === "all" && (
+          {periodTab === "custom" && (
             <div className="flex items-center gap-2">
               <div className="w-[160px]">
                 <DatePicker
@@ -133,7 +148,6 @@ const ReportPage = () => {
                   placeholder="Từ ngày"
                   onChange={(d) => {
                     setAllFrom(d);
-                    // nếu user chọn from > to thì tự clear to (hoặc auto set)
                     if (d && allTo && d > allTo) setAllTo(undefined);
                   }}
                 />
@@ -158,17 +172,18 @@ const ReportPage = () => {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <StatCard
             title="Doanh thu"
-            value="980 triệu"
-            note="+8.2% so với tháng trước"
+            value={totalRevenue.toLocaleString("vi-VN")}
+            note={`${percentageComparedToPreviousMonth >= 0 ? '+' : ''}${percentageComparedToPreviousMonth}% so với kỳ trước`}
             accent="emerald"
           />
-          <StatCard title="Tổng công nợ" value="245,8 triệu" note="32 căn hộ còn nợ" accent="red" />
+          <StatCard title="Tổng công nợ" value={totalDebt.toLocaleString("vi-VN")} note={`${totalApartmentsOwing} căn hộ còn nợ`} accent="red" />
           <StatCard
             title="Đã bảo trì"
-            value="10 thiết bị"
+            value={`${totalAssetsMaintenanced} thiết bị`}
             note="Xem chi tiết"
             accent="amber"
             clickable
+            onClick={() => navigate("/maintenances")}
           />
         </div>
 
@@ -178,12 +193,11 @@ const ReportPage = () => {
             <h2 className="text-xl font-semibold">Doanh thu &amp; Chi phí</h2>
             <span className="text-sm text-neutral-500">{dateRange.label}</span>
           </div>
-          {hasData ? (
-            <RevenueExpenseChart revenue={mockRevenue} expense={mockExpense} />
+          {hasDataRevenue ? (
+            <RevenueExpenseChart revenue={revenuePoints} expense={expensePoints} />
           ) : (
             <div className="rounded-xl border border-dashed border-neutral-200 p-6 text-sm text-neutral-600">
-              Không có dữ liệu trong khoảng <b>{dateRange.label}</b>. Hãy thử chọn tháng/năm khác
-              hoặc chuyển sang “Tất cả”.
+              Không có dữ liệu trong khoảng <b>{dateRange.label}</b>. Hãy thử chọn tháng/năm khác.
             </div>
           )}
         </div>
@@ -192,8 +206,8 @@ const ReportPage = () => {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
             <h3 className="mb-3 text-sm font-semibold">Dịch vụ (lượt)</h3>
-            {hasData ? (
-              <ServicesBarChart data={mockServices} />
+            {hasDataService ? (
+              <ServicesBarChart data={servicePoints} />
             ) : (
               <div className="text-sm text-neutral-600">Chưa có dữ liệu.</div>
             )}
@@ -201,8 +215,11 @@ const ReportPage = () => {
 
           <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
             <h3 className="mb-7 text-sm font-semibold">Tài sản &amp; Thiết bị</h3>
-            <AssetStatusSummary data={{ broken: 96, maintaining: 705, good: 1113 }} />
-            {/* <AssetStatusSummary data={apiData.assetStatus} loading={isLoading} /> */}
+            {hasDataAsset ? (
+              <AssetStatusSummary data={{ broken: assetStatus?.brokenAssets ?? 0, maintaining: assetStatus?.maintenancedAssets ?? 0, good: assetStatus?.workingAssets ?? 0 }} />
+            ) : (
+              <div className="text-sm text-neutral-600">Chưa có dữ liệu.</div>
+            )}
           </div>
         </div>
       </div>

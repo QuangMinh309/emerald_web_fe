@@ -40,3 +40,14 @@ export const clearAuthStorage = () => {
   clearTokens();
   clearStoredUser();
 };
+
+export const isJwtExpired = (token: string) => {
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    const expMs = payload.exp * 1000;
+    return Date.now() >= expMs - 5000; // trừ 5s buffer
+  } catch {
+    return true;
+  }
+};
+
