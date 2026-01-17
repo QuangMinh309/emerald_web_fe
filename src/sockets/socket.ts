@@ -13,6 +13,10 @@ const connectSocket = () => {
   socket.on("connect", () => {
     console.log("Socket connected:", socket?.id);
   });
+  socket.on("system_notification", (data) => {
+    console.log("Received system notification:", data);
+    // Here you can integrate with your notification system to show to users
+  });
 };
 
 const disconnectSocket = () => {
