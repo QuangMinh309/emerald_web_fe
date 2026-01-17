@@ -4,8 +4,8 @@ import type { Service } from "@/types/service";
 import { formatVND } from "@/utils/money";
 
 const typeMap: Record<string, { label: string; type?: "success" | "warning" | "error" }> = {
-  active: { label: "Hoạt động", type: "success" },
-  inactive: { label: "Tạm ngừng", type: "error" },
+  NORMAL: { label: "Normal", type: "warning" },
+  COMMUNITY: { label: "Community", type: "success" },
 };
 
 export const serviceColumns: TableColumn<Service>[] = [
@@ -35,15 +35,15 @@ export const serviceColumns: TableColumn<Service>[] = [
   { key: "totalSlot", label: "Sức chứa", sortable: true, width: "110px", align: "center" },
 
   {
-    key: "status",
-    label: "Trạng thái",
+    key: "type",
+    label: "Loại",
     align: "center",
     width: "140px",
     filterable: true,
-    filterAccessor: (row) => typeMap[String(row.status)]?.label ?? String(row.status),
+    filterAccessor: (row) => typeMap[String(row.type)]?.label ?? String(row.type),
     render: (row) => {
-      const config = typeMap[String(row.status ?? "NORMAL")] ?? {
-        label: String(row.type ?? "NORMAL"),
+      const config = typeMap[String(row.type)] ?? {
+        label: String(row.type),
       };
       return <StatusBadge label={config.label} type={config.type} />;
     },

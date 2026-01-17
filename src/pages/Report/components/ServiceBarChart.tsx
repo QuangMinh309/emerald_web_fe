@@ -1,4 +1,4 @@
-import { buildLinearScale } from "@/lib/chart";
+import { buildLinearScale, buildNiceTicks } from "@/lib/chart";
 
 export type BarPoint = { label: string; value: number };
 
@@ -7,15 +7,16 @@ type Props = {
   width?: number;
   height?: number;
   ariaLabel?: string;
-  maxFallback?: number; // nếu data nhỏ vẫn có trục đẹp
+  maxFallback?: number;
 };
+const MAX_BAR_W = 90;
+const MIN_GAP = 18;
 
 export default function ServicesBarChart({
   data,
   width = 520,
   height = 240,
   ariaLabel = "Dịch vụ",
-  maxFallback = 400,
 }: Props) {
   const padding = { l: 44, r: 18, t: 10, b: 44 };
   const innerW = width - padding.l - padding.r;
@@ -28,16 +29,21 @@ export default function ServicesBarChart({
       </div>
     );
   }
+  const n = data.length;
+  const totalGap = n > 1 ? (n - 1) * MIN_GAP : 0;
+  const barW = Math.min(MAX_BAR_W, (innerW - totalGap) / n);
 
-  const max = Math.max(...data.map((d) => d.value), maxFallback);
-  const y = buildLinearScale(0, max, padding.t + innerH, padding.t);
+  const startX = padding.l + 10;
+  const rawMax = Math.max(...data.map((d) => Math.round(d.value)), 0);
+  const baseMax = rawMax === 0 ? 10 : rawMax;
 
-  // tick tự động theo max (đỡ hardcode)
-  const tickStep = max <= 50 ? 10 : max <= 200 ? 50 : 100;
-  const ticks = Array.from({ length: Math.floor(max / tickStep) + 1 }, (_, i) => i * tickStep);
+  const maxWithPad = Math.ceil(baseMax * 1.1);
 
-  const gap = 22;
-  const barW = (innerW - gap * (data.length - 1)) / data.length;
+  const ticks = buildNiceTicks(0, maxWithPad, 5, { minStep: 1, multipleOf: 5 });
+  const yMax = ticks[ticks.length - 1] ?? maxWithPad;
+
+  const y = buildLinearScale(0, yMax, padding.t + innerH, padding.t);
+
 
   return (
     <div className="w-full overflow-x-auto">
@@ -70,10 +76,9 @@ export default function ServicesBarChart({
 
         {/* Bars */}
         {data.map((d, i) => {
-          const x = padding.l + i * (barW + gap);
+          const x = startX + i * (barW + MIN_GAP);
           const h = y(0) - y(d.value);
           const yy = y(d.value);
-
           return (
             <g key={d.label}>
               <rect x={x} y={yy} width={barW} height={h} rx="10" className="fill-neutral-200" />

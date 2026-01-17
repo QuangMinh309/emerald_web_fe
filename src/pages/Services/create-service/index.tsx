@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Modal } from "@/components/common/Modal";
 import {
   Form,
@@ -26,8 +26,8 @@ import z from "zod";
 import { toast } from "sonner";
 
 import { useCreateService } from "@/hooks/data/useServices";
+import { UploadImages } from "@/components/common/UploadImages";
 import type { ServiceType } from "@/types/service";
-import { formatVND } from "@/utils/money";
 
 const formatVNDInput = (v: string) => {
   if (!v) return "";
@@ -56,14 +56,13 @@ const CreateServiceSchema = z.object({
     .min(1, "Vui lòng nhập sức chứa")
     .refine((v) => Number(v) > 0, "Sức chứa phải lớn hơn 0"),
   type: z.string().optional(),
-  status: z.string().min(1, "Vui lòng chọn trạng thái"),
-  // imageUrl: z.string().optional(),
 });
 
 type ServiceFormValues = z.infer<typeof CreateServiceSchema>;
 
 const CreateServiceModal = ({ open, setOpen }: ModalProps) => {
   const { mutate: createService, isPending } = useCreateService();
+  const [image, setImage] = useState<File[]>([]);
 
   const form = useForm<ServiceFormValues>({
     resolver: zodResolver(CreateServiceSchema),
@@ -74,10 +73,8 @@ const CreateServiceModal = ({ open, setOpen }: ModalProps) => {
       unitTimeBlock: "60",
       openHour: "06:00",
       closeHour: "17:00",
-      totalSlot: "1",
+      totalSlot: "",
       type: "NORMAL",
-      status: "",
-      // imageUrl: "",
     },
   });
 
@@ -110,37 +107,55 @@ const CreateServiceModal = ({ open, setOpen }: ModalProps) => {
     ],
     [],
   );
+  const typeOptions = useMemo(() => {
+    const opts: { value: ServiceType; label: string }[] = [
+      { value: "NORMAL", label: "Bình thường" },
+      { value: "COMMUNITY", label: "Cộng đồng" },
+    ];
+    return opts;
+  }, []);
+
+  useEffect(() => {
+    if (open) {
+      setImage([]);
+    }
+  }, [open]);
 
   const handleClose = () => {
     setOpen(false);
     form.reset();
+    setImage([]);
   };
 
-  function onSubmit(values: ServiceFormValues) {
-    createService(
-      {
-        name: values.name,
-        description: values.description,
-        unitPrice: Number(values.unitPrice),
-        unitTimeBlock: Number(values.unitTimeBlock),
-        openHour: values.openHour,
-        closeHour: values.closeHour,
-        totalSlot: Number(values.totalSlot),
-        // imageUrl: values.imageUrl ?? "",
-        type: (values.type ?? "NORMAL") as ServiceType,
-        status: values.status,
-      } as any,
-      {
-        onSuccess: () => {
-          toast.success("Dịch vụ đã được tạo thành công");
-          handleClose();
-        },
-        onError: (error: any) => {
-          toast.error(`${error?.message ?? "Có lỗi xảy ra"}`);
-        },
+  async function onSubmit(values: ServiceFormValues) {
+    if (isPending) return;
+
+    const formData = new FormData();
+    formData.append("name", values.name);
+    formData.append("description", values.description ?? "");
+    formData.append("unitPrice", digitsOnly(values.unitPrice));     
+    formData.append("unitTimeBlock", String(values.unitTimeBlock));
+    formData.append("openHour", values.openHour);
+    formData.append("closeHour", values.closeHour);
+    formData.append("totalSlot", String(values.totalSlot));
+    formData.append("type", values.type ?? "NORMAL");
+
+    if (image.length > 0) {
+      formData.append("image", image[0]);
+    }
+
+    createService(formData as any, {
+      onSuccess: () => {
+        toast.success("Dịch vụ đã được tạo thành công");
+        handleClose();
       },
-    );
+      onError: (error: any) => {
+        toast.error(`${error?.message ?? "Có lỗi xảy ra"}`);
+      },
+    });
+
   }
+
 
   return (
     <Modal
@@ -149,6 +164,7 @@ const CreateServiceModal = ({ open, setOpen }: ModalProps) => {
       title="Thêm dịch vụ mới"
       submitText="Tạo mới"
       onSubmit={form.handleSubmit(onSubmit)}
+      onLoading={isPending}
     >
       <Form {...form}>
         <form className="space-y-4">
@@ -209,6 +225,31 @@ const CreateServiceModal = ({ open, setOpen }: ModalProps) => {
                       {unitOptions.map((u) => (
                         <SelectItem key={u.value} value={u.value}>
                           {u.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage className="text-xs" />
+                </FormItem>
+              )}
+            />
+            <FormField
+              disabled={isPending}
+              control={form.control}
+              name="type"
+              render={({ field }) => (
+                <FormItem className="space-y-1.5">
+                  <FormLabel>Loại dịch vụ</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value ?? "NORMAL"}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Chọn loại" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {typeOptions.map((t) => (
+                        <SelectItem key={t.value} value={t.value}>
+                          {t.label}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -311,45 +352,16 @@ const CreateServiceModal = ({ open, setOpen }: ModalProps) => {
               )}
             />
 
-            {/* Trạng thái */}
-            <FormField
-              disabled={isPending}
-              control={form.control}
-              name="status"
-              render={({ field }) => (
-                <FormItem className="space-y-1.5">
-                  <FormLabel isRequired>Trạng thái</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Chọn trạng thái" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="active">Hoạt động</SelectItem>
-                      <SelectItem value="inactive">Tạm ngừng</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage className="text-xs" />
-                </FormItem>
-              )}
-            />
           </div>
 
-          {/* <FormField
-            disabled={isPending}
-            control={form.control}
-            name="imageUrl"
-            render={({ field }) => (
-              <FormItem className="space-y-1.5">
-                <FormLabel>Ảnh (URL)</FormLabel>
-                <FormControl>
-                  <Input placeholder="https://..." {...field} />
-                </FormControl>
-                <FormMessage className="text-xs" />
-              </FormItem>
-            )}
-          /> */}
+          {/* Image */}
+          <UploadImages
+            files={image}
+            onChange={(files) => {
+              setImage(files);
+            }}
+            maxImages={1}
+          />
         </form>
       </Form>
     </Modal>
