@@ -1,6 +1,7 @@
 import type React from "react";
 import { useState } from "react";
 import { Bell, ChevronDown, LogOut, User } from "lucide-react";
+import { useAppSelector } from "@/store/hooks";
 
 interface HeaderProps {
   userName?: string;
@@ -16,15 +17,34 @@ const Header: React.FC<HeaderProps> = ({
   onLogout,
 }) => {
   const [showDropdown, setShowDropdown] = useState(false);
-
+  const { items, unreadCount } = useAppSelector((state) => state.notification);
   return (
     <div className="h-16 bg-white border-b border-gray-200 shadow-sm flex items-center justify-end px-6 gap-4 fixed top-0 left-64 right-0 z-40 transition-all duration-300">
       <button
         type="button"
-        className="p-2 hover:bg-gray-100 rounded-full transition-colors relative"
+        className="relative p-2 hover:bg-gray-100 rounded-full transition-colors"
       >
         <Bell className="w-5 h-5 text-gray-600" />
-        <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+
+        {/* badge */}
+        {unreadCount > 0 && (
+          <span
+            className="
+            absolute -top-1 -right-1
+            min-w-[18px] h-[18px]
+            px-1
+            bg-red-500
+            text-white
+            text-[11px]
+            font-semibold
+            rounded-full
+            flex items-center justify-center
+            leading-none
+          "
+          >
+            {unreadCount > 99 ? "99+" : unreadCount}
+          </span>
+        )}
       </button>
 
       <div className="relative">

@@ -10,11 +10,11 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <SocketProvider>
-          <Provider store={store}>
+        <Provider store={store}>
+          <SocketProvider>
             <RouterProvider router={routes} />
-          </Provider>
-        </SocketProvider>
+          </SocketProvider>
+        </Provider>
       </AuthProvider>
     </QueryClientProvider>
   );

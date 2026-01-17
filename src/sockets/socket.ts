@@ -18,7 +18,12 @@ const connectSocket = () => {
     // Here you can integrate with your notification system to show to users
   });
 };
-
+const getSocket = () => {
+  if (!socket) {
+    connectSocket();
+  }
+  return socket;
+};
 const disconnectSocket = () => {
   if (socket) {
     socket.disconnect();
@@ -26,4 +31,4 @@ const disconnectSocket = () => {
     console.log("Socket disconnected");
   }
 };
-export { socket, connectSocket, disconnectSocket };
+export { socket, connectSocket, disconnectSocket, getSocket };
