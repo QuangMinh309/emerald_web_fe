@@ -35,6 +35,24 @@ const formatVNDInput = (v: string) => {
 };
 
 const digitsOnly = (text: string) => text.replace(/\D/g, "");
+const toMinutes = (t: string) => {
+  const [h, m] = t.split(":").map(Number);
+  return h * 60 + m;
+};
+
+const durationMinutes = (open: string, close: string) => {
+  const a = toMinutes(open);
+  const b = toMinutes(close);
+  return b > a ? b - a : 24 * 60 - a + b;
+};
+
+const formatDuration = (mins: number) => {
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  if (h === 0) return `${m} phút`;
+  if (m === 0) return `${h} giờ`;
+  return `${h} giờ ${m} phút`;
+};
 
 interface ModalProps {
   open: boolean;
@@ -56,6 +74,19 @@ const CreateServiceSchema = z.object({
     .min(1, "Vui lòng nhập sức chứa")
     .refine((v) => Number(v) > 0, "Sức chứa phải lớn hơn 0"),
   type: z.string().optional(),
+}).superRefine((data, ctx) => {
+  const unit = Number(data.unitTimeBlock || 0);
+  if (!unit) return;
+
+  const dur = durationMinutes(data.openHour, data.closeHour);
+
+  if (dur < unit) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["closeHour"],
+      message: `Tổng thời gian hoạt động phải từ ${unit} phút trở lên`,
+    });
+  }
 });
 
 type ServiceFormValues = z.infer<typeof CreateServiceSchema>;
@@ -77,6 +108,12 @@ const CreateServiceModal = ({ open, setOpen }: ModalProps) => {
       type: "NORMAL",
     },
   });
+  const openHour = form.watch("openHour");
+  const closeHour = form.watch("closeHour");
+  const isOvernight =
+    openHour && closeHour && toMinutes(closeHour) < toMinutes(openHour);
+  const dur =
+    openHour && closeHour ? durationMinutes(openHour, closeHour) : null;
 
   const hourOptions = useMemo(() => {
     const options: { value: string; label: string }[] = [];
@@ -89,24 +126,33 @@ const CreateServiceModal = ({ open, setOpen }: ModalProps) => {
         value: `${hh}:00`,
         label: `${h}h`,
       });
-
+      // :15
+      options.push({
+        value: `${hh}:15`,
+        label: `${h}h15`,
+      });
       // :30
       options.push({
         value: `${hh}:30`,
         label: `${h}h30`,
       });
+      // :45
+      options.push({
+        value: `${hh}:45`,
+        label: `${h}h45`,
+      });
     }
-
     return options;
   }, []);
-
   const unitOptions = useMemo(
     () => [
+      { value: "15", label: "15 phút" },
       { value: "30", label: "30 phút" },
       { value: "60", label: "60 phút" },
     ],
     [],
   );
+
   const typeOptions = useMemo(() => {
     const opts: { value: ServiceType; label: string }[] = [
       { value: "NORMAL", label: "Bình thường" },
@@ -133,7 +179,7 @@ const CreateServiceModal = ({ open, setOpen }: ModalProps) => {
     const formData = new FormData();
     formData.append("name", values.name);
     formData.append("description", values.description ?? "");
-    formData.append("unitPrice", digitsOnly(values.unitPrice));     
+    formData.append("unitPrice", digitsOnly(values.unitPrice));
     formData.append("unitTimeBlock", String(values.unitTimeBlock));
     formData.append("openHour", values.openHour);
     formData.append("closeHour", values.closeHour);
@@ -197,7 +243,7 @@ const CreateServiceModal = ({ open, setOpen }: ModalProps) => {
                     <Input
                       type="text"
                       inputMode="numeric"
-                      value={formatVNDInput(String(field.value ?? ""))} // field.value nên lưu raw digits: "1000"
+                      value={formatVNDInput(String(field.value ?? ""))}
                       onChange={(e) => field.onChange(digitsOnly(e.target.value))}
                       placeholder="Nhập giá"
                     />
@@ -330,7 +376,16 @@ const CreateServiceModal = ({ open, setOpen }: ModalProps) => {
                 </FormItem>
               )}
             />
+          </div>
 
+          {openHour && closeHour && (
+            <p className="mt-1 text-xs text-neutral-500">
+              {isOvernight ? "Dịch vụ qua đêm. " : ""}
+              {dur !== null ? `Tổng thời gian hoạt động: ${formatDuration(dur)}` : ""}
+            </p>
+          )}
+
+          <div className="grid grid-cols-2 gap-x-4 gap-y-4">
             {/* Sức chứa / đơn vị thời gian */}
             <FormField
               disabled={isPending}
@@ -351,7 +406,6 @@ const CreateServiceModal = ({ open, setOpen }: ModalProps) => {
                 </FormItem>
               )}
             />
-
           </div>
 
           {/* Image */}

@@ -43,7 +43,7 @@ const ServicesPage = () => {
       result = result.filter((item) => {
         return (
           normalizeString(item.name).includes(search) ||
-          normalizeString(item.description ?? "").includes(search)
+          normalizeString(item.id ?? "").includes(search)
         );
       });
     }
@@ -103,7 +103,7 @@ const ServicesPage = () => {
         />
 
         <div className="bg-white p-4 rounded-sm border border-gray-200 shadow-sm space-y-4">
-          <SearchBar placeholder="Tìm kiếm theo tên dịch vụ, mô tả..." onSearch={setSearchTerm} />
+          <SearchBar placeholder="Tìm kiếm theo tên dịch vụ, mã dịch vụ..." onSearch={setSearchTerm} />
         </div>
 
         <div className="min-h-[400px]">

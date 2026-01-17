@@ -22,13 +22,37 @@ import {
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { set, z } from "zod";
+import { z } from "zod";
 import { toast } from "sonner";
 
 import type { ServiceType } from "@/types/service";
 import { useGetServiceById, useUpdateService } from "@/hooks/data/useServices";
 
 import { UploadImages } from "@/components/common/UploadImages";
+const formatVNDInput = (v: string) => {
+  if (!v) return "";
+  return new Intl.NumberFormat("vi-VN").format(Number(v));
+};
+
+const digitsOnly = (text: string) => text.replace(/\D/g, "");
+const toMinutes = (t: string) => {
+  const [h, m] = t.split(":").map(Number);
+  return h * 60 + m;
+};
+
+const durationMinutes = (open: string, close: string) => {
+  const a = toMinutes(open);
+  const b = toMinutes(close);
+  return b > a ? b - a : 24 * 60 - a + b;
+};
+
+const formatDuration = (mins: number) => {
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  if (h === 0) return `${m} phút`;
+  if (m === 0) return `${h} giờ`;
+  return `${h} giờ ${m} phút`;
+};
 
 interface UpdateModalProps {
   open: boolean;
@@ -38,14 +62,11 @@ interface UpdateModalProps {
 const UpdateServiceSchema = z.object({
   name: z.string().min(1, "Vui lòng nhập tên dịch vụ"),
   description: z.string().optional(),
-
   unitPrice: z
     .string()
     .min(1, "Vui lòng nhập giá")
     .refine((v) => !Number.isNaN(Number(v)), "Giá không hợp lệ"),
-
   unitTimeBlock: z.string().min(1, "Vui lòng chọn đơn vị"),
-
   openHour: z.string().min(1, "Vui lòng chọn giờ mở cửa"),
   closeHour: z.string().min(1, "Vui lòng chọn giờ đóng cửa"),
 
@@ -53,8 +74,20 @@ const UpdateServiceSchema = z.object({
     .string()
     .min(1, "Vui lòng nhập sức chứa")
     .refine((v) => Number(v) > 0, "Sức chứa phải lớn hơn 0"),
-
   type: z.string().optional(),
+}).superRefine((data, ctx) => {
+  const unit = Number(data.unitTimeBlock || 0);
+  if (!unit) return;
+
+  const dur = durationMinutes(data.openHour, data.closeHour);
+
+  if (dur < unit) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["closeHour"],
+      message: `Tổng thời gian hoạt động phải từ ${unit} phút trở lên`,
+    });
+  }
 });
 
 type ServiceFormValues = z.infer<typeof UpdateServiceSchema>;
@@ -80,6 +113,12 @@ const UpdateServiceModal = ({ open, setOpen, serviceId }: UpdateModalProps) => {
       type: "NORMAL",
     },
   });
+  const openHour = form.watch("openHour");
+  const closeHour = form.watch("closeHour");
+  const isOvernight =
+    openHour && closeHour && toMinutes(closeHour) < toMinutes(openHour);
+  const dur =
+    openHour && closeHour ? durationMinutes(openHour, closeHour) : null;
 
   useEffect(() => {
     if (open) {
@@ -91,16 +130,37 @@ const UpdateServiceModal = ({ open, setOpen, serviceId }: UpdateModalProps) => {
 
   const hourOptions = useMemo(() => {
     const options: { value: string; label: string }[] = [];
+
     for (let h = 0; h < 24; h++) {
       const hh = String(h).padStart(2, "0");
-      options.push({ value: `${hh}:00`, label: `${h}h` });
-      options.push({ value: `${hh}:30`, label: `${h}h30` });
+
+      // :00
+      options.push({
+        value: `${hh}:00`,
+        label: `${h}h`,
+      });
+      // :15
+      options.push({
+        value: `${hh}:15`,
+        label: `${h}h15`,
+      });
+      // :30
+      options.push({
+        value: `${hh}:30`,
+        label: `${h}h30`,
+      });
+      // :45
+      options.push({
+        value: `${hh}:45`,
+        label: `${h}h45`,
+      });
     }
+
     return options;
   }, []);
-
   const unitOptions = useMemo(
     () => [
+      { value: "15", label: "15 phút" },
       { value: "30", label: "30 phút" },
       { value: "60", label: "60 phút" },
     ],
@@ -143,7 +203,7 @@ const UpdateServiceModal = ({ open, setOpen, serviceId }: UpdateModalProps) => {
     formData.append("description", values.description ?? "");
     formData.append("openHour", values.openHour);
     formData.append("closeHour", values.closeHour);
-    formData.append("unitPrice", values.unitPrice);
+    formData.append("unitPrice", digitsOnly(values.unitPrice));
     formData.append("unitTimeBlock", values.unitTimeBlock);
     formData.append("totalSlot", values.totalSlot);
     formData.append("type", values.type ?? "NORMAL");
@@ -207,9 +267,9 @@ const UpdateServiceModal = ({ open, setOpen, serviceId }: UpdateModalProps) => {
                   <FormControl>
                     <Input
                       type="number"
-                      placeholder="VD: 200000"
-                      value={field.value ?? ""}
-                      onChange={(e) => field.onChange(e.target.value)}
+                      placeholder="Nhập giá"
+                      value={formatVNDInput(String(field.value ?? ""))}
+                      onChange={(e) => field.onChange(digitsOnly(e.target.value))}
                     />
                   </FormControl>
                   <FormMessage className="text-xs" />
@@ -217,7 +277,7 @@ const UpdateServiceModal = ({ open, setOpen, serviceId }: UpdateModalProps) => {
               )}
             />
 
-            {/* Đơn vị (block time) */}
+            {/* Đơn vị */}
             <FormField
               disabled={isPending}
               control={form.control}
@@ -344,7 +404,16 @@ const UpdateServiceModal = ({ open, setOpen, serviceId }: UpdateModalProps) => {
                 </FormItem>
               )}
             />
+          </div>
 
+          {openHour && closeHour && (
+            <p className="mt-1 text-xs text-neutral-500">
+              {isOvernight ? "Dịch vụ qua đêm. " : ""}
+              {dur !== null ? `Tổng thời gian hoạt động: ${formatDuration(dur)}` : ""}
+            </p>
+          )}
+
+          <div className="grid grid-cols-2 gap-x-4 gap-y-4">
             {/* Sức chứa */}
             <FormField
               disabled={isPending}
@@ -365,7 +434,6 @@ const UpdateServiceModal = ({ open, setOpen, serviceId }: UpdateModalProps) => {
                 </FormItem>
               )}
             />
-
           </div>
 
           {/* Image */}

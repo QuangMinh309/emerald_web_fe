@@ -9,7 +9,8 @@ const typeMap: Record<string, { label: string; type?: "success" | "warning" | "e
 };
 
 export const serviceColumns: TableColumn<Service>[] = [
-  { key: "stt", label: "STT", align: "center", width: "60px" },
+  // { key: "stt", label: "STT", align: "center", width: "60px" },
+  { key: "id", label: "ID", align: "center", width: "60px", sortable: true },
 
   { key: "name", label: "Tên dịch vụ", sortable: true, width: "200px" },
 
