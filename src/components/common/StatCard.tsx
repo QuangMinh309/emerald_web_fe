@@ -25,7 +25,7 @@ const valueMap: Record<Accent, string> = {
 interface StatCardProps {
   title: string;
   value: string;
-  note: string;
+  note?: string;
   accent: Accent;
   icon?: React.ReactNode;
   clickable?: boolean;

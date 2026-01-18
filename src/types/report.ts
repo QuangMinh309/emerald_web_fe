@@ -1,7 +1,7 @@
 export type RangeType = "month" | "year" | "custom";
 
 export type ReportsParams = {
-  rangeType: RangeType;
+  // rangeType: RangeType;
   startDate?: string; // "YYYY-MM-DD"
   endDate?: string;   // "YYYY-MM-DD"
 };

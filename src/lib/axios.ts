@@ -60,6 +60,7 @@ function attachAuthInterceptors(client: ReturnType<typeof axios.create>) {
         }
 
         if (isRefreshing) {
+          console.log("REFRESHING...")
           return new Promise((resolve, reject) => {
             refreshQueue.push((token) => {
               if (!token) return reject(error);
@@ -68,7 +69,6 @@ function attachAuthInterceptors(client: ReturnType<typeof axios.create>) {
                 originalRequest.headers.Authorization = `Bearer ${token}`;
               }
 
-              // ✅ retry bằng chính client (json hay multipart đều đúng)
               resolve(client(originalRequest));
             });
           });

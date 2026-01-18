@@ -11,8 +11,7 @@ export const useReports = (params: ReportsParams, enabled = true) =>
 
     enabled:
       enabled &&
-      (params.rangeType !== "custom" ||
-        (Boolean(params.startDate) && Boolean(params.endDate))),
+        (Boolean(params.startDate) && Boolean(params.endDate)),
 
     retry: (count, err: any) => {
       const status = err?.response?.status ?? err?.response?.data?.statusCode;
