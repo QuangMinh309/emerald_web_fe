@@ -5,6 +5,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { Provider } from "react-redux";
 import { store } from "@/store";
 import { SocketProvider } from "@/sockets/socket.provider";
+import { NotificationProvider } from "@/providers/notification.provider";
 const queryClient = new QueryClient();
 export default function App() {
   return (
@@ -12,7 +13,9 @@ export default function App() {
       <AuthProvider>
         <Provider store={store}>
           <SocketProvider>
-            <RouterProvider router={routes} />
+            <NotificationProvider>
+              <RouterProvider router={routes} />
+            </NotificationProvider>
           </SocketProvider>
         </Provider>
       </AuthProvider>

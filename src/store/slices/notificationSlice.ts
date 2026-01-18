@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { SystemUserNotification } from "@/types/system-notification";
 interface NotificationState {
   items: SystemUserNotification[];
@@ -23,8 +23,13 @@ const notificationSlice = createSlice({
       state.unreadCount = 0;
       state.items.forEach((n) => (n.isRead = true));
     },
+
+    initializeNotifications(state, action: PayloadAction<SystemUserNotification[]>) {
+      state.items = action.payload;
+      state.unreadCount = action.payload.filter((n: SystemUserNotification) => !n.isRead).length;
+    },
   },
 });
 
-export const { markAllRead, pushNotification } = notificationSlice.actions;
+export const { markAllRead, pushNotification, initializeNotifications } = notificationSlice.actions;
 export default notificationSlice.reducer;

@@ -45,75 +45,78 @@ axiosInstance.interceptors.response.use(
     }
 
     const status = error.response.status;
-    const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
+    const originalRequest = error.config as AxiosRequestConfig & {
+      _retry?: boolean;
+    };
 
     const requestUrl = originalRequest?.url || "";
     const isAuthRequest =
       requestUrl.includes("/auth/login") || requestUrl.includes("/auth/refresh");
 
-    if (status === 401 && !originalRequest?._retry && !isAuthRequest) {
-      const refreshToken = getRefreshToken();
-      if (!refreshToken) {
-        clearAuthStorage();
-        window.location.assign("/login");
-        return Promise.reject(error);
-      }
+    // if (status === 401 && !originalRequest?._retry && !isAuthRequest) {
+    //   const refreshToken = getRefreshToken();
+    //   if (!refreshToken) {
+    //     clearAuthStorage();
+    //     window.location.assign("/login");
+    //     return Promise.reject(error);
+    //   }
 
-      if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-          refreshQueue.push((token) => {
-            if (!token) {
-              reject(error);
-              return;
-            }
-            if (originalRequest.headers) {
-              originalRequest.headers.Authorization = `Bearer ${token}`;
-            }
-            resolve(axiosInstance(originalRequest));
-          });
-        });
-      }
+    //   if (isRefreshing) {
+    //     return new Promise((resolve, reject) => {
+    //       refreshQueue.push((token) => {
+    //         if (!token) {
+    //           reject(error);
+    //           return;
+    //         }
+    //         if (originalRequest.headers) {
+    //           originalRequest.headers.Authorization = `Bearer ${token}`;
+    //         }
+    //         resolve(axiosInstance(originalRequest));
+    //       });
+    //     });
+    //   }
 
-      originalRequest._retry = true;
-      isRefreshing = true;
+    //   originalRequest._retry = true;
+    //   isRefreshing = true;
 
-      try {
-        const refreshResponse = await refreshClient.post(
-          "/auth/refresh",
-          {},
-          {
-            headers: {
-              Authorization: `Bearer ${refreshToken}`,
-            },
-          },
-        );
+    //   try {
+    //     const refreshResponse = await refreshClient.post(
+    //       "/auth/refresh",
+    //       {},
+    //       {
+    //         headers: {
+    //           Authorization: `Bearer ${refreshToken}`,
+    //         },
+    //       },
+    //     );
 
-        const { accessToken, refreshToken: newRefreshToken } = refreshResponse.data.data as {
-          accessToken: string;
-          refreshToken: string;
-        };
+    //     const { accessToken, refreshToken: newRefreshToken } = refreshResponse
+    //       .data.data as {
+    //       accessToken: string;
+    //       refreshToken: string;
+    //     };
 
-        setTokens(accessToken, newRefreshToken);
-        axiosInstance.defaults.headers.Authorization = `Bearer ${accessToken}`;
-        resolveRefreshQueue(accessToken);
+    //     setTokens(accessToken, newRefreshToken);
+    //     axiosInstance.defaults.headers.Authorization = `Bearer ${accessToken}`;
+    //     resolveRefreshQueue(accessToken);
 
-        if (originalRequest.headers) {
-          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-        }
-        return axiosInstance(originalRequest);
-      } catch (refreshError) {
-        resolveRefreshQueue(null);
-        clearAuthStorage();
-        window.location.assign("/login");
-        return Promise.reject(refreshError);
-      } finally {
-        isRefreshing = false;
-      }
-    }
+    //     if (originalRequest.headers) {
+    //       originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+    //     }
+    //     return axiosInstance(originalRequest);
+    //   } catch (refreshError) {
+    //     resolveRefreshQueue(null);
+    //     clearAuthStorage();
+    //     window.location.assign("/login");
+    //     return Promise.reject(refreshError);
+    //   } finally {
+    //     isRefreshing = false;
+    //   }
+    // }
 
-    if (status === 403) {
-      alert("Bạn không có quyền truy cập chức năng này");
-    }
+    // if (status === 403) {
+    //   alert("Bạn không có quyền truy cập chức năng này");
+    // }
 
     return Promise.reject(error);
   },
