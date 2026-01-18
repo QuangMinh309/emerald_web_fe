@@ -12,6 +12,7 @@ import {
   setTokens,
 } from "@/lib/auth-storage";
 import axios from "axios";
+import { connectSocket, disconnectSocket } from "@/sockets/socket";
 
 type AuthContextValue = {
   user: AuthUser | null;
@@ -93,11 +94,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setTokens(accessToken, refreshToken);
     setStoredUser(profile);
     setUser(profile);
+    connectSocket();
     return profile;
   };
 
   const logout = () => {
     clearAuthStorage();
+    disconnectSocket();
     setUser(null);
   };
 
