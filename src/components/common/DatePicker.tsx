@@ -1,21 +1,15 @@
 import * as React from "react";
-import { ChevronDownIcon } from "lucide-react";
+import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
-interface DatePickerProps {
-  value?: Date | string;
-  onChange: (date: Date | undefined) => void;
-  placeholder?: string;
-  type?: "date" | "month" | "year";
-}
-
+// Cấu hình format cho từng loại
 const typeConfig = {
   date: {
-    format: "MM/dd/yyyy",
+    format: "dd/MM/yyyy", // Đã sửa thành format Việt Nam
     mode: "single" as const,
   },
   month: {
@@ -28,10 +22,29 @@ const typeConfig = {
   },
 };
 
-export function DatePicker({ value, onChange, placeholder, type = "date" }: DatePickerProps) {
-  const [open, setOpen] = React.useState(false);
-  const dateValue = value ? new Date(value) : undefined;
+interface DatePickerProps {
+  value?: Date | string;
+  onChange: (date: Date | undefined) => void;
+  placeholder?: string;
+  className?: string;
+  type?: "date" | "month" | "year";
+  minDate?: Date; // Thêm sẵn để hỗ trợ disable ngày cũ
+  maxDate?: Date;
+}
 
+export function DatePicker({
+  value,
+  onChange,
+  placeholder,
+  className,
+  type = "date",
+  minDate,
+  maxDate,
+}: DatePickerProps) {
+  const [open, setOpen] = React.useState(false);
+
+  // Xử lý value an toàn
+  const dateValue = value ? new Date(value) : undefined;
   const config = typeConfig[type];
 
   return (
@@ -40,28 +53,35 @@ export function DatePicker({ value, onChange, placeholder, type = "date" }: Date
         <Button
           variant="outline"
           className={cn(
-            "w-full justify-between font-normal text-left h-9 px-3",
+            "w-full h-9 flex items-center justify-start gap-2 font-normal",
             !dateValue && "text-muted-foreground",
+            className,
           )}
         >
+          <CalendarIcon className="h-4 w-4 opacity-50" />
           {dateValue ? (
             format(dateValue, config.format)
           ) : (
-            <span>{placeholder ?? config.format}</span>
+            <span>{placeholder || config.format}</span>
           )}
-          <ChevronDownIcon className="h-4 w-4 opacity-50" />
         </Button>
       </PopoverTrigger>
 
       <PopoverContent className="w-auto p-0" align="start">
         <Calendar
           mode={config.mode}
-          captionLayout="dropdown"
           selected={dateValue}
           onSelect={(date) => {
             onChange(date);
             setOpen(false);
           }}
+          // Hỗ trợ disable ngày (ví dụ minDate cho ngày đăng thông báo)
+          disabled={(date) => {
+            if (minDate && date < minDate) return true;
+            if (maxDate && date > maxDate) return true;
+            return false;
+          }}
+          initialFocus
         />
       </PopoverContent>
     </Popover>

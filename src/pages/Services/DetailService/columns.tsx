@@ -1,6 +1,6 @@
 import type { TableColumn } from "@/types";
 import StatusBadge from "@components/common/StatusBadge";
-import type { Booking, BookingStatus } from "@/types/booking";
+import type { Booking } from "@/types/booking";
 import { formatVND } from "@/utils/money";
 
 const statusMap: Record<string, { label: string; type?: "success" | "warning" | "error" }> = {
@@ -18,10 +18,14 @@ export const bookingColumns: TableColumn<Booking>[] = [
 
   { key: "bookingDate", label: "Ngày đặt", sortable: true, width: "140px", align: "center" },
 
-  { key: "unitPrice", label: "Đơn giá", sortable: true, width: "110px", align: "center", render: (row) => formatVND(row.unitPrice) },
-  // Nếu muốn có cột "Đơn vị" thì bạn cần thêm field unitLabel vào Booking,
-  // hoặc bỏ cột này.
-  // { key: "unitLabel", label: "Đơn vị", width: "100px", align: "center" },
+  {
+    key: "unitPrice",
+    label: "Đơn giá",
+    sortable: true,
+    width: "110px",
+    align: "center",
+    render: (row) => formatVND(row.unitPrice),
+  },
 
   { key: "receiveDate", label: "Ngày nhận", sortable: true, width: "140px", align: "center" },
   { key: "checkIn", label: "Giờ vào", width: "90px", align: "center" },

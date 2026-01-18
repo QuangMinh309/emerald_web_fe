@@ -100,6 +100,19 @@ const DetailServicePage = () => {
             <h2 className="title-text">Thông tin chung</h2>
 
             <div className="space-y-2">
+              {service.imageUrl ? (
+                <img
+                  src={service.imageUrl}
+                  alt={service.name ?? "Service image"}
+                  className="mx-auto w-full max-w-[520px] aspect-[16/9] rounded-xl border object-cover"
+                  loading="lazy"
+                />
+              ) : (
+                <p className="display-text"></p>
+              )}
+            </div>
+
+            <div className="space-y-2">
               <h3 className="display-label">Mô tả</h3>
               <p className="display-text">{service.description ?? "—"}</p>
             </div>
@@ -154,17 +167,11 @@ const DetailServicePage = () => {
                 </button>
               </div>
             ) : (
-              <CustomTable
-                data={filteredBookings}
-                columns={bookingColumns}
-                defaultPageSize={10}
-                // onDelete={(row) => console.log("Xóa booking", row)}
-              />
+              <CustomTable data={filteredBookings} columns={bookingColumns} defaultPageSize={10} />
             )}
           </div>
         </div>
       </div>
-
     </div>
   );
 };

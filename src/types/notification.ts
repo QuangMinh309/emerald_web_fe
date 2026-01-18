@@ -26,6 +26,7 @@ export interface NotificationData {
   targetScope: TargetScope;
   targetBlocks: TargetBlockConfig[];
   isActive: boolean;
+  publishedAt: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -37,6 +38,7 @@ export interface NotificationPayload {
   isUrgent: boolean;
   channels: string[];
   targetScope: string;
+  publishedAt: Date;
   targetBlocks: {
     blockId: number;
     targetFloorNumbers: string[];

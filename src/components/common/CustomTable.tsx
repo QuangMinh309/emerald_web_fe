@@ -42,6 +42,7 @@ interface CustomTableProps<T> {
   onEdit?: (item: T) => void;
   onDelete?: (item: T) => void;
   onView?: (item: T) => void;
+  isEditable?: (item: T) => boolean;
   defaultPageSize?: number;
   paginationAlign?: "start" | "center" | "end";
 }
@@ -54,6 +55,7 @@ function CustomTable<T extends { id: string | number }>({
   onEdit,
   onDelete,
   onView,
+  isEditable,
   defaultPageSize = 10,
   paginationAlign = "center",
 }: CustomTableProps<T>) {
@@ -318,7 +320,11 @@ function CustomTable<T extends { id: string | number }>({
                             variant="ghost"
                             size="icon"
                             onClick={() => onEdit(row)}
-                            className="h-8 w-8 text-gray-500 hover:text-blue-600 hover:bg-blue-50"
+                            className={cn(
+                              "h-8 w-8 text-gray-500 hover:text-blue-600 hover:bg-blue-50",
+                              isEditable && !isEditable(row) && "hidden",
+                            )}
+                            title="Sửa"
                           >
                             <Edit className="w-4 h-4 stroke-[2]" />
                           </Button>
@@ -328,7 +334,11 @@ function CustomTable<T extends { id: string | number }>({
                             variant="ghost"
                             size="icon"
                             onClick={() => onDelete(row)}
-                            className="h-8 w-8 text-gray-500 hover:text-red-600 hover:bg-red-50"
+                            className={cn(
+                              "h-8 w-8 text-gray-500 hover:text-red-600 hover:bg-red-50",
+                              isEditable && !isEditable(row) && "hidden",
+                            )}
+                            title="Xóa"
                           >
                             <Trash2 className="w-4 h-4 stroke-[2]" />
                           </Button>
@@ -339,6 +349,7 @@ function CustomTable<T extends { id: string | number }>({
                             size="icon"
                             onClick={() => onView(row)}
                             className="h-8 w-8 text-gray-500 hover:text-main hover:bg-main/10"
+                            title="Xem"
                           >
                             <Eye className="w-4 h-4 stroke-[2]" />
                           </Button>
