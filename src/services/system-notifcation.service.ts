@@ -93,7 +93,7 @@ export const markNotificationAsRead = async (notificationId: number) => {
     `/system-notifications/my-notifications/${notificationId}/read`,
   );
 
-  return response.data;
+  return notificationId;
 };
 
 /**
