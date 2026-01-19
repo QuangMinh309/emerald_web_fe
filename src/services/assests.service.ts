@@ -95,6 +95,8 @@ export const deleteAssetType = async (assetTypeId: number) => {
 };
 
 export const deleteManyAssetTypes = async (ids: number[]) => {
-  const response = await axiosInstance.post(`/asset-types/delete-many`, { ids });
+  const response = await axiosInstance.post(`/asset-types/delete-many`, {
+    ids,
+  });
   return response.data;
 };
