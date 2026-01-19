@@ -17,7 +17,9 @@ export const issueService = {
     isUrgent?: boolean;
     search?: string;
   }) => {
-    const res = await axiosInstance.get<{ data: IssueListItem[] }>(BASE, { params });
+    const res = await axiosInstance.get<{ data: IssueListItem[] }>(BASE, {
+      params,
+    });
     return res.data.data;
   },
 
@@ -32,7 +34,9 @@ export const issueService = {
   },
 
   reject: async (id: number, rejectionReason: string) => {
-    const res = await axiosInstance.post(`${BASE}/${id}/reject`, { rejectionReason });
+    const res = await axiosInstance.post(`${BASE}/${id}/reject`, {
+      rejectionReason,
+    });
     return res.data.data;
   },
 

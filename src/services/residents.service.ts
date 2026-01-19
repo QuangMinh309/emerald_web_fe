@@ -34,9 +34,15 @@ export const createResident = async (residentData: {
     formData.append("detailAddress", residentData.detailAddress);
   }
   if (residentData.image) {
+    console.log("Appending image to form data", residentData.image);
     formData.append("image", residentData.image);
   }
-  const response = await axiosInstance.post("/residents", formData);
+  console.log("Form Data:", formData.getAll("image"));
+  const response = await axiosInstance.post("/residents", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
   console.log("Created resident response:", response.data);
   return response.data.data as Resident;
 };

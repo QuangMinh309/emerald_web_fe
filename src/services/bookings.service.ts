@@ -89,8 +89,7 @@ const mockBookings: Booking[] = [
 export const getBookingsByServiceId = async (serviceId: number): Promise<Booking[]> => {
   if (USE_MOCK) {
     await sleep(200);
-    return mockBookings
-      .filter((b) => b.serviceId === serviceId)
+    return mockBookings.filter((b) => b.serviceId === serviceId);
   }
 
   const res = await axiosInstance.get(`/services/${serviceId}/bookings`);
@@ -139,11 +138,16 @@ export const createBooking = async (payload: CreateBookingInput): Promise<Bookin
   return res.data.data as Booking;
 };
 
-export type UpdateBookingInput = Partial<Omit<Booking, "id" | "serviceId" | "code" | "createdAt">> & {
+export type UpdateBookingInput = Partial<
+  Omit<Booking, "id" | "serviceId" | "code" | "createdAt">
+> & {
   status?: BookingStatus;
 };
 
-export const updateBooking = async (args: { id: number; payload: UpdateBookingInput }): Promise<Booking> => {
+export const updateBooking = async (args: {
+  id: number;
+  payload: UpdateBookingInput;
+}): Promise<Booking> => {
   if (USE_MOCK) {
     await sleep(200);
     const idx = mockBookings.findIndex((b) => b.id === args.id);

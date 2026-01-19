@@ -24,9 +24,9 @@ import { DatePicker } from "@/components/common/DatePicker";
 import { useCreateResident } from "@/hooks/data/useResidents";
 import { toast } from "sonner";
 import { useState } from "react";
-import { Label } from "@/components/ui/label";
 import { address } from "@/lib/address";
 import { GenderTypeOptions } from "@/constants/genderType";
+import { UploadImages } from "@/components/common/UploadImages";
 
 interface ModalProps {
   open: boolean;
@@ -55,8 +55,7 @@ type ResidentFormValues = z.infer<typeof CreateResidentSchema>;
 
 const CreateResidentModal = ({ open, setOpen }: ModalProps) => {
   const { mutate: createResident, isPending } = useCreateResident();
-  const [imagePreview, setImagePreview] = useState<string>("");
-
+  const [image, setImage] = useState<File[]>([]);
   const form = useForm<ResidentFormValues>({
     resolver: zodResolver(CreateResidentSchema),
     defaultValues: {
@@ -74,6 +73,7 @@ const CreateResidentModal = ({ open, setOpen }: ModalProps) => {
   });
 
   function onSubmit(values: ResidentFormValues) {
+    console.log("images", image);
     createResident(
       {
         email: values.email,
@@ -87,7 +87,7 @@ const CreateResidentModal = ({ open, setOpen }: ModalProps) => {
         district: values.district,
         province: values.province,
         detailAddress: values.detailAddress,
-        image: values.image,
+        image: image[0],
       },
       {
         onSuccess: () => {
@@ -100,23 +100,10 @@ const CreateResidentModal = ({ open, setOpen }: ModalProps) => {
       },
     );
   }
-
   const handleClose = () => {
     setOpen(false);
     form.reset();
-    setImagePreview("");
-  };
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      form.setValue("image", file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
+    setImage([]);
   };
   const selectedProvince = form.watch("province");
   const selectedDistrict = form.watch("district");
@@ -139,16 +126,13 @@ const CreateResidentModal = ({ open, setOpen }: ModalProps) => {
       <Form {...form}>
         <form className="space-y-4">
           {/* Ảnh đại diện */}
-          <div className="flex flex-col items-center gap-2">
-            {imagePreview && (
-              <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-gray-200">
-                <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
-              </div>
-            )}
-
-            <Label>Ảnh đại diện</Label>
-            <Input type="file" accept="image/*" onChange={handleImageChange} disabled={isPending} />
-          </div>
+          <UploadImages
+            files={image}
+            onChange={(files) => {
+              setImage(files);
+            }}
+            maxImages={1}
+          />
 
           <div className="grid grid-cols-2 gap-x-4 gap-y-4">
             {/* Email */}
