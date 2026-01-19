@@ -4,7 +4,6 @@ import { axiosMultipart } from "@/lib/axios";
 
 export const getServices = async (): Promise<Service[]> => {
   const res = await axiosInstance.get("/services");
-  console.log(res.data.data);
   return res.data.data as Service[];
 };
 

@@ -1,6 +1,6 @@
 import type { TableColumn } from "@/types";
 import StatusBadge from "@components/common/StatusBadge";
-import type { Booking } from "@/types/booking";
+import type { BookingRow } from "@/types/service";
 import { formatVND } from "@/utils/money";
 
 const statusMap: Record<string, { label: string; type?: "success" | "warning" | "error" }> = {
@@ -8,15 +8,46 @@ const statusMap: Record<string, { label: string; type?: "success" | "warning" | 
   CONFIRMED: { label: "Đã xác nhận", type: "success" },
   COMPLETED: { label: "Hoàn thành", type: "success" },
   CANCELLED: { label: "Đã huỷ", type: "error" },
+  PAID: { label: "Đã thanh toán", type: "success" },
+  EXPIRED: { label: "Hết hạn", type: "error" },
 };
 
-export const bookingColumns: TableColumn<Booking>[] = [
+const formatDateTimeVN = (iso: string) => {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "—";
+  return d.toLocaleString("vi-VN");
+};
+const formatDDMMYYYYFromYMD = (ymd: string) => {
+  // ymd: "2026-01-18"
+  if (!ymd) return "—";
+  const [yyyy, mm, dd] = ymd.split("-");
+  if (!yyyy || !mm || !dd) return "—";
+  return `${dd}/${mm}/${yyyy}`;
+};
+
+export const bookingColumns: TableColumn<BookingRow>[] = [
   { key: "stt", label: "STT", align: "center", width: "60px" },
 
-  { key: "customerName", label: "Tên khách", sortable: true, width: "180px" },
-  { key: "customerPhone", label: "Số điện thoại", width: "140px" },
+  { key: "residentName", label: "Tên khách", sortable: true, width: "180px" },
+  { key: "phoneNumber", label: "Số điện thoại", width: "140px" },
 
-  { key: "bookingDate", label: "Ngày đặt", sortable: true, width: "140px", align: "center" },
+  {
+    key: "createdAt",
+    label: "Ngày đặt",
+    sortable: true,
+    width: "160px",
+    align: "center",
+    render: (row) => formatDateTimeVN(row.createdAt),
+  },
+
+  {
+    key: "bookingDate",
+    label: "Ngày nhận",
+    sortable: true,
+    width: "140px",
+    align: "center",
+    render: (row) => formatDDMMYYYYFromYMD(row.bookingDate),
+  },
 
   {
     key: "unitPrice",
@@ -27,9 +58,8 @@ export const bookingColumns: TableColumn<Booking>[] = [
     render: (row) => formatVND(row.unitPrice),
   },
 
-  { key: "receiveDate", label: "Ngày nhận", sortable: true, width: "140px", align: "center" },
-  { key: "checkIn", label: "Giờ vào", width: "90px", align: "center" },
-  { key: "checkOut", label: "Giờ ra", width: "90px", align: "center" },
+  { key: "startTime", label: "Giờ vào", width: "90px", align: "center" },
+  { key: "endTime", label: "Giờ ra", width: "90px", align: "center" },
 
   {
     key: "status",
@@ -37,9 +67,10 @@ export const bookingColumns: TableColumn<Booking>[] = [
     align: "center",
     width: "160px",
     filterable: true,
-    filterAccessor: (row) => statusMap[String(row.status)]?.label ?? String(row.status),
+    filterAccessor: (row) =>
+      row.statusLabel ?? statusMap[String(row.status)]?.label ?? String(row.status),
     render: (row) => {
-      const config = statusMap[String(row.status)] ?? { label: String(row.status) };
+      const config = statusMap[String(row.status)] ?? { label: row.statusLabel ?? String(row.status) };
       return <StatusBadge label={config.label} type={config.type} />;
     },
   },

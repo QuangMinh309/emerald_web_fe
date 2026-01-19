@@ -29,16 +29,15 @@ const refreshClient = axios.create({
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<AuthUser | null>(null);
+const [user, setUser] = useState<AuthUser | null>(() => getStoredUser());
   const [isLoading, setIsLoading] = useState(true);
-
+  useEffect(() => {
+  }, [user]);
   useEffect(() => {
     const boot = async () => {
       try {
         let access = getAccessToken();
         const refresh = getRefreshToken();
-
-        // ✅ nếu access hết hạn mà có refresh -> refresh ngay khi boot
         if (access && refresh && isJwtExpired(access)) {
           const rr = await refreshClient.post(
             "/auth/refresh",

@@ -1,10 +1,23 @@
+import * as React from "react";
+import { cn } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 type MonthPickerProps = {
   value: string; // "YYYY-MM"
   onChange: (value: string) => void;
-  yearRange?: number; // số năm lùi lại từ năm hiện tại
+  yearRange?: number;
+  className?: string;
 };
 
-export function MonthPicker({ value, onChange, yearRange = 6 }: MonthPickerProps) {
+const pad2 = (n: number) => String(n).padStart(2, "0");
+
+export function MonthPicker({ value, onChange, yearRange = 6, className }: MonthPickerProps) {
   const [yStr, mStr] = value.split("-");
   const year = Number(yStr) || new Date().getFullYear();
   const month = Number(mStr) || new Date().getMonth() + 1;
@@ -12,39 +25,62 @@ export function MonthPicker({ value, onChange, yearRange = 6 }: MonthPickerProps
   const years = Array.from({ length: yearRange }).map((_, i) => new Date().getFullYear() - i);
 
   return (
-    <div className="flex gap-2">
-      <select
-        className="h-9 rounded-lg border border-neutral-200 bg-white px-3 text-sm"
-        value={month}
-        onChange={(e) => {
-          const mm = String(e.target.value).padStart(2, "0");
+    <div className={cn("flex gap-2", className)}>
+      {/* Tháng */}
+      <Select
+        value={String(month)}
+        onValueChange={(v) => {
+          const mm = pad2(Number(v));
           onChange(`${year}-${mm}`);
         }}
       >
-        {Array.from({ length: 12 }).map((_, i) => {
-          const mm = i + 1;
-          return (
-            <option key={mm} value={mm}>
-              Tháng {mm}
-            </option>
-          );
-        })}
-      </select>
+        <SelectTrigger className="h-9 w-[140px] bg-white border-neutral-200 rounded-lg text-sm shadow-sm focus:ring-1 focus:ring-main focus:border-main">
+          <SelectValue placeholder="Tháng" />
+        </SelectTrigger>
 
-      <select
-        className="h-9 rounded-lg border border-neutral-200 bg-white px-3 text-sm"
-        value={year}
-        onChange={(e) => {
-          const yy = e.target.value;
-          onChange(`${yy}-${String(month).padStart(2, "0")}`);
+        <SelectContent
+          side="bottom"
+          align="start"
+          sideOffset={6}
+          avoidCollisions
+          className="z-50 max-h-72"
+        >
+          {Array.from({ length: 12 }).map((_, i) => {
+            const mm = i + 1;
+            return (
+              <SelectItem key={mm} value={String(mm)} className="cursor-pointer">
+                Tháng {mm}
+              </SelectItem>
+            );
+          })}
+        </SelectContent>
+      </Select>
+
+      {/* Năm */}
+      <Select
+        value={String(year)}
+        onValueChange={(v) => {
+          onChange(`${v}-${pad2(month)}`);
         }}
       >
-        {years.map((yy) => (
-          <option key={yy} value={yy}>
-            {yy}
-          </option>
-        ))}
-      </select>
+        <SelectTrigger className="h-9 w-[120px] bg-white border-neutral-200 rounded-lg text-sm shadow-sm focus:ring-1 focus:ring-main focus:border-main">
+          <SelectValue placeholder="Năm" />
+        </SelectTrigger>
+
+        <SelectContent
+          side="bottom"
+          align="start"
+          sideOffset={6}
+          avoidCollisions
+          className="z-50 max-h-72"
+        >
+          {years.map((yy) => (
+            <SelectItem key={yy} value={String(yy)} className="cursor-pointer">
+              {yy}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 }

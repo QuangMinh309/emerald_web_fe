@@ -9,7 +9,11 @@ export const useReports = (params: ReportsParams, enabled = true) =>
 
     enabled:
       enabled &&
+<<<<<<< HEAD
+        (Boolean(params.startDate) && Boolean(params.endDate)),
+=======
       (params.rangeType !== "custom" || (Boolean(params.startDate) && Boolean(params.endDate))),
+>>>>>>> c861f3a7d56d67a90278bd1590ddf07bfd5df77b
 
     retry: (count, err: any) => {
       const status = err?.response?.status ?? err?.response?.data?.statusCode;
