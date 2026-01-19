@@ -11,6 +11,7 @@ import { normalizeString } from "@/utils/string";
 import { useTechnicians } from "@/hooks/data/useTechnicians";
 import CreateTechnicianModal from "@/pages/Technicians/create-technician";
 import DeleteTechnicianModal from "@/pages/Technicians/delete-technician";
+import DeleteManyTechnicianModal from "@/pages/Technicians/multiple-delete-technicians";
 import UpdateTechnicianModal from "@/pages/Technicians/update-technician";
 import type { Technician } from "@/types/technician";
 import { useNavigate } from "react-router-dom";
@@ -26,6 +27,9 @@ const TechniciansPage = () => {
 
   const [selectedTechnician, setSelectedTechnician] = useState<Technician>();
   const [updatedTechnician, setUpdatedTechnician] = useState<Technician>();
+
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [isDeleteManyOpen, setIsDeleteManyOpen] = useState(false);
 
   // Lấy dữ liệu từ Hooks
   const { data: technicians = [], isLoading, isError, error, refetch } = useTechnicians();
@@ -84,13 +88,23 @@ const TechniciansPage = () => {
           subtitle="Quản lý danh sách kỹ thuật viên bảo trì trong chung cư"
           actions={
             <div className="flex items-center gap-2">
-              <button
-                onClick={() => setIsCreateModalOpen(true)}
-                className="flex items-center gap-2 bg-main text-white px-4 py-2 rounded-lg hover:bg-main/90 transition-colors text-sm font-medium"
-              >
-                <Plus className="w-4 h-4" />
-                Tạo kỹ thuật viên
-              </button>
+              {selectedIds.length > 0 ? (
+                <button
+                  onClick={() => setIsDeleteManyOpen(true)}
+                  className="flex items-center gap-2 bg-destructive text-destructive-foreground px-4 py-2 rounded-lg hover:bg-destructive/90 transition-colors text-sm font-medium animate-in fade-in zoom-in-95 shadow-sm"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Xóa ({selectedIds.length})
+                </button>
+              ) : (
+                <button
+                  onClick={() => setIsCreateModalOpen(true)}
+                  className="flex items-center gap-2 bg-main text-white px-4 py-2 rounded-lg hover:bg-main/90 transition-colors text-sm font-medium"
+                >
+                  <Plus className="w-4 h-4" />
+                  Tạo kỹ thuật viên
+                </button>
+              )}
 
               <ActionDropdown
                 options={actions}
@@ -130,6 +144,8 @@ const TechniciansPage = () => {
               data={filteredTechnicians}
               columns={technicianColumns}
               defaultPageSize={10}
+              onSelectionChange={setSelectedIds}
+              selection={selectedIds}
               onEdit={(row) => {
                 setIsUpdateOpen(true);
                 setUpdatedTechnician(row);
@@ -155,6 +171,12 @@ const TechniciansPage = () => {
         open={isUpdateOpen}
         setOpen={setIsUpdateOpen}
         technician={updatedTechnician}
+      />
+      <DeleteManyTechnicianModal
+        open={isDeleteManyOpen}
+        setOpen={setIsDeleteManyOpen}
+        selectedIds={selectedIds}
+        onSuccess={() => setSelectedIds([])}
       />
     </>
   );

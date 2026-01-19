@@ -35,6 +35,12 @@ export const deleteTechnician = async (technicianId: number) => {
   const response = await axiosInstance.delete(`/technicians/${technicianId}`);
   return response.data;
 };
+
+export const deleteManyTechnicians = async (ids: number[]) => {
+  const response = await axiosInstance.post(`/technicians/delete-many`, { ids });
+  return response.data;
+};
+
 export const getTechnicianById = async (id: number) => {
   const response = await axiosInstance.get(`/technicians/${id}`);
   return response.data.data as TechnicianDetail;

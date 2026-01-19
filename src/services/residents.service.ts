@@ -88,6 +88,12 @@ export const deleteResident = async (residentId: number) => {
   const response = await axiosInstance.delete(`/residents/${residentId}`);
   return response.data;
 };
+
+export const deleteManyResidents = async (ids: number[]) => {
+  const response = await axiosInstance.post(`/residents/delete-many`, { ids });
+  return response.data;
+};
+
 export const getResidentById = async (id: number) => {
   const response = await axiosInstance.get(`/residents/${id}`);
   return response.data.data as ResidentDetail;

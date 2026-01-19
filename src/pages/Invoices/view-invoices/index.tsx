@@ -15,6 +15,7 @@ import type { Invoice, InvoiceDetail } from "@/types/invoice";
 import { useNavigate } from "react-router-dom";
 import CreateInvoiceModal from "@/pages/Invoices/create-invoice";
 import DeleteInvoice from "@/pages/Invoices/delete-invoice";
+import DeleteManyInvoiceModal from "@/pages/Invoices/multiple-delete-invoices";
 import UpdateInvoiceModal from "@/pages/Invoices/update-invoice";
 import VerifyInvoiceModal from "@/pages/Invoices/verify-invoice";
 import { getInvoicesMadeByClient } from "@/services/invoices.service";
@@ -30,6 +31,9 @@ const InvoicesPage = () => {
   const [deletedInvoice, setDeletedInvoice] = useState<Invoice>();
   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
   const [updatedInvoice, setUpdatedInvoice] = useState<number>();
+
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [isDeleteManyOpen, setIsDeleteManyOpen] = useState(false);
 
   // Client Invoice states
   const [clientInvoices, setClientInvoices] = useState<InvoiceDetail[]>([]);
@@ -136,14 +140,24 @@ const InvoicesPage = () => {
           subtitle="Quản lý danh sách các hóa đơn thanh toán"
           actions={
             <div className="flex items-center gap-2">
-              {activeTab === "invoices" && (
+              {selectedIds.length > 0 ? (
                 <button
-                  onClick={() => setNewIsModalOpen(true)}
-                  className="flex items-center gap-2 bg-main text-white px-4 py-2 rounded-lg hover:bg-main/90 transition-colors text-sm font-medium"
+                  onClick={() => setIsDeleteManyOpen(true)}
+                  className="flex items-center gap-2 bg-destructive text-destructive-foreground px-4 py-2 rounded-lg hover:bg-destructive/90 transition-colors text-sm font-medium animate-in fade-in zoom-in-95 shadow-sm"
                 >
-                  <Plus className="w-4 h-4" />
-                  Tạo hóa đơn
+                  <Trash2 className="w-4 h-4" />
+                  Xóa ({selectedIds.length})
                 </button>
+              ) : (
+                activeTab === "invoices" && (
+                  <button
+                    onClick={() => setNewIsModalOpen(true)}
+                    className="flex items-center gap-2 bg-main text-white px-4 py-2 rounded-lg hover:bg-main/90 transition-colors text-sm font-medium"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Tạo hóa đơn
+                  </button>
+                )
               )}
 
               <ActionDropdown
@@ -203,6 +217,8 @@ const InvoicesPage = () => {
                   data={filteredInvoices}
                   columns={invoiceColumns}
                   defaultPageSize={10}
+                  onSelectionChange={setSelectedIds}
+                  selection={selectedIds}
                   onEdit={(row) => {
                     setIsUpdateOpen(true);
                     setUpdatedInvoice((row as Invoice).id);
@@ -258,6 +274,12 @@ const InvoicesPage = () => {
         open={isVerifyModalOpen}
         setOpen={setIsVerifyModalOpen}
         invoice={selectedClientInvoice}
+      />
+      <DeleteManyInvoiceModal
+        open={isDeleteManyOpen}
+        setOpen={setIsDeleteManyOpen}
+        selectedIds={selectedIds}
+        onSuccess={() => setSelectedIds([])}
       />
     </>
   );

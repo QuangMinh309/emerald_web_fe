@@ -1,6 +1,7 @@
 import {
   createInvoiceByAdmin,
   deleteInvoice,
+  deleteManyInvoices,
   getInvoiceById,
   getInvoices,
   updateInvoice,
@@ -49,6 +50,16 @@ export const useDeleteInvoice = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: deleteInvoice,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
+    },
+  });
+};
+
+export const useDeleteManyInvoices = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (ids: number[]) => deleteManyInvoices(ids),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
     },

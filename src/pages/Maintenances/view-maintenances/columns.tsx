@@ -5,7 +5,7 @@ import StatusBadge from "@components/common/StatusBadge";
 import { TicketPriorityMap } from "@/constants/ticketPriority";
 
 export const maintenanceColumns: TableColumn<MaintenanceTicketListItem>[] = [
-  { key: "id", label: "ID", align: "center", width: "60px" },
+  { key: "stt", label: "STT", align: "center" },
   { key: "title", label: "Tiêu đề", sortable: true },
   {
     key: "priority",

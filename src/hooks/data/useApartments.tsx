@@ -3,6 +3,7 @@ import {
   deleteApartment,
   getApartmentById,
   getApartments,
+  mutilDeleteApartment,
   updateApartment,
 } from "@/services/apartments.service";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -47,6 +48,15 @@ export const useDeleteApartment = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: deleteApartment,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["apartments"] });
+    },
+  });
+};
+export const useMutilDeleteApartment = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: mutilDeleteApartment,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["apartments"] });
     },

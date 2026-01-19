@@ -1,6 +1,7 @@
 import {
   createResident,
   deleteResident,
+  deleteManyResidents,
   getResidentById,
   getResidents,
   updateAsset,
@@ -48,6 +49,16 @@ export const useDeleteResident = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: deleteResident,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["residents"] });
+    },
+  });
+};
+
+export const useDeleteManyResidents = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (ids: number[]) => deleteManyResidents(ids),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["residents"] });
     },

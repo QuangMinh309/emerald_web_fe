@@ -35,6 +35,12 @@ export const deleteInvoice = async (id: number) => {
   const response = await axiosInstance.delete(`/invoices/${id}`);
   return response.data.data as Invoice;
 };
+
+export const deleteManyInvoices = async (ids: number[]) => {
+  const response = await axiosInstance.post(`/invoices/delete-many`, { ids });
+  return response.data;
+};
+
 export const getInvoiceById = async (id: number) => {
   const response = await axiosInstance.get(`/invoices/${id}`);
   return response.data.data as InvoiceDetail;

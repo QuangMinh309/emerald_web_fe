@@ -4,7 +4,7 @@ import type { Apartment } from "@/types/apartment";
 import StatusBadge from "@components/common/StatusBadge";
 
 export const apartmentColumns: TableColumn<Apartment>[] = [
-  { key: "id", label: "ID", align: "center", width: "60px" },
+  { key: "stt", label: "STT", align: "center" },
   { key: "roomName", label: "Mã căn hộ", sortable: true },
   { key: "type", label: "Loại", sortable: true, filterable: true },
   {
