@@ -136,5 +136,6 @@ const invoicesMadeByClient: InvoiceDetail[] = [
   },
 ];
 export const getInvoicesMadeByClient = async () => {
-  return invoicesMadeByClient as InvoiceDetail[];
+  const response = await axiosInstance.get("/invoices/made-by-client/list");
+  return response.data.data as InvoiceDetail[];
 };

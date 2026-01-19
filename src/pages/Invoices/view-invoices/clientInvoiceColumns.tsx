@@ -1,11 +1,9 @@
 import type { TableColumn } from "@/types";
 import type { InvoiceDetail } from "@/types/invoice";
-import StatusBadge from "@components/common/StatusBadge";
-import { InvoiceStatusMap } from "@/constants/invoiceStatus";
 import { formatVND } from "@/utils/money";
 
 export const clientInvoiceColumns: TableColumn<InvoiceDetail>[] = [
-  { key: "id", label: "ID", align: "center", width: "60px" },
+  { key: "stt", label: "STT", align: "center" },
   { key: "invoiceCode", label: "Mã hóa đơn", sortable: true },
   { key: "apartmentId", label: "Mã căn hộ", sortable: true, align: "center" },
   {
