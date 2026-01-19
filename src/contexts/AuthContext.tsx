@@ -12,6 +12,7 @@ import {
   setTokens,
 } from "@/lib/auth-storage";
 import axios from "axios";
+import { connectSocket, disconnectSocket } from "@/sockets/socket";
 
 type AuthContextValue = {
   user: AuthUser | null;
@@ -21,7 +22,9 @@ type AuthContextValue = {
   logout: () => void;
   refreshProfile: () => Promise<void>;
 };
-const refreshClient = axios.create({ baseURL: import.meta.env.VITE_API_URL || "http://localhost:4000/api" });
+const refreshClient = axios.create({
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:4000/api",
+});
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
@@ -39,7 +42,7 @@ const [user, setUser] = useState<AuthUser | null>(() => getStoredUser());
           const rr = await refreshClient.post(
             "/auth/refresh",
             {},
-            { headers: { Authorization: `Bearer ${refresh}` } }
+            { headers: { Authorization: `Bearer ${refresh}` } },
           );
           const { accessToken, refreshToken: newRefresh } = rr.data.data;
           setTokens(accessToken, newRefresh);
@@ -61,7 +64,7 @@ const [user, setUser] = useState<AuthUser | null>(() => getStoredUser());
             const rr = await refreshClient.post(
               "/auth/refresh",
               {},
-              { headers: { Authorization: `Bearer ${refresh}` } }
+              { headers: { Authorization: `Bearer ${refresh}` } },
             );
             const { accessToken, refreshToken: newRefresh } = rr.data.data;
             setTokens(accessToken, newRefresh);
@@ -81,30 +84,22 @@ const [user, setUser] = useState<AuthUser | null>(() => getStoredUser());
       }
     };
 
-
     void boot();
   }, []);
 
   const login = async (email: string, password: string) => {
-  const data = await loginRequest(email, password);
-
-  // data: { id, email, role, ..., accessToken, refreshToken }
-  const { accessToken, refreshToken, ...profile } = data;
-
-  if (!accessToken || !refreshToken) {
-    throw new Error("Missing tokens from login response");
-  }
-
-  setTokens(accessToken, refreshToken);
-
-  setStoredUser(profile as AuthUser);
-  setUser(profile as AuthUser);
-
-  return profile as AuthUser;
-};
+    const data = await loginRequest(email, password);
+    const { accessToken, refreshToken, ...profile } = data;
+    setTokens(accessToken, refreshToken);
+    setStoredUser(profile);
+    setUser(profile);
+    connectSocket();
+    return profile;
+  };
 
   const logout = () => {
     clearAuthStorage();
+    disconnectSocket();
     setUser(null);
   };
 

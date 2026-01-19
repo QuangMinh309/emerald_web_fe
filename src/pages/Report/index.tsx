@@ -82,7 +82,6 @@ const ReportPage = () => {
 
   const { data, isLoading } = useReports(reportParams, !authLoading && isAuthenticated);
 
-
   const totalRevenue = data?.revenue?.totalRevenue || 0;
   const percentageComparedToPreviousMonth = data?.revenue?.percentageComparedToPreviousMonth || 0;
 
@@ -98,7 +97,8 @@ const ReportPage = () => {
     data?.revenueExpenseChart?.map((d) => ({ label: d.label, value: d.expense ?? 0 })) ?? [];
 
   const servicePoints: BarPoint[] =
-    data?.serviceBookingChart?.map((d) => ({ label: d.serviceName, value: d.bookingCount ?? 0 })) ?? [];
+    data?.serviceBookingChart?.map((d) => ({ label: d.serviceName, value: d.bookingCount ?? 0 })) ??
+    [];
 
   const assetStatus = data?.assetStatus;
   const hasDataRevenue = data?.revenueExpenseChart && data.revenueExpenseChart.length > 0;
@@ -141,9 +141,41 @@ const ReportPage = () => {
           )}
         </div>
 
+<<<<<<< HEAD
         {isLoading ? (
           <div className="flex justify-center items-center h-[500px] ">
             <Spinner />
+=======
+        {/* Top stats */}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <StatCard
+            title="Doanh thu"
+            value={totalRevenue.toLocaleString("vi-VN")}
+            note={`${percentageComparedToPreviousMonth >= 0 ? "+" : ""}${percentageComparedToPreviousMonth}% so với kỳ trước`}
+            accent="emerald"
+          />
+          <StatCard
+            title="Tổng công nợ"
+            value={totalDebt.toLocaleString("vi-VN")}
+            note={`${totalApartmentsOwing} căn hộ còn nợ`}
+            accent="red"
+          />
+          <StatCard
+            title="Đã bảo trì"
+            value={`${totalAssetsMaintenanced} thiết bị`}
+            note="Xem chi tiết"
+            accent="amber"
+            clickable
+            onClick={() => navigate("/maintenances")}
+          />
+        </div>
+
+        {/* Big chart */}
+        <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <h2 className="text-xl font-semibold">Doanh thu &amp; Chi phí</h2>
+            <span className="text-sm text-neutral-500">{dateRange.label}</span>
+>>>>>>> c861f3a7d56d67a90278bd1590ddf07bfd5df77b
           </div>
         ) : (
           <>
@@ -179,6 +211,7 @@ const ReportPage = () => {
               )}
             </div>
 
+<<<<<<< HEAD
             {/* Bottom cards */}
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
@@ -202,6 +235,23 @@ const ReportPage = () => {
           </>
         )
         }
+=======
+          <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
+            <h3 className="mb-7 text-sm font-semibold">Tài sản &amp; Thiết bị</h3>
+            {hasDataAsset ? (
+              <AssetStatusSummary
+                data={{
+                  broken: assetStatus?.brokenAssets ?? 0,
+                  maintaining: assetStatus?.maintenancedAssets ?? 0,
+                  good: assetStatus?.workingAssets ?? 0,
+                }}
+              />
+            ) : (
+              <div className="text-sm text-neutral-600">Chưa có dữ liệu.</div>
+            )}
+          </div>
+        </div>
+>>>>>>> c861f3a7d56d67a90278bd1590ddf07bfd5df77b
       </div>
     </div>
   );

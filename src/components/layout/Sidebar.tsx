@@ -7,7 +7,6 @@ import {
   Users,
   Armchair,
   Store,
-  Info,
   Wrench,
   Vote,
   MessageSquare,
@@ -15,6 +14,7 @@ import {
   UserCog,
   UtilityPole,
   User2,
+  AlertCircle,
 } from "lucide-react";
 import Logo from "@assets/logo.svg";
 
@@ -29,7 +29,7 @@ const Sidebar: React.FC = () => {
     { id: "technicians", icon: UtilityPole, label: "Kỹ thuật viên" },
     { id: "assets", icon: Armchair, label: "Tài sản, thiết bị" },
     { id: "services", icon: Store, label: "Dịch vụ" },
-    { id: "feedback", icon: Info, label: "Phản ánh, yêu cầu" },
+    { id: "issues", icon: AlertCircle, label: "Phản ánh, yêu cầu" },
     { id: "votings", icon: Vote, label: "Biểu quyết" },
     { id: "maintenances", icon: Wrench, label: "Bảo trì" },
     { id: "notifications", icon: MessageSquare, label: "Thông báo" },

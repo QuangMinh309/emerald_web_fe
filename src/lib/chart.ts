@@ -1,11 +1,6 @@
 export type XYPoint = { x: number; y: number };
 
-export function buildLinearScale(
-  d0: number,
-  d1: number,
-  r0: number,
-  r1: number
-) {
+export function buildLinearScale(d0: number, d1: number, r0: number, r1: number) {
   const denom = d1 - d0 || 1;
   const m = (r1 - r0) / denom;
   return (v: number) => r0 + (v - d0) * m;
@@ -14,7 +9,7 @@ export function buildLinearScale(
 export function buildPoints(
   values: number[],
   x: (i: number) => number,
-  y: (v: number) => number
+  y: (v: number) => number,
 ): XYPoint[] {
   return values.map((v, i) => ({ x: x(i), y: y(v) }));
 }
@@ -22,7 +17,7 @@ export function buildPoints(
 export function niceStep(
   range: number,
   targetTicks: number,
-  options?: { minStep?: number; multipleOf?: number }
+  options?: { minStep?: number; multipleOf?: number },
 ) {
   const minStep = options?.minStep ?? 1;
   const multipleOf = options?.multipleOf; // vd 5
@@ -57,7 +52,7 @@ export function niceDomain(
   min: number,
   max: number,
   targetTicks = 5,
-  options?: { minStep?: number; multipleOf?: number }
+  options?: { minStep?: number; multipleOf?: number },
 ) {
   if (!Number.isFinite(min) || !Number.isFinite(max)) return { min: 0, max: 1, step: 1 };
 
@@ -79,7 +74,7 @@ export function buildNiceTicks(
   min: number,
   max: number,
   targetTicks = 5,
-  options?: { minStep?: number; multipleOf?: number }
+  options?: { minStep?: number; multipleOf?: number },
 ) {
   const d = niceDomain(min, max, targetTicks, options);
 

@@ -38,7 +38,9 @@ const buildFormData = (data: VotingPayload) => {
 
 export const votingService = {
   getAll: async (params?: any) => {
-    const response = await axiosInstance.get<{ data: VotingData[] }>(BASE, { params });
+    const response = await axiosInstance.get<{ data: VotingData[] }>(BASE, {
+      params,
+    });
     return response.data.data;
   },
   getById: async (id: number) => {

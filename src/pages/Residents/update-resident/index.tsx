@@ -27,6 +27,7 @@ import { useEffect, useState } from "react";
 import { address } from "@/lib/address";
 import { Label } from "@/components/ui/label";
 import { GenderTypeOptions } from "@/constants/genderType";
+import { UploadImages } from "@/components/common/UploadImages";
 
 interface UpdateModalProps {
   open: boolean;
@@ -56,7 +57,7 @@ type ResidentFormValues = z.infer<typeof UpdateResidentSchema>;
 const UpdateResidentModal = ({ open, setOpen, residentId }: UpdateModalProps) => {
   const { data: resident } = useGetResidentById(residentId!);
   const { mutate: updateResident, isPending } = useUpdateResident();
-  const [imagePreview, setImagePreview] = useState<string>("");
+  const [existingImageUrl, setExistingImageUrl] = useState<string>("");
 
   const form = useForm<ResidentFormValues>({
     resolver: zodResolver(UpdateResidentSchema),
@@ -90,28 +91,14 @@ const UpdateResidentModal = ({ open, setOpen, residentId }: UpdateModalProps) =>
         province: resident.province,
         detailAddress: resident.detailAddress ?? undefined,
       });
-      if (resident.imageUrl) {
-        setImagePreview(resident.imageUrl);
-      }
+      setExistingImageUrl(resident.imageUrl || "");
     }
   }, [resident, open, form]);
 
   const handleClose = () => {
     setOpen(false);
     form.reset();
-    setImagePreview("");
-  };
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      form.setValue("image", file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
+    setExistingImageUrl("");
   };
 
   function onSubmit(values: ResidentFormValues) {
@@ -165,15 +152,18 @@ const UpdateResidentModal = ({ open, setOpen, residentId }: UpdateModalProps) =>
       <Form {...form}>
         <form className="space-y-4">
           {/* Ảnh đại diện */}
-          <div className="flex flex-col items-center gap-2">
-            {imagePreview && (
-              <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-gray-200">
-                <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
-              </div>
-            )}
-            <Label>Ảnh đại diện</Label>
-            <Input type="file" accept="image/*" onChange={handleImageChange} disabled={isPending} />
-          </div>
+          <UploadImages
+            existingUrls={existingImageUrl ? [existingImageUrl] : []}
+            files={
+              form.watch("image")
+                ? [form.watch("image")].filter((f): f is File => f !== undefined)
+                : []
+            }
+            onChange={(files) => form.setValue("image", files[0])}
+            onRemoveExisting={() => setExistingImageUrl("")}
+            isRequired={false}
+            maxImages={1}
+          />
 
           <div className="grid grid-cols-2 gap-x-4 gap-y-4">
             {/* Email */}

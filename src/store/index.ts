@@ -1,8 +1,10 @@
 import { configureStore } from "@reduxjs/toolkit";
 import actionBlockReducer from "./slices/actionBlockSlice";
+import notificationReducer from "./slices/notificationSlice";
 export const store = configureStore({
   reducer: {
     actionBlock: actionBlockReducer,
+    notification: notificationReducer,
   },
 });
 

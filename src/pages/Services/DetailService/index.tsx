@@ -32,8 +32,7 @@ const DetailServicePage = () => {
   const { id } = useParams();
   const serviceId = Number(id);
   const isValidId = Number.isFinite(serviceId) && serviceId > 0;
-const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const [selectedService, setSelectedService] = useState<Service | undefined>(undefined);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
   const [serviceToEdit, setServiceToEdit] = useState<Service | null>(null);
@@ -111,7 +110,7 @@ const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   }
 
   if (!service) return <div>Không tìm thấy dịch vụ</div>;
-const headerActions = (
+  const headerActions = (
     <div className="flex items-center gap-2">
       <Button
         className="h-9 px-3 bg-red-600 text-white border-red-200 hover:bg-red-700"
@@ -198,16 +197,12 @@ const headerActions = (
                 <p className="text-sm">{String((serviceErrObj as any)?.message ?? "Error")}</p>
               </div>
             ) : (
-              <CustomTable
-                data={filteredBookings}
-                columns={bookingColumns}
-                defaultPageSize={10}
-              />
+              <CustomTable data={filteredBookings} columns={bookingColumns} defaultPageSize={10} />
             )}
           </div>
         </div>
       </div>
-<DeleteService
+      <DeleteService
         open={isDeleteOpen}
         setOpen={setIsDeleteOpen}
         selectedService={service}

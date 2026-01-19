@@ -102,19 +102,15 @@ const MaintenancesPage = () => {
           subtitle="Quản lý các yêu cầu bảo trì và sửa chữa trong chung cư"
           actions={
             <div className="flex items-center gap-2">
-              <Button
-                onClick={() => {
-                  if (activeTab === "incident") {
-                    setIsCreateIncidentModalOpen(true);
-                  } else {
-                    setIsCreateScheduledModalOpen(true);
-                  }
-                }}
-                className="flex items-center gap-2 bg-main text-white px-4 py-2 rounded-lg hover:bg-main/90 transition-colors text-sm font-medium"
-              >
-                <Plus className="w-4 h-4" />
-                {activeTab === "incident" ? "Tạo yêu cầu phản ánh" : "Tạo bảo trì định kỳ"}
-              </Button>
+              {activeTab !== "incident" && (
+                <Button
+                  onClick={() => setIsCreateScheduledModalOpen(true)}
+                  className="flex items-center gap-2 bg-main text-white px-4 py-2 rounded-lg hover:bg-main/90 transition-colors text-sm font-medium"
+                >
+                  <Plus className="w-4 h-4" />
+                  Tạo bảo trì định kỳ
+                </Button>
+              )}
 
               <ActionDropdown
                 options={actions}

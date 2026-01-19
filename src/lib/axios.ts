@@ -1,117 +1,115 @@
 import axios, { type AxiosError, type AxiosRequestConfig } from "axios";
 import { clearAuthStorage, getAccessToken, getRefreshToken, setTokens } from "@/lib/auth-storage";
 
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
+
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8080/api",
+  baseURL: BASE_URL,
   timeout: 50000,
-  headers: {
-    "Content-Type": "application/json",
-  },
+  headers: { "Content-Type": "application/json" },
 });
+
 export const axiosMultipart = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8080/api",
+  baseURL: BASE_URL,
   timeout: 50000,
 });
 
 const refreshClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8080/api",
+  baseURL: BASE_URL,
   timeout: 10000,
-  headers: {
-    "Content-Type": "application/json",
-  },
+  headers: { "Content-Type": "application/json" },
 });
 
 let isRefreshing = false;
-let refreshQueue: Array<(token: string | null) => void> = [];
+let queue: Array<(token: string | null) => void> = [];
 
-const resolveRefreshQueue = (token: string | null) => {
-  refreshQueue.forEach((callback) => callback(token));
-  refreshQueue = [];
+const flushQueue = (token: string | null) => {
+  queue.forEach((cb) => cb(token));
+  queue = [];
 };
 
-function attachAuthInterceptors(client: ReturnType<typeof axios.create>) {
-  client.interceptors.request.use(
-    (config) => {
-      const token = getAccessToken();
-      if (token) config.headers.Authorization = `Bearer ${token}`;
-      return config;
-    },
-    (error) => Promise.reject(error),
-  );
+const forceLogout = () => {
+  clearAuthStorage();
+  if (window.location.pathname !== "/login") window.location.assign("/login");
+};
+
+function attachAuthInterceptors(client: typeof axiosInstance) {
+  client.interceptors.request.use((config) => {
+    const token = getAccessToken();
+    if (token) {
+      config.headers = config.headers ?? {};
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  });
 
   client.interceptors.response.use(
-    (response) => response,
+    (res) => res,
     async (error: AxiosError) => {
       if (!error.response) return Promise.reject(error);
 
       const status = error.response.status;
-      const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
+      const original = error.config as AxiosRequestConfig & { _retry?: boolean };
+      const url = String(original?.url ?? "");
 
-      const requestUrl = originalRequest?.url || "";
-      const isAuthRequest =
-        requestUrl.includes("/auth/login") || requestUrl.includes("/auth/refresh");
+      const isAuthEndpoint = url.includes("/auth/login") || url.includes("/auth/refresh");
 
-      if (status === 401 && !originalRequest?._retry && !isAuthRequest) {
-        const refreshToken = getRefreshToken();
-        if (!refreshToken) {
-          clearAuthStorage();
-          window.location.assign("/login");
-          return Promise.reject(error);
-        }
+      // 1) Không xử lý refresh cho chính login/refresh
+      if (isAuthEndpoint) return Promise.reject(error);
 
-        if (isRefreshing) {
-          console.log("REFRESHING...")
-          return new Promise((resolve, reject) => {
-            refreshQueue.push((token) => {
-              if (!token) return reject(error);
+      // 2) Chỉ xử lý 401, và chỉ retry 1 lần
+      if (status !== 401 || original._retry) return Promise.reject(error);
 
-              if (originalRequest.headers) {
-                originalRequest.headers.Authorization = `Bearer ${token}`;
-              }
-
-              resolve(client(originalRequest));
-            });
-          });
-        }
-
-        originalRequest._retry = true;
-        isRefreshing = true;
-
-        try {
-          const refreshResponse = await refreshClient.post(
-            "/auth/refresh",
-            {},
-            { headers: { Authorization: `Bearer ${refreshToken}` } },
-          );
-
-          const { accessToken, refreshToken: newRefreshToken } = refreshResponse.data.data as {
-            accessToken: string;
-            refreshToken: string;
-          };
-
-          setTokens(accessToken, newRefreshToken);
-          resolveRefreshQueue(accessToken);
-
-          if (originalRequest.headers) {
-            originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-          }
-
-          return client(originalRequest);
-        } catch (refreshError) {
-          resolveRefreshQueue(null);
-          clearAuthStorage();
-          window.location.assign("/login");
-          return Promise.reject(refreshError);
-        } finally {
-          isRefreshing = false;
-        }
+      const refreshToken = getRefreshToken();
+      if (!refreshToken) {
+        forceLogout();
+        return Promise.reject(error);
       }
 
-      if (status === 403) alert("Bạn không có quyền truy cập chức năng này");
-      return Promise.reject(error);
+      // 3) Nếu đang refresh => chờ
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          queue.push((token) => {
+            if (!token) return reject(error);
+            original.headers = original.headers ?? {};
+            original.headers.Authorization = `Bearer ${token}`;
+            resolve(client(original));
+          });
+        });
+      }
+
+      original._retry = true;
+      isRefreshing = true;
+
+      try {
+        const rr = await refreshClient.post(
+          "/auth/refresh",
+          {},
+          { headers: { Authorization: `Bearer ${refreshToken}` } },
+        );
+
+        const { accessToken, refreshToken: newRefresh } = rr.data.data as {
+          accessToken: string;
+          refreshToken: string;
+        };
+
+        setTokens(accessToken, newRefresh);
+        flushQueue(accessToken);
+
+        original.headers = original.headers ?? {};
+        original.headers.Authorization = `Bearer ${accessToken}`;
+        return client(original);
+      } catch (refreshErr) {
+        flushQueue(null);
+        forceLogout();
+        return Promise.reject(refreshErr);
+      } finally {
+        isRefreshing = false;
+      }
     },
   );
 }
+
 attachAuthInterceptors(axiosInstance);
 attachAuthInterceptors(axiosMultipart);
 

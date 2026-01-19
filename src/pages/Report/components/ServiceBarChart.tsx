@@ -44,7 +44,6 @@ export default function ServicesBarChart({
 
   const y = buildLinearScale(0, yMax, padding.t + innerH, padding.t);
 
-
   return (
     <div className="w-full overflow-x-auto">
       <svg
@@ -67,7 +66,12 @@ export default function ServicesBarChart({
                 strokeDasharray="4 4"
                 strokeWidth="1"
               />
-              <text x={padding.l - 10} y={yy + 4} textAnchor="end" className="fill-neutral-500 text-[12px]">
+              <text
+                x={padding.l - 10}
+                y={yy + 4}
+                textAnchor="end"
+                className="fill-neutral-500 text-[12px]"
+              >
                 {t}
               </text>
             </g>

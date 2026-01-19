@@ -41,19 +41,27 @@ export default function RevenueExpenseChart({
 
   const ticks = buildNiceTicks(0, maxWithPad, 5, { multipleOf: 5 });
 
-
-
   const yMax = ticks[ticks.length - 1] ?? maxWithPad;
   const y = buildLinearScale(0, yMax, padding.t + innerH, padding.t);
 
-  const revPts = buildPoints(revenue.map((d) => d.value), x, y);
-  const expPts = buildPoints(expense.map((d) => d.value), x, y);
+  const revPts = buildPoints(
+    revenue.map((d) => d.value),
+    x,
+    y,
+  );
+  const expPts = buildPoints(
+    expense.map((d) => d.value),
+    x,
+    y,
+  );
 
   const revPath = toPath(revPts);
   const expPath = toPath(expPts);
 
   // X labels: ưu tiên label từ revenue, nếu thiếu thì lấy từ expense
-  const labels = Array.from({ length: n }).map((_, i) => revenue[i]?.label ?? expense[i]?.label ?? "");
+  const labels = Array.from({ length: n }).map(
+    (_, i) => revenue[i]?.label ?? expense[i]?.label ?? "",
+  );
 
   return (
     <div className="w-full overflow-x-auto">
@@ -77,7 +85,12 @@ export default function RevenueExpenseChart({
                 strokeDasharray="4 4"
                 strokeWidth="1"
               />
-              <text x={padding.l - 10} y={yy + 4} textAnchor="end" className="fill-neutral-500 text-[12px]">
+              <text
+                x={padding.l - 10}
+                y={yy + 4}
+                textAnchor="end"
+                className="fill-neutral-500 text-[12px]"
+              >
                 {t === 0 ? "0" : `${t / 1000}k`}
               </text>
             </g>

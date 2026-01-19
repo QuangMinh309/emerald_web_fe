@@ -59,36 +59,38 @@ interface UpdateModalProps {
   setOpen: (value: boolean) => void;
   serviceId?: number;
 }
-const UpdateServiceSchema = z.object({
-  name: z.string().min(1, "Vui lòng nhập tên dịch vụ"),
-  description: z.string().optional(),
-  unitPrice: z
-    .string()
-    .min(1, "Vui lòng nhập giá")
-    .refine((v) => !Number.isNaN(Number(v)), "Giá không hợp lệ"),
-  unitTimeBlock: z.string().min(1, "Vui lòng chọn đơn vị"),
-  openHour: z.string().min(1, "Vui lòng chọn giờ mở cửa"),
-  closeHour: z.string().min(1, "Vui lòng chọn giờ đóng cửa"),
+const UpdateServiceSchema = z
+  .object({
+    name: z.string().min(1, "Vui lòng nhập tên dịch vụ"),
+    description: z.string().optional(),
+    unitPrice: z
+      .string()
+      .min(1, "Vui lòng nhập giá")
+      .refine((v) => !Number.isNaN(Number(v)), "Giá không hợp lệ"),
+    unitTimeBlock: z.string().min(1, "Vui lòng chọn đơn vị"),
+    openHour: z.string().min(1, "Vui lòng chọn giờ mở cửa"),
+    closeHour: z.string().min(1, "Vui lòng chọn giờ đóng cửa"),
 
-  totalSlot: z
-    .string()
-    .min(1, "Vui lòng nhập sức chứa")
-    .refine((v) => Number(v) > 0, "Sức chứa phải lớn hơn 0"),
-  type: z.string().optional(),
-}).superRefine((data, ctx) => {
-  const unit = Number(data.unitTimeBlock || 0);
-  if (!unit) return;
+    totalSlot: z
+      .string()
+      .min(1, "Vui lòng nhập sức chứa")
+      .refine((v) => Number(v) > 0, "Sức chứa phải lớn hơn 0"),
+    type: z.string().optional(),
+  })
+  .superRefine((data, ctx) => {
+    const unit = Number(data.unitTimeBlock || 0);
+    if (!unit) return;
 
-  const dur = durationMinutes(data.openHour, data.closeHour);
+    const dur = durationMinutes(data.openHour, data.closeHour);
 
-  if (dur < unit) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      path: ["closeHour"],
-      message: `Tổng thời gian hoạt động phải từ ${unit} phút trở lên`,
-    });
-  }
-});
+    if (dur < unit) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["closeHour"],
+        message: `Tổng thời gian hoạt động phải từ ${unit} phút trở lên`,
+      });
+    }
+  });
 
 type ServiceFormValues = z.infer<typeof UpdateServiceSchema>;
 
@@ -115,10 +117,8 @@ const UpdateServiceModal = ({ open, setOpen, serviceId }: UpdateModalProps) => {
   });
   const openHour = form.watch("openHour");
   const closeHour = form.watch("closeHour");
-  const isOvernight =
-    openHour && closeHour && toMinutes(closeHour) < toMinutes(openHour);
-  const dur =
-    openHour && closeHour ? durationMinutes(openHour, closeHour) : null;
+  const isOvernight = openHour && closeHour && toMinutes(closeHour) < toMinutes(openHour);
+  const dur = openHour && closeHour ? durationMinutes(openHour, closeHour) : null;
 
   useEffect(() => {
     if (open) {
@@ -445,9 +445,7 @@ const UpdateServiceModal = ({ open, setOpen, serviceId }: UpdateModalProps) => {
                 setRemoveExistingImage(true);
               }
             }}
-            existingUrls={
-              existingImageUrl && !removeExistingImage ? [existingImageUrl] : []
-            }
+            existingUrls={existingImageUrl && !removeExistingImage ? [existingImageUrl] : []}
             onRemoveExisting={() => setRemoveExistingImage(true)}
             maxImages={1}
           />

@@ -50,4 +50,3 @@ export const isJwtExpired = (token: string) => {
     return true;
   }
 };
-

@@ -3,7 +3,7 @@ export type RangeType = "month" | "year" | "custom";
 export type ReportsParams = {
   // rangeType: RangeType;
   startDate?: string; // "YYYY-MM-DD"
-  endDate?: string;   // "YYYY-MM-DD"
+  endDate?: string; // "YYYY-MM-DD"
 };
 
 export type RevenueBlock = {
@@ -21,7 +21,7 @@ export type MaintenanceBlock = {
 };
 
 export type RevenueExpenseRawItem = {
-  label: string;      // "2026-01-02"
+  label: string; // "2026-01-02"
   revenue: number;
   expense: number;
 };

@@ -35,7 +35,7 @@ interface StatCardProps {
 
 export default function StatCard(props: StatCardProps) {
   const { title, value, note, accent, clickable, icon, className, onClick } = props;
-const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (!clickable) return;
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
@@ -57,7 +57,6 @@ const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
       tabIndex={clickable ? 0 : undefined}
       onClick={clickable ? onClick : undefined}
       onKeyDown={handleKeyDown}
-
     >
       <div className="flex justify-between items-start mb-2">
         <div className="text-base font-semibold tracking-wide">{title}</div>

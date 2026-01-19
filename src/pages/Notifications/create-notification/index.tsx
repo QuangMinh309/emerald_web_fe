@@ -241,7 +241,7 @@ const CreateNotificationModal = ({ open, setOpen }: ModalProps) => {
                       <FormControl>
                         <SelectTrigger>
                           {isUrgent ? (
-                            <span className="text-red-600">Thông báo khẩn</span>
+                            <span className="text-orange-600">Thông báo khẩn</span>
                           ) : (
                             <span className="text-sm">Bình thường</span>
                           )}
@@ -254,7 +254,7 @@ const CreateNotificationModal = ({ open, setOpen }: ModalProps) => {
                         </SelectItem>
 
                         <SelectItem value="true">
-                          <span className="text-red-600">Thông báo khẩn</span>
+                          <span className="text-orange-600">Thông báo khẩn</span>
                         </SelectItem>
                       </SelectContent>
                     </Select>

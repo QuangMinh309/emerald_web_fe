@@ -267,7 +267,7 @@ const UpdateNotificationModal = ({ open, setOpen, notificationId }: UpdateModalP
                       <FormControl>
                         <SelectTrigger>
                           {isUrgent ? (
-                            <span className="text-red-600">Thông báo khẩn</span>
+                            <span className="text-orange-600">Thông báo khẩn</span>
                           ) : (
                             <span className="text-sm">Bình thường</span>
                           )}
@@ -278,7 +278,7 @@ const UpdateNotificationModal = ({ open, setOpen, notificationId }: UpdateModalP
                           <span>Bình thường</span>
                         </SelectItem>
                         <SelectItem value="true">
-                          <span className="text-red-600">Thông báo khẩn</span>
+                          <span className="text-orange-600">Thông báo khẩn</span>
                         </SelectItem>
                       </SelectContent>
                     </Select>
