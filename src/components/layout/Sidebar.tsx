@@ -14,6 +14,7 @@ import {
   TrendingUp,
   UserCog,
   UtilityPole,
+  User2,
 } from "lucide-react";
 import Logo from "@assets/logo.svg";
 
@@ -34,6 +35,7 @@ const Sidebar: React.FC = () => {
     { id: "notifications", icon: MessageSquare, label: "Thông báo" },
     { id: "reports", icon: TrendingUp, label: "Báo cáo thống kê" },
     { id: "permissions", icon: UserCog, label: "Phân quyền" },
+    { id: "profile", icon: User2, label: "Tài khoản" },
   ];
 
   const handleNavigate = (path: string) => {

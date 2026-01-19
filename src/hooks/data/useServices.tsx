@@ -39,8 +39,6 @@ export const useCreateService = () => {
     mutationFn: createService,
     onSuccess: (newItem) => {
       queryClient.setQueryData(["services"], (old: Service[] = []) => [newItem, ...old]);
-      // hoặc invalidate nếu muốn chắc chắn sync với server:
-      // queryClient.invalidateQueries({ queryKey: ["services"] });
     },
   });
 };

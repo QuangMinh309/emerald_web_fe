@@ -29,7 +29,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 const [user, setUser] = useState<AuthUser | null>(() => getStoredUser());
   const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
-    console.log("user changed:", user);
   }, [user]);
   useEffect(() => {
     const boot = async () => {
@@ -103,8 +102,6 @@ const [user, setUser] = useState<AuthUser | null>(() => getStoredUser());
 
   return profile as AuthUser;
 };
-
-
 
   const logout = () => {
     clearAuthStorage();
