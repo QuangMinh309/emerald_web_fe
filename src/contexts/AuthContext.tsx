@@ -2,16 +2,7 @@ import type { ReactNode } from "react";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { AuthUser } from "@/types/auth";
 import { getProfile, login as loginRequest } from "@/services/auth.service";
-import {
-  clearAuthStorage,
-  getAccessToken,
-  getRefreshToken,
-  getStoredUser,
-  isJwtExpired,
-  setStoredUser,
-  setTokens,
-} from "@/lib/auth-storage";
-import axios from "axios";
+import { clearAuthStorage, getAccessToken, setStoredUser, setTokens } from "@/lib/auth-storage";
 import { connectSocket, disconnectSocket } from "@/sockets/socket";
 
 type AuthContextValue = {
@@ -22,9 +13,6 @@ type AuthContextValue = {
   logout: () => void;
   refreshProfile: () => Promise<void>;
 };
-const refreshClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:4000/api",
-});
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
@@ -34,51 +22,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const boot = async () => {
+      const token = getAccessToken();
+      // ✅ KHÔNG có token → không gọi API
+      if (!token) {
+        console.log("No access token found");
+        setIsLoading(false);
+        return;
+      }
+
       try {
-        let access = getAccessToken();
-        const refresh = getRefreshToken();
-
-        // ✅ nếu access hết hạn mà có refresh -> refresh ngay khi boot
-        if (access && refresh && isJwtExpired(access)) {
-          const rr = await refreshClient.post(
-            "/auth/refresh",
-            {},
-            { headers: { Authorization: `Bearer ${refresh}` } },
-          );
-          const { accessToken, refreshToken: newRefresh } = rr.data.data;
-          setTokens(accessToken, newRefresh);
-          access = accessToken;
-        }
-
-        if (!access) return;
-
-        try {
-          const profile = await getProfile();
-          setStoredUser(profile);
-          setUser(profile);
-          return;
-        } catch (e: any) {
-          const status = e?.response?.status;
-
-          // Nếu 401 mà có refresh -> refresh rồi lấy profile lại 1 lần
-          if (status === 401 && refresh) {
-            const rr = await refreshClient.post(
-              "/auth/refresh",
-              {},
-              { headers: { Authorization: `Bearer ${refresh}` } },
-            );
-            const { accessToken, refreshToken: newRefresh } = rr.data.data;
-            setTokens(accessToken, newRefresh);
-
-            const profile = await getProfile();
-            setStoredUser(profile);
-            setUser(profile);
-            return;
-          }
-
-          throw e;
-        }
-      } catch {
+        const profile = await getProfile();
+        setStoredUser(profile);
+        setUser(profile);
+      } catch (err) {
         clearAuthStorage();
       } finally {
         setIsLoading(false);
@@ -91,7 +47,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (email: string, password: string) => {
     const data = await loginRequest(email, password);
     const { accessToken, refreshToken, ...profile } = data;
-    setTokens(accessToken, refreshToken);
+    setTokens(accessToken);
     setStoredUser(profile);
     setUser(profile);
     connectSocket();

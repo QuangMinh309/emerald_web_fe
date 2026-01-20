@@ -10,3 +10,8 @@ export const getProfile = async () => {
   const response = await axiosInstance.get("/auth/profile");
   return response.data.data as AuthUser;
 };
+export const refreshToken = async () => {
+  const response = await axiosInstance.post("/auth/refresh");
+  console.log("Refresh token response:", response.data);
+  return response.data.data as { accessToken: string };
+};
