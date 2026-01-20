@@ -36,3 +36,7 @@ export const deleteService = async (id: number) => {
   const res = await axiosInstance.delete(`/services/${id}`);
   return res.data;
 };
+export const deleteManyServices = async (ids: number[]) => {
+    const res = await axiosInstance.post(`/services/delete-many`, { ids });
+    return res.data;
+};

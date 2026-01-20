@@ -6,6 +6,7 @@ import {
   getServiceById,
   getServices,
   updateService,
+  deleteManyServices,
 } from "@/services/services.service";
 import type { Service } from "@/types/service";
 
@@ -58,6 +59,16 @@ export const useDeleteService = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: deleteService,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["services"] });
+    },
+  });
+};
+
+export const useDeleteManyServices = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (ids: number[]) => deleteManyServices(ids),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["services"] });
     },

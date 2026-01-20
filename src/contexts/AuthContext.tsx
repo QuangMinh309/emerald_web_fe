@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { AuthUser } from "@/types/auth";
-import { getProfile, login as loginRequest } from "@/services/auth.service";
+import { getProfile, login as loginRequest, logout as logoutRequest } from "@/services/auth.service";
 import {
   clearAuthStorage,
   getAccessToken,
@@ -16,7 +16,7 @@ type AuthContextValue = {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<AuthUser>;
-  logout: () => void;
+  logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 };
 
@@ -42,6 +42,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(profile);
       } catch (err) {
         clearAuthStorage();
+        setUser(null);
       } finally {
         setIsLoading(false);
       }
@@ -56,14 +57,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setTokens(accessToken);
     setStoredUser(profile);
     setUser(profile);
-    connectSocket();
+
     return profile;
   };
 
-  const logout = () => {
-    clearAuthStorage();
-    disconnectSocket();
-    setUser(null);
+  const logout = async () => {
+    try {
+      await logoutRequest();
+    } catch {
+    } finally {
+      clearAuthStorage();
+      setUser(null);
+    }
   };
 
   const refreshProfile = async () => {
