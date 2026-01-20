@@ -14,7 +14,7 @@ import type { ActionOption } from "@/types";
 import type { Service } from "@/types/service";
 import { serviceColumns } from "./columns";
 
-import { useServices } from "@/hooks/data/useServices";
+import { useServices, useServiceDetail } from "@/hooks/data/useServices";
 import DeleteService from "./delete-service";
 import CreateServiceModal from "./create-service";
 import UpdateServiceModal from "./update-service";
@@ -31,9 +31,7 @@ const ServicesPage = () => {
   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
   const [serviceToEdit, setServiceToEdit] = useState<Service | null>(null);
 
-  // Lấy dữ liệu từ Hook (mock đang nằm ở service file)
   const { data: services = [], isLoading, isError, error, refetch } = useServices();
-
   // Filter theo search (bạn có thể thêm lọc theo tab/status sau)
   const filteredData = useMemo(() => {
     let result = [...services];

@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import PageHeader from "@components/common/PageHeader";
 import ServicesBarChart, { type BarPoint } from "./components/ServiceBarChart";
 import AssetStatusSummary from "./components/AssetStatus";
@@ -7,13 +7,13 @@ import StatCard from "../../components/common/StatCard";
 import { TabNavigation } from "@/components/common/TabNavigation";
 import { MonthPicker } from "./components/MonthPicker";
 import { YearPicker } from "./components/YearPicker";
-import { DatePicker } from "@/components/common/DatePicker";
 import { useReports } from "@/hooks/data/useReport";
 import type { RangeType } from "@/types/report";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import Spinner from "@/components/common/Spinner";
 
-const DEFAULT_FROM = new Date(2000, 0, 1);
+const DEFAULT_FROM = new Date(2025, 11, 1);
 const DEFAULT_TO = new Date();
 
 function toISODate(d?: Date) {
@@ -23,7 +23,6 @@ function toISODate(d?: Date) {
   const dd = String(d.getDate()).padStart(2, "0");
   return `${yyyy}-${mm}-${dd}`;
 }
-
 function endOfMonth(d: Date) {
   return new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59, 999);
 }
@@ -68,14 +67,12 @@ const ReportPage = () => {
   const reportParams = useMemo(() => {
     if (periodTab === "month" || periodTab === "year") {
       return {
-        rangeType: periodTab,
         startDate: toISODate(dateRange.from),
         endDate: toISODate(dateRange.to),
       };
     }
 
     return {
-      rangeType: "custom" as const,
       startDate: toISODate(allFrom),
       endDate: toISODate(allTo),
     };
@@ -103,10 +100,7 @@ const ReportPage = () => {
     [];
 
   const assetStatus = data?.assetStatus;
-  // console.log("revenuePoints", revenuePoints);
   const hasDataRevenue = data?.revenueExpenseChart && data.revenueExpenseChart.length > 0;
-  const hasDataService = data?.serviceBookingChart && data.serviceBookingChart.length > 0;
-  const hasDataAsset = assetStatus;
   useEffect(() => {
     if (periodTab === "custom") {
       setAllFrom((v) => v ?? DEFAULT_FROM);
@@ -133,106 +127,101 @@ const ReportPage = () => {
           </div>
         }
       />
-
       <div className="space-y-4">
         <div className="flex justify-end">
-          {periodTab === "month" && <MonthPicker value={monthValue} onChange={setMonthValue} />}
+          {periodTab === "month" && (
+            <MonthPicker value={monthValue} onChange={setMonthValue} yearRange={2} />
+          )}
           {periodTab === "year" && (
-            <YearPicker value={Number(yearValue)} onChange={(year) => setYearValue(String(year))} />
+            <YearPicker
+              value={Number(yearValue)}
+              onChange={(year) => setYearValue(String(year))}
+              yearRange={2}
+            />
           )}
           {periodTab === "custom" && (
             <div className="flex items-center gap-2">
-              <div className="w-[160px]">
-                <DatePicker
-                  value={allFrom}
-                  placeholder="Từ ngày"
-                  onChange={(d) => {
-                    setAllFrom(d);
-                    if (d && allTo && d > allTo) setAllTo(undefined);
-                  }}
-                />
-              </div>
-              <span className="text-neutral-500">-</span>
-              <div className="w-[160px]">
-                <DatePicker
-                  value={allTo}
-                  placeholder="Đến ngày"
-                  onChange={(d) => {
-                    // chặn chọn to < from
-                    if (d && allFrom && d < allFrom) return;
-                    setAllTo(d);
-                  }}
-                />
-              </div>
+              <span className="text-sm text-neutral-500">{dateRange.label}</span>
             </div>
           )}
         </div>
 
-        {/* Top stats */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <StatCard
-            title="Doanh thu"
-            value={totalRevenue.toLocaleString("vi-VN")}
-            note={`${percentageComparedToPreviousMonth >= 0 ? "+" : ""}${percentageComparedToPreviousMonth}% so với kỳ trước`}
-            accent="emerald"
-          />
-          <StatCard
-            title="Tổng công nợ"
-            value={totalDebt.toLocaleString("vi-VN")}
-            note={`${totalApartmentsOwing} căn hộ còn nợ`}
-            accent="red"
-          />
-          <StatCard
-            title="Đã bảo trì"
-            value={`${totalAssetsMaintenanced} thiết bị`}
-            note="Xem chi tiết"
-            accent="amber"
-            clickable
-            onClick={() => navigate("/maintenances")}
-          />
-        </div>
-
-        {/* Big chart */}
-        <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
-          <div className="mb-4 flex items-center justify-between gap-3">
-            <h2 className="text-xl font-semibold">Doanh thu &amp; Chi phí</h2>
-            <span className="text-sm text-neutral-500">{dateRange.label}</span>
+        {isLoading ? (
+          <div className="flex justify-center items-center h-[500px] ">
+            <Spinner />
           </div>
-          {hasDataRevenue ? (
-            <RevenueExpenseChart revenue={revenuePoints} expense={expensePoints} />
-          ) : (
-            <div className="rounded-xl border border-dashed border-neutral-200 p-6 text-sm text-neutral-600">
-              Không có dữ liệu trong khoảng <b>{dateRange.label}</b>. Hãy thử chọn tháng/năm khác.
-            </div>
-          )}
-        </div>
-
-        {/* Bottom cards */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
-            <h3 className="mb-3 text-sm font-semibold">Dịch vụ (lượt)</h3>
-            {hasDataService ? (
-              <ServicesBarChart data={servicePoints} />
-            ) : (
-              <div className="text-sm text-neutral-600">Chưa có dữ liệu.</div>
-            )}
-          </div>
-
-          <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
-            <h3 className="mb-7 text-sm font-semibold">Tài sản &amp; Thiết bị</h3>
-            {hasDataAsset ? (
-              <AssetStatusSummary
-                data={{
-                  broken: assetStatus?.brokenAssets ?? 0,
-                  maintaining: assetStatus?.maintenancedAssets ?? 0,
-                  good: assetStatus?.workingAssets ?? 0,
-                }}
+        ) : (
+          <>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              <StatCard
+                title="Doanh thu"
+                value={totalRevenue.toLocaleString("vi-VN")}
+                note={
+                  percentageComparedToPreviousMonth > 0
+                    ? `${percentageComparedToPreviousMonth > 0 ? "+" : ""}${percentageComparedToPreviousMonth}% so với kỳ trước`
+                    : "VND"
+                }
+                accent="emerald"
               />
-            ) : (
-              <div className="text-sm text-neutral-600">Chưa có dữ liệu.</div>
-            )}
-          </div>
-        </div>
+              <StatCard
+                title="Tổng công nợ"
+                value={totalDebt.toLocaleString("vi-VN")}
+                note={`${totalApartmentsOwing} căn hộ còn nợ`}
+                accent="red"
+              />
+              <StatCard
+                title="Đã bảo trì"
+                value={`${totalAssetsMaintenanced}`}
+                note="thiết bị"
+                accent="amber"
+                clickable
+                onClick={() => navigate("/maintenances")}
+              />
+            </div>
+
+            {/* Big chart */}
+            <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <h2 className="text-xl font-semibold">Doanh thu &amp; Chi phí</h2>
+              </div>
+              {hasDataRevenue ? (
+                <RevenueExpenseChart revenue={revenuePoints} expense={expensePoints} />
+              ) : (
+                <div className="rounded-xl border border-dashed border-neutral-200 p-6 text-sm text-neutral-600">
+                  Không có dữ liệu trong khoảng <b>{dateRange.label}</b>. Hãy thử chọn tháng/năm
+                  khác.
+                </div>
+              )}
+            </div>
+
+            {/* Bottom cards */}
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
+                <h3 className="mb-3 text-sm font-semibold">Dịch vụ (lượt)</h3>
+                {hasDataRevenue ? (
+                  <ServicesBarChart data={servicePoints} />
+                ) : (
+                  <div className="text-sm text-neutral-600">Chưa có dữ liệu.</div>
+                )}
+              </div>
+
+              <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
+                <h3 className="mb-7 text-sm font-semibold">Tài sản &amp; Thiết bị</h3>
+                {hasDataRevenue ? (
+                  <AssetStatusSummary
+                    data={{
+                      broken: assetStatus?.brokenAssets ?? 0,
+                      maintaining: assetStatus?.maintenancedAssets ?? 0,
+                      good: assetStatus?.workingAssets ?? 0,
+                    }}
+                  />
+                ) : (
+                  <div className="text-sm text-neutral-600">Chưa có dữ liệu.</div>
+                )}
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

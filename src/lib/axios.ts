@@ -3,7 +3,13 @@ import { clearTokens, getAccessToken, setTokens } from "@/lib/auth-storage";
 import { refreshToken } from "@/services/auth.service";
 
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8080/api",
+  baseURL: BASE_URL,
+  timeout: 50000,
+  headers: { "Content-Type": "application/json" },
+});
+
+export const axiosMultipart = axios.create({
+  baseURL: BASE_URL,
   timeout: 50000,
   headers: {
     "Content-Type": "application/json",

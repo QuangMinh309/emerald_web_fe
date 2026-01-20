@@ -13,6 +13,7 @@ import {
   TrendingUp,
   UserCog,
   UtilityPole,
+  User2,
   AlertCircle,
   Receipt,
 } from "lucide-react";
@@ -36,6 +37,7 @@ const Sidebar: React.FC = () => {
     { id: "notifications", icon: MessageSquare, label: "Thông báo" },
     { id: "reports", icon: TrendingUp, label: "Báo cáo thống kê" },
     { id: "permissions", icon: UserCog, label: "Phân quyền" },
+    { id: "profile", icon: User2, label: "Tài khoản" },
   ];
 
   const handleNavigate = (path: string) => {

@@ -7,9 +7,7 @@ export const useReports = (params: ReportsParams, enabled = true) =>
     queryKey: ["reports", params],
     queryFn: () => getReports(params),
 
-    enabled:
-      enabled &&
-      (params.rangeType !== "custom" || (Boolean(params.startDate) && Boolean(params.endDate))),
+    enabled: enabled && Boolean(params.startDate) && Boolean(params.endDate),
 
     retry: (count, err: any) => {
       const status = err?.response?.status ?? err?.response?.data?.statusCode;

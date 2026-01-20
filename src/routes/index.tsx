@@ -36,6 +36,7 @@ const ForgotPassword = lazy(() => import("@/pages/ForgotPassword"));
 const VerifyEmail = lazy(() => import("@/pages/VerifyEmail"));
 const ResetPassword = lazy(() => import("@/pages/ResetPassword"));
 const VotingsPage = lazy(() => import("@/pages/Votings/view-votings"));
+const ProfilePage = lazy(() => import("@/pages/Profile"));
 
 export const routes = createBrowserRouter([
   { path: "/login", element: <Login /> },
@@ -76,6 +77,7 @@ export const routes = createBrowserRouter([
       { path: "technicians/:id", element: <DetailTechnicianPage /> },
       { path: "maintenances", element: <MaintenancesPage /> },
       { path: "maintenances/:id", element: <DetailMaintenancePage /> },
+      { path: "profile", element: <ProfilePage /> },
       { path: "issues", element: <IssuesPage /> },
       { path: "issues/:id", element: <DetailIssuePage /> },
       { path: "fees", element: <FeesPage /> },

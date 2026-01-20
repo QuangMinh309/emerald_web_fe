@@ -1,5 +1,10 @@
 export type UserRole = "ADMIN" | "RESIDENT" | "TECHNICIAN";
 
+export type ChangePasswordPayload = {
+  oldPassword: string;
+  newPassword: string;
+};
+
 export type AuthUser = {
   id: number;
   email: string;

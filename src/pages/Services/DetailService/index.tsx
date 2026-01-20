@@ -4,19 +4,22 @@ import { useParams } from "react-router-dom";
 import PageHeader from "@components/common/PageHeader";
 import CustomTable from "@components/common/CustomTable";
 import { SearchBar } from "@/components/common/SearchBar";
+import { Edit, Trash2 } from "lucide-react";
 
 import { bookingColumns } from "./columns";
 import { normalizeString } from "@/utils/string";
 
 import { useServiceDetail } from "@hooks/data/useServices";
-import { useBookingsByServiceId } from "@/hooks/data/useBookings";
-
+import type { BookingRow, Service } from "@/types/service";
+import { Button } from "@/components/ui/button";
+import DeleteService from "../delete-service";
+import UpdateServiceModal from "../update-service";
+import { useNavigate } from "react-router-dom";
 const formatVND = (n?: number) =>
   n == null ? "—" : new Intl.NumberFormat("vi-VN").format(n) + " VND";
 
 const formatHour = (time?: string) => {
   if (!time) return "—";
-  // hỗ trợ "08:00" hoặc "08:00:00"
   const parts = time.split(":");
   const h = String(Number(parts[0] || 0));
   const m = parts[1] ?? "00";
@@ -25,9 +28,14 @@ const formatHour = (time?: string) => {
 };
 
 const DetailServicePage = () => {
+  const navigate = useNavigate();
   const { id } = useParams();
   const serviceId = Number(id);
   const isValidId = Number.isFinite(serviceId) && serviceId > 0;
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+
+  const [isUpdateOpen, setIsUpdateOpen] = useState(false);
+  const [serviceToEdit, setServiceToEdit] = useState<Service | null>(null);
 
   // Service query
   const {
@@ -38,14 +46,27 @@ const DetailServicePage = () => {
     refetch: refetchService,
   } = useServiceDetail(serviceId, isValidId);
 
-  // Bookings query
-  const {
-    data: bookings = [],
-    isLoading: bookingLoading,
-    isError: bookingError,
-    error: bookingErrObj,
-    refetch: refetchBookings,
-  } = useBookingsByServiceId(serviceId, isValidId);
+  const bookings: BookingRow[] =
+    service?.bookingHistory?.flatMap((b) =>
+      (b.timestamps ?? []).map((t, idx) => ({
+        id: `${b.id}-${idx}`,
+        bookingId: b.id,
+
+        code: b.code,
+        residentName: b.residentName,
+        phoneNumber: b.phoneNumber,
+        bookingDate: b.bookingDate,
+        unitPrice: b.unitPrice,
+        totalPrice: b.totalPrice,
+        status: b.status,
+        statusLabel: b.statusLabel,
+        createdAt: b.createdAt,
+
+        startTime: t.startTime,
+        endTime: t.endTime,
+        slotIndex: idx,
+      })),
+    ) ?? [];
 
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -55,8 +76,8 @@ const DetailServicePage = () => {
 
     return bookings.filter((b) => {
       return (
-        normalizeString(b.customerName).includes(q) ||
-        normalizeString(b.customerPhone).includes(q) ||
+        normalizeString(b.residentName).includes(q) ||
+        normalizeString(b.phoneNumber).includes(q) ||
         normalizeString(b.code).includes(q)
       );
     });
@@ -88,10 +109,25 @@ const DetailServicePage = () => {
   }
 
   if (!service) return <div>Không tìm thấy dịch vụ</div>;
-
+  const headerActions = (
+    <div className="flex items-center gap-2">
+      <Button
+        className="h-9 px-3 bg-red-600 text-white border-red-200 hover:bg-red-700"
+        onClick={() => setIsDeleteOpen(true)}
+      >
+        <Trash2 size={16} className="mr-2" /> Xóa
+      </Button>
+      <Button
+        className="h-9 px-4 bg-[#1F4E3D] hover:bg-[#16382b] text-white shadow-sm"
+        onClick={() => setIsUpdateOpen(true)}
+      >
+        <Edit size={16} className="mr-2" /> Chỉnh sửa
+      </Button>
+    </div>
+  );
   return (
     <div className="p-1.5 pt-0 space-y-4">
-      <PageHeader title={service?.name ?? "Chi tiết dịch vụ"} showBack />
+      <PageHeader title={service?.name ?? "Chi tiết dịch vụ"} actions={headerActions} showBack />
 
       <div className="bg-white p-4 pt-6 pb-6 rounded-sm border border-gray-200 shadow-sm space-y-6">
         {/* Thông tin chung */}
@@ -147,24 +183,17 @@ const DetailServicePage = () => {
             <h2 className="title-text">Lịch sử đặt chỗ</h2>
             <div className="w-full">
               <SearchBar
-                placeholder="Tìm kiếm theo tên khách hàng, số điện thoại..."
+                placeholder="Tìm kiếm theo tên khách hàng, số điện thoại, mã đặt hàng..."
                 onSearch={setSearchTerm}
               />
             </div>
 
-            {bookingLoading ? (
+            {serviceLoading ? (
               <div className="p-6 text-center text-gray-500">Đang tải booking...</div>
-            ) : bookingError ? (
+            ) : serviceError ? (
               <div className="bg-red-50 border border-red-200 p-6 rounded text-center space-y-3 text-red-600">
                 <p className="font-medium">Không thể tải danh sách booking!</p>
-                <p className="text-sm">{String((bookingErrObj as any)?.message ?? "Error")}</p>
-                <button
-                  type="button"
-                  onClick={() => refetchBookings()}
-                  className="px-4 py-2 bg-red-600 text-white rounded-md text-sm"
-                >
-                  Thử lại
-                </button>
+                <p className="text-sm">{String((serviceErrObj as any)?.message ?? "Error")}</p>
               </div>
             ) : (
               <CustomTable data={filteredBookings} columns={bookingColumns} defaultPageSize={10} />
@@ -172,6 +201,20 @@ const DetailServicePage = () => {
           </div>
         </div>
       </div>
+      <DeleteService
+        open={isDeleteOpen}
+        setOpen={setIsDeleteOpen}
+        selectedService={service}
+        onDeleted={() => navigate("/services", { replace: true })}
+      />
+      <UpdateServiceModal
+        open={isUpdateOpen}
+        setOpen={(open) => {
+          setIsUpdateOpen(open);
+          if (!open) setServiceToEdit(null);
+        }}
+        serviceId={Number(id)}
+      />
     </div>
   );
 };
