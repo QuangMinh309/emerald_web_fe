@@ -2,10 +2,10 @@
 
 export type ServiceType = "NORMAL" | "COMMUNITY";
 export type ServiceStatus = "active" | "inactive"; // nếu hệ thống bạn có
-export type BookingStatus = "PAID" | "PENDING" | "CANCELLED" | "CONFIRMED"|"EXPIRED";
+export type BookingStatus = "PAID" | "PENDING" | "CANCELLED" | "CONFIRMED" | "EXPIRED";
 export interface BookingTimestamp {
   startTime: string; // "06:00"
-  endTime: string;   // "07:00"
+  endTime: string; // "07:00"
 }
 
 export interface BookingHistoryItem {
@@ -23,8 +23,8 @@ export interface BookingHistoryItem {
 }
 
 export interface BookingRow extends BookingTimestamp {
-  id: string;         
-  bookingId: number; 
+  id: string;
+  bookingId: number;
   code: string;
   residentName: string;
   phoneNumber: string;
@@ -36,7 +36,6 @@ export interface BookingRow extends BookingTimestamp {
   createdAt: string;
   slotIndex: number;
 }
-
 
 export interface Service {
   id: number;
@@ -53,4 +52,3 @@ export interface Service {
   status: ServiceStatus; // thêm trạng thái dịch vụ
   bookingHistory?: BookingHistoryItem[];
 }
-

@@ -4,7 +4,7 @@ import type { Technician } from "@/types/technician";
 import StatusBadge from "@components/common/StatusBadge";
 
 export const technicianColumns: TableColumn<Technician>[] = [
-  { key: "id", label: "ID", align: "center", width: "60px" },
+  { key: "stt", label: "STT", align: "center" },
   { key: "fullName", label: "Họ và tên", sortable: true },
   { key: "phoneNumber", label: "Số điện thoại", sortable: true },
   {

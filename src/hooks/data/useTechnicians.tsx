@@ -1,6 +1,7 @@
 import {
   createTechnician,
   deleteTechnician,
+  deleteManyTechnicians,
   getTechnicianById,
   getTechnicians,
   updateTechnician,
@@ -47,6 +48,16 @@ export const useDeleteTechnician = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: deleteTechnician,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["technicians"] });
+    },
+  });
+};
+
+export const useDeleteManyTechnicians = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (ids: number[]) => deleteManyTechnicians(ids),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["technicians"] });
     },

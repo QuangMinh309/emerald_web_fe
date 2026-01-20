@@ -2,7 +2,7 @@ import type { TableColumn } from "@/types";
 import type { AssetType } from "@/types/asset";
 
 export const assetTypeColumns: TableColumn<AssetType>[] = [
-  { key: "id", label: "ID", align: "center", width: "80px" },
+  { key: "stt", label: "STT", align: "center" },
   { key: "name", label: "Tên loại tài sản", sortable: true },
   {
     key: "description",

@@ -13,12 +13,14 @@ import { normalizeString } from "@/utils/string";
 import { useAssets, useAssetTypes } from "@/hooks/data/useAssests";
 import CreateAssetModal from "@/pages/Assets/create-asset";
 import DeleteAsset from "@/pages/Assets/delete-asset";
+import DeleteManyAssetModal from "@/pages/Assets/multiple-delete-assets";
 import type { Asset, AssetType } from "@/types/asset";
 import UpdateAssetModal from "@/pages/Assets/update-asset";
 import CreateAssetTypeModal from "@/pages/Assets/create-asset-type";
 import UpdateAssetTypeModal from "@/pages/Assets/update-asset-type";
 import DeleteAssetType from "@/pages/Assets/delete-asset-type";
 import { useNavigate } from "react-router-dom";
+import DeleteManyAssetTypeModal from "@/pages/Assets/multiple-delete-asset-types";
 
 const AssetsPage = () => {
   const navigate = useNavigate();
@@ -32,13 +34,16 @@ const AssetsPage = () => {
   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
   const [updatedAsset, setUpdatedAsset] = useState<number>();
 
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [isDeleteManyAssetOpen, setIsDeleteManyAssetOpen] = useState(false);
+
   // AssetType states
   const [isCreateAssetTypeModalOpen, setIsCreateAssetTypeModalOpen] = useState(false);
   const [isDeleteAssetTypeOpen, setIsDeleteAssetTypeOpen] = useState(false);
   const [deletedAssetType, setDeletedAssetType] = useState<AssetType>();
   const [isUpdateAssetTypeOpen, setIsUpdateAssetTypeOpen] = useState(false);
   const [updatedAssetType, setUpdatedAssetType] = useState<number>();
-
+  const [isDeleteManyAssetTypeOpen, setIsDeleteManyAssetTypeOpen] = useState(false);
   // Lấy dữ liệu từ Hooks
   const {
     data: assets = [],
@@ -134,19 +139,32 @@ const AssetsPage = () => {
           subtitle="Quản lý danh sách các tài sản, thiết bị trong tòa nhà"
           actions={
             <div className="flex items-center gap-2">
-              <button
-                onClick={() => {
-                  if (activeTab === "assets") {
-                    setNewIsModalOpen(true);
-                  } else {
-                    setIsCreateAssetTypeModalOpen(true);
-                  }
-                }}
-                className="flex items-center gap-2 bg-main text-white px-4 py-2 rounded-lg hover:bg-main/90 transition-colors text-sm font-medium"
-              >
-                <Plus className="w-4 h-4" />
-                {activeTab === "assets" ? "Tạo tài sản" : "Tạo phân loại"}
-              </button>
+              {selectedIds.length > 0 ? (
+                <button
+                  onClick={() => {
+                    if (activeTab === "asset") setIsDeleteManyAssetOpen(true);
+                    else setIsDeleteManyAssetTypeOpen(true);
+                  }}
+                  className="flex items-center gap-2 bg-destructive text-destructive-foreground px-4 py-2 rounded-lg hover:bg-destructive/90 transition-colors text-sm font-medium animate-in fade-in zoom-in-95 shadow-sm"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Xóa ({selectedIds.length})
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    if (activeTab === "assets") {
+                      setNewIsModalOpen(true);
+                    } else {
+                      setIsCreateAssetTypeModalOpen(true);
+                    }
+                  }}
+                  className="flex items-center gap-2 bg-main text-white px-4 py-2 rounded-lg hover:bg-main/90 transition-colors text-sm font-medium"
+                >
+                  <Plus className="w-4 h-4" />
+                  {activeTab === "assets" ? "Tạo tài sản" : "Tạo phân loại"}
+                </button>
+              )}
 
               <ActionDropdown
                 options={actions}
@@ -208,6 +226,8 @@ const AssetsPage = () => {
               data={filteredData as any}
               columns={columns as any}
               defaultPageSize={10}
+              onSelectionChange={setSelectedIds}
+              selection={activeTab === "assets" ? selectedIds : undefined}
               onEdit={(row) => {
                 if (activeTab === "assets") {
                   setIsUpdateOpen(true);
@@ -251,6 +271,18 @@ const AssetsPage = () => {
         open={isUpdateAssetTypeOpen}
         setOpen={setIsUpdateAssetTypeOpen}
         assetTypeId={updatedAssetType!}
+      />
+      <DeleteManyAssetModal
+        open={isDeleteManyAssetOpen}
+        setOpen={setIsDeleteManyAssetOpen}
+        selectedIds={selectedIds}
+        onSuccess={() => setSelectedIds([])}
+      />
+      <DeleteManyAssetTypeModal
+        open={isDeleteManyAssetTypeOpen}
+        setOpen={setIsDeleteManyAssetTypeOpen}
+        selectedIds={selectedIds}
+        onSuccess={() => setSelectedIds([])}
       />
     </>
   );

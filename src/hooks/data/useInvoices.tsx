@@ -1,8 +1,10 @@
 import {
   createInvoiceByAdmin,
   deleteInvoice,
+  deleteManyInvoices,
   getInvoiceById,
   getInvoices,
+  getInvoicesMadeByClient,
   updateInvoice,
   verifyInvoice,
 } from "@/services/invoices.service";
@@ -13,6 +15,13 @@ export const useInvoices = () => {
   return useQuery({
     queryKey: ["invoices"],
     queryFn: getInvoices,
+  });
+};
+
+export const useInvoicesByClient = () => {
+  return useQuery({
+    queryKey: ["invoices-client"],
+    queryFn: getInvoicesMadeByClient,
   });
 };
 
@@ -55,13 +64,23 @@ export const useDeleteInvoice = () => {
   });
 };
 
+export const useDeleteManyInvoices = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (ids: number[]) => deleteManyInvoices(ids),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
+    },
+  });
+};
+
 export const useVerifyInvoice = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: verifyInvoice,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
-      queryClient.invalidateQueries({ queryKey: ["invoice"] });
+      queryClient.invalidateQueries({ queryKey: ["invoices-client"] });
     },
   });
 };

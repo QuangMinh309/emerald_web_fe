@@ -2,7 +2,9 @@ import {
   createAsset,
   createAssetType,
   deleteAsset,
+  deleteManyAssets,
   deleteAssetType,
+  deleteManyAssetTypes,
   getAssetById,
   getAssets,
   getAssetTypeById,
@@ -59,6 +61,16 @@ export const useDeleteAsset = () => {
   });
 };
 
+export const useDeleteManyAssets = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (ids: number[]) => deleteManyAssets(ids),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["assets"] });
+    },
+  });
+};
+
 // AssetType Hooks
 export const useAssetTypes = () => {
   return useQuery({
@@ -100,6 +112,16 @@ export const useDeleteAssetType = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: deleteAssetType,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["assetTypes"] });
+    },
+  });
+};
+
+export const useDeleteManyAssetTypes = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (ids: number[]) => deleteManyAssetTypes(ids),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["assetTypes"] });
     },

@@ -16,7 +16,7 @@ const statusMap: Record<
 };
 
 export const assetColumns: TableColumn<Asset>[] = [
-  { key: "id", label: "ID", align: "center", width: "60px" },
+  { key: "stt", label: "STT", align: "center" },
   { key: "name", label: "Tên tài sản", sortable: true },
   { key: "typeName", label: "Loại thiết bị", sortable: true, filterable: true },
   {

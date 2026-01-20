@@ -11,6 +11,7 @@ import { normalizeString } from "@/utils/string";
 import { useResidents } from "@/hooks/data/useResidents";
 import CreateResidentModal from "@/pages/Residents/create-resident";
 import DeleteResident from "@/pages/Residents/delete-resident";
+import DeleteManyResidentModal from "@/pages/Residents/multiple-delete-residents";
 import type { Resident } from "@/types/resident";
 import UpdateResidentModal from "@/pages/Residents/update-resident";
 import { useNavigate } from "react-router-dom";
@@ -25,6 +26,9 @@ const ResidentsPage = () => {
   const [deletedResident, setDeletedResident] = useState<Resident>();
   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
   const [updatedResident, setUpdatedResident] = useState<number>();
+
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [isDeleteManyOpen, setIsDeleteManyOpen] = useState(false);
 
   // Lấy dữ liệu từ Hooks
   const {
@@ -89,13 +93,23 @@ const ResidentsPage = () => {
           subtitle="Quản lý danh sách cư dân trong tòa nhà"
           actions={
             <div className="flex items-center gap-2">
-              <button
-                onClick={() => setNewIsModalOpen(true)}
-                className="flex items-center gap-2 bg-main text-white px-4 py-2 rounded-lg hover:bg-main/90 transition-colors text-sm font-medium"
-              >
-                <Plus className="w-4 h-4" />
-                Tạo cư dân
-              </button>
+              {selectedIds.length > 0 ? (
+                <button
+                  onClick={() => setIsDeleteManyOpen(true)}
+                  className="flex items-center gap-2 bg-destructive text-destructive-foreground px-4 py-2 rounded-lg hover:bg-destructive/90 transition-colors text-sm font-medium animate-in fade-in zoom-in-95 shadow-sm"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Xóa ({selectedIds.length})
+                </button>
+              ) : (
+                <button
+                  onClick={() => setNewIsModalOpen(true)}
+                  className="flex items-center gap-2 bg-main text-white px-4 py-2 rounded-lg hover:bg-main/90 transition-colors text-sm font-medium"
+                >
+                  <Plus className="w-4 h-4" />
+                  Tạo cư dân
+                </button>
+              )}
 
               <ActionDropdown
                 options={actions}
@@ -135,6 +149,8 @@ const ResidentsPage = () => {
               data={filteredResidents}
               columns={residentColumns}
               defaultPageSize={10}
+              onSelectionChange={setSelectedIds}
+              selection={selectedIds}
               onEdit={(row) => {
                 setIsUpdateOpen(true);
                 setUpdatedResident((row as Resident).id);
@@ -160,6 +176,12 @@ const ResidentsPage = () => {
         open={isUpdateOpen}
         setOpen={setIsUpdateOpen}
         residentId={updatedResident!}
+      />
+      <DeleteManyResidentModal
+        open={isDeleteManyOpen}
+        setOpen={setIsDeleteManyOpen}
+        selectedIds={selectedIds}
+        onSuccess={() => setSelectedIds([])}
       />
     </>
   );

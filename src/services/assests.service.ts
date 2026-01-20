@@ -45,6 +45,12 @@ export const deleteAsset = async (assetId: number) => {
   const response = await axiosInstance.delete(`/assets/${assetId}`);
   return response.data;
 };
+
+export const deleteManyAssets = async (ids: number[]) => {
+  const response = await axiosInstance.post(`/assets/delete-many`, { ids });
+  return response.data;
+};
+
 export const getAssetById = async (id: number) => {
   const response = await axiosInstance.get(`/assets/${id}`);
   return response.data.data as AssetDetail;
@@ -85,5 +91,12 @@ export const updateAssetType = async ({
 
 export const deleteAssetType = async (assetTypeId: number) => {
   const response = await axiosInstance.delete(`/asset-types/${assetTypeId}`);
+  return response.data;
+};
+
+export const deleteManyAssetTypes = async (ids: number[]) => {
+  const response = await axiosInstance.post(`/asset-types/delete-many`, {
+    ids,
+  });
   return response.data;
 };

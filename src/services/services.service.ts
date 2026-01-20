@@ -1,6 +1,5 @@
 import axiosInstance from "@/lib/axios";
 import type { Service } from "@/types/service";
-import { axiosMultipart } from "@/lib/axios";
 
 export const getServices = async (): Promise<Service[]> => {
   const res = await axiosInstance.get("/services");
@@ -16,12 +15,20 @@ export type CreateServiceInput = Omit<Service, "id" | "createdAt">;
 
 // POST /services
 export const createService = async (payload: FormData): Promise<Service> => {
-  const res = await axiosMultipart.post("/services", payload);
+  const res = await axiosInstance.post("/services", payload, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
   return res.data.data as Service;
 };
 
 export const updateService = async (args: { id: number; payload: FormData }) => {
-  const res = await axiosMultipart.patch(`/services/${args.id}`, args.payload);
+  const res = await axiosInstance.patch(`/services/${args.id}`, args.payload, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
   return res.data.data as Service;
 };
 

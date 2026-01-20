@@ -53,7 +53,6 @@ export const getBlockById = async (id: number) => {
   return response.data.data as BlockDetail;
 };
 export const hasResidentsInBlock = async (id: number) => {
-  return { hasResidents: false };
-  // const response = await axiosInstance.get(`/blocks/${id}/has-residents`);
-  // return response.data.data as { hasResidents: boolean };
+  const response = await axiosInstance.get(`/blocks/${id}/has-residents`);
+  return response.data.data as { hasResidents: boolean };
 };

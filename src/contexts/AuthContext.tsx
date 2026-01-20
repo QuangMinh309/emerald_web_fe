@@ -7,8 +7,9 @@ import {
   getAccessToken,
   getStoredUser,
   setStoredUser,
-  setAccessToken,
+  setTokens,
 } from "@/lib/auth-storage";
+import { connectSocket, disconnectSocket } from "@/sockets/socket";
 
 type AuthContextValue = {
   user: AuthUser | null;
@@ -22,18 +23,24 @@ type AuthContextValue = {
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-const [user, setUser] = useState<AuthUser | null>(() => getStoredUser());
+  const [user, setUser] = useState<AuthUser | null>(() => getStoredUser());
   const [isLoading, setIsLoading] = useState(true);
-  
+  useEffect(() => {}, [user]);
   useEffect(() => {
     const boot = async () => {
+      const token = getAccessToken();
+      // ✅ KHÔNG có token → không gọi API
+      if (!token) {
+        console.log("No access token found");
+        setIsLoading(false);
+        return;
+      }
+
       try {
-        let access = getAccessToken();
-        if (!access) return;
-          const profile = await getProfile();
-          setStoredUser(profile);
-          setUser(profile);
-      } catch {
+        const profile = await getProfile();
+        setStoredUser(profile);
+        setUser(profile);
+      } catch (err) {
         clearAuthStorage();
         setUser(null);
       } finally {
@@ -46,11 +53,8 @@ const [user, setUser] = useState<AuthUser | null>(() => getStoredUser());
 
   const login = async (email: string, password: string) => {
     const data = await loginRequest(email, password);
-    const { accessToken, ...profile } = data;
-    console.log("accessToken trong login: ", accessToken);
-    if (!accessToken) throw new Error("Missing accessToken from login");
-
-    setAccessToken(accessToken);
+    const { accessToken, refreshToken, ...profile } = data;
+    setTokens(accessToken);
     setStoredUser(profile);
     setUser(profile);
 

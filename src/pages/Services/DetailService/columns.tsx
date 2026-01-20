@@ -70,7 +70,9 @@ export const bookingColumns: TableColumn<BookingRow>[] = [
     filterAccessor: (row) =>
       row.statusLabel ?? statusMap[String(row.status)]?.label ?? String(row.status),
     render: (row) => {
-      const config = statusMap[String(row.status)] ?? { label: row.statusLabel ?? String(row.status) };
+      const config = statusMap[String(row.status)] ?? {
+        label: row.statusLabel ?? String(row.status),
+      };
       return <StatusBadge label={config.label} type={config.type} />;
     },
   },

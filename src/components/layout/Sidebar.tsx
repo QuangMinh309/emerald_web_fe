@@ -15,6 +15,7 @@ import {
   UtilityPole,
   User2,
   AlertCircle,
+  Receipt,
 } from "lucide-react";
 import Logo from "@assets/logo.svg";
 
@@ -25,6 +26,7 @@ const Sidebar: React.FC = () => {
     { id: "blocks", icon: Building2, label: "Quản lý tòa nhà" },
     { id: "apartments", icon: Home, label: "Căn hộ" },
     { id: "invoices", icon: CircleDollarSign, label: "Công nợ" },
+    { id: "fees", icon: Receipt, label: "Phí dịch vụ" },
     { id: "residents", icon: Users, label: "Cư dân" },
     { id: "technicians", icon: UtilityPole, label: "Kỹ thuật viên" },
     { id: "assets", icon: Armchair, label: "Tài sản, thiết bị" },

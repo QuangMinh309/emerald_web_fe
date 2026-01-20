@@ -11,6 +11,7 @@ import type { ActionOption } from "@/types";
 import { normalizeString } from "@/utils/string";
 import { useMaintenanceTickets } from "@/hooks/data/useMaintenance";
 import DeleteMaintenanceModal from "@/pages/Maintenances/delete-maintenance";
+import DeleteManyMaintenanceModal from "@/pages/Maintenances/multiple-delete-maintenances";
 import type { MaintenanceTicketListItem } from "@/types/maintenance";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -35,6 +36,9 @@ const MaintenancesPage = () => {
   // delete
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [deletedTicket, setDeletedTicket] = useState<MaintenanceTicketListItem>();
+
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [isDeleteManyOpen, setIsDeleteManyOpen] = useState(false);
 
   // Lấy dữ liệu từ Hooks
   const { data: tickets = [], isLoading, isError, error, refetch } = useMaintenanceTickets();
@@ -102,14 +106,24 @@ const MaintenancesPage = () => {
           subtitle="Quản lý các yêu cầu bảo trì và sửa chữa trong chung cư"
           actions={
             <div className="flex items-center gap-2">
-              {activeTab !== "incident" && (
-                <Button
-                  onClick={() => setIsCreateScheduledModalOpen(true)}
-                  className="flex items-center gap-2 bg-main text-white px-4 py-2 rounded-lg hover:bg-main/90 transition-colors text-sm font-medium"
+              {selectedIds.length > 0 ? (
+                <button
+                  onClick={() => setIsDeleteManyOpen(true)}
+                  className="flex items-center gap-2 bg-destructive text-destructive-foreground px-4 py-2 rounded-lg hover:bg-destructive/90 transition-colors text-sm font-medium animate-in fade-in zoom-in-95 shadow-sm"
                 >
-                  <Plus className="w-4 h-4" />
-                  Tạo bảo trì định kỳ
-                </Button>
+                  <Trash2 className="w-4 h-4" />
+                  Xóa ({selectedIds.length})
+                </button>
+              ) : (
+                activeTab !== "incident" && (
+                  <Button
+                    onClick={() => setIsCreateScheduledModalOpen(true)}
+                    className="flex items-center gap-2 bg-main text-white px-4 py-2 rounded-lg hover:bg-main/90 transition-colors text-sm font-medium"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Tạo bảo trì định kỳ
+                  </Button>
+                )
               )}
 
               <ActionDropdown
@@ -162,6 +176,8 @@ const MaintenancesPage = () => {
               data={filteredTickets}
               columns={maintenanceColumns}
               defaultPageSize={10}
+              onSelectionChange={setSelectedIds}
+              selection={selectedIds}
               onEdit={(row) => {
                 if (row.type === "INCIDENT") {
                   setIsUpdateIncidentOpen(true);
@@ -184,6 +200,12 @@ const MaintenancesPage = () => {
         selectedTicket={deletedTicket}
         open={isDeleteOpen}
         setOpen={setIsDeleteOpen}
+      />
+      <DeleteManyMaintenanceModal
+        open={isDeleteManyOpen}
+        setOpen={setIsDeleteManyOpen}
+        selectedIds={selectedIds}
+        onSuccess={() => setSelectedIds([])}
       />
       {/* Incident Modals */}
       <CreateIncidentMaintenanceModal

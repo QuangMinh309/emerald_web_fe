@@ -52,3 +52,7 @@ export const getApartmentById = async (id: number) => {
   const response = await axiosInstance.get(`/apartments/${id}`);
   return response.data.data as ApartmentDetail;
 };
+export const mutilDeleteApartment = async (ids: number) => {
+  const response = await axiosInstance.post(`/apartments/delete-many`, { ids });
+  return response.data;
+};

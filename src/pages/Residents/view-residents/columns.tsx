@@ -2,7 +2,7 @@ import type { TableColumn } from "@/types";
 import type { Resident } from "@/types/resident";
 
 export const residentColumns: TableColumn<Resident>[] = [
-  { key: "id", label: "ID", align: "center", width: "60px" },
+  { key: "stt", label: "STT", align: "center" },
   { key: "fullName", label: "Họ và tên", sortable: true },
   { key: "citizenId", label: "CCCD", sortable: true },
   {

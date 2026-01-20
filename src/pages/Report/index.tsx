@@ -129,9 +129,15 @@ const ReportPage = () => {
       />
       <div className="space-y-4">
         <div className="flex justify-end">
-          {periodTab === "month" && <MonthPicker value={monthValue} onChange={setMonthValue} yearRange={2} />}
+          {periodTab === "month" && (
+            <MonthPicker value={monthValue} onChange={setMonthValue} yearRange={2} />
+          )}
           {periodTab === "year" && (
-            <YearPicker value={Number(yearValue)} onChange={(year) => setYearValue(String(year))} yearRange={2}/>
+            <YearPicker
+              value={Number(yearValue)}
+              onChange={(year) => setYearValue(String(year))}
+              yearRange={2}
+            />
           )}
           {periodTab === "custom" && (
             <div className="flex items-center gap-2">
@@ -150,10 +156,19 @@ const ReportPage = () => {
               <StatCard
                 title="Doanh thu"
                 value={totalRevenue.toLocaleString("vi-VN")}
-                note={percentageComparedToPreviousMonth > 0 ? (`${percentageComparedToPreviousMonth > 0 ? '+' : ''}${percentageComparedToPreviousMonth}% so với kỳ trước`) : "VND"}
+                note={
+                  percentageComparedToPreviousMonth > 0
+                    ? `${percentageComparedToPreviousMonth > 0 ? "+" : ""}${percentageComparedToPreviousMonth}% so với kỳ trước`
+                    : "VND"
+                }
                 accent="emerald"
               />
-              <StatCard title="Tổng công nợ" value={totalDebt.toLocaleString("vi-VN")} note={`${totalApartmentsOwing} căn hộ còn nợ`} accent="red" />
+              <StatCard
+                title="Tổng công nợ"
+                value={totalDebt.toLocaleString("vi-VN")}
+                note={`${totalApartmentsOwing} căn hộ còn nợ`}
+                accent="red"
+              />
               <StatCard
                 title="Đã bảo trì"
                 value={`${totalAssetsMaintenanced}`}
@@ -173,7 +188,8 @@ const ReportPage = () => {
                 <RevenueExpenseChart revenue={revenuePoints} expense={expensePoints} />
               ) : (
                 <div className="rounded-xl border border-dashed border-neutral-200 p-6 text-sm text-neutral-600">
-                  Không có dữ liệu trong khoảng <b>{dateRange.label}</b>. Hãy thử chọn tháng/năm khác.
+                  Không có dữ liệu trong khoảng <b>{dateRange.label}</b>. Hãy thử chọn tháng/năm
+                  khác.
                 </div>
               )}
             </div>
@@ -192,15 +208,20 @@ const ReportPage = () => {
               <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
                 <h3 className="mb-7 text-sm font-semibold">Tài sản &amp; Thiết bị</h3>
                 {hasDataRevenue ? (
-                  <AssetStatusSummary data={{ broken: assetStatus?.brokenAssets ?? 0, maintaining: assetStatus?.maintenancedAssets ?? 0, good: assetStatus?.workingAssets ?? 0 }} />
+                  <AssetStatusSummary
+                    data={{
+                      broken: assetStatus?.brokenAssets ?? 0,
+                      maintaining: assetStatus?.maintenancedAssets ?? 0,
+                      good: assetStatus?.workingAssets ?? 0,
+                    }}
+                  />
                 ) : (
                   <div className="text-sm text-neutral-600">Chưa có dữ liệu.</div>
                 )}
               </div>
             </div>
           </>
-        )
-        }
+        )}
       </div>
     </div>
   );

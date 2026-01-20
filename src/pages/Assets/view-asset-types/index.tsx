@@ -12,6 +12,7 @@ import CreateAssetTypeModal from "@/pages/Assets/create-asset-type";
 import DeleteAssetType from "@/pages/Assets/delete-asset-type";
 import type { AssetType } from "@/types/asset";
 import UpdateAssetTypeModal from "@/pages/Assets/update-asset-type";
+import DeleteManyAssetTypeModal from "@/pages/Assets/multiple-delete-asset-types";
 
 const AssetTypesPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -20,6 +21,8 @@ const AssetTypesPage = () => {
   const [deletedAssetType, setDeletedAssetType] = useState<AssetType>();
   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
   const [updatedAssetType, setUpdatedAssetType] = useState<number>();
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [isDeleteManyOpen, setIsDeleteManyOpen] = useState(false);
 
   // Lấy dữ liệu từ Hook
   const { data: assetTypes = [], isLoading, isError, error, refetch } = useAssetTypes();
@@ -76,12 +79,21 @@ const AssetTypesPage = () => {
           subtitle="Quản lý danh mục phân loại tài sản, thiết bị"
           actions={
             <div className="flex items-center gap-2">
-              <button
-                onClick={() => setIsCreateModalOpen(true)}
-                className="flex items-center gap-2 bg-main text-white px-4 py-2 rounded-lg hover:bg-main/90 transition-colors text-sm font-medium"
-              >
-                <Plus className="w-4 h-4" /> Tạo phân loại
-              </button>
+              {/* {selectedIds.length  0 ? (
+                <button
+                  onClick={() => setIsDeleteManyOpen(true)}
+                  className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
+                >
+                  <Trash2 className="w-4 h-4" /> Xóa ({selectedIds.length})
+                </button>
+              ) : (
+                <button
+                  onClick={() => setIsCreateModalOpen(true)}
+                  className="flex items-center gap-2 bg-main text-white px-4 py-2 rounded-lg hover:bg-main/90 transition-colors text-sm font-medium"
+                >
+                  <Plus className="w-4 h-4" /> Tạo phân loại
+                </button>
+              )} */}
 
               <ActionDropdown
                 options={actions}
@@ -118,6 +130,8 @@ const AssetTypesPage = () => {
               data={filteredData}
               columns={assetTypeColumns}
               defaultPageSize={10}
+              onSelectionChange={setSelectedIds}
+              selection={selectedIds}
               onEdit={(row) => {
                 console.log("Sửa", row);
                 setIsUpdateOpen(true);
@@ -142,6 +156,12 @@ const AssetTypesPage = () => {
         open={isUpdateOpen}
         setOpen={setIsUpdateOpen}
         assetTypeId={updatedAssetType!}
+      />
+      <DeleteManyAssetTypeModal
+        open={isDeleteManyOpen}
+        setOpen={setIsDeleteManyOpen}
+        selectedIds={selectedIds}
+        onSuccess={() => setSelectedIds([])}
       />
     </>
   );

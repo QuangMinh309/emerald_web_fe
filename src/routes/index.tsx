@@ -23,6 +23,8 @@ import MaintenancesPage from "@/pages/Maintenances/view-maintenances";
 import DetailMaintenancePage from "@/pages/Maintenances/detail-maintenance";
 import IssuesPage from "@/pages/Issues/view-issues";
 import DetailIssuePage from "@/pages/Issues/detail-issue";
+import FeesPage from "@/pages/Fees/view-fees";
+import DetailFeePage from "@/pages/Fees/detail-fee";
 
 const Assets = lazy(() => import("@/pages/Assets/view-assets"));
 const Notifications = lazy(() => import("@/pages/Notifications/view-notifications"));
@@ -78,6 +80,8 @@ export const routes = createBrowserRouter([
       { path: "profile", element: <ProfilePage /> },
       { path: "issues", element: <IssuesPage /> },
       { path: "issues/:id", element: <DetailIssuePage /> },
+      { path: "fees", element: <FeesPage /> },
+      { path: "fees/:id", element: <DetailFeePage /> },
     ],
   },
 ]);

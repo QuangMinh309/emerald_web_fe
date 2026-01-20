@@ -7,7 +7,7 @@ interface DeleteServiceProps {
   open: boolean;
   setOpen: (value: boolean) => void;
   selectedService: Service | undefined;
-  onDeleted?: () => void;   
+  onDeleted?: () => void;
 }
 
 const DeleteService = ({ open, setOpen, selectedService, onDeleted }: DeleteServiceProps) => {
@@ -18,7 +18,7 @@ const DeleteService = ({ open, setOpen, selectedService, onDeleted }: DeleteServ
       onSuccess: () => {
         toast.success("Dịch vụ đã được xóa thành công");
         setOpen(false);
-        onDeleted?.();              
+        onDeleted?.();
       },
       onError: (error: any) => {
         toast.error(`Ohh!!! ${error?.message ?? "Có lỗi xảy ra"}`);

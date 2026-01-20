@@ -1,106 +1,58 @@
-import axios, { type AxiosError, type AxiosRequestConfig } from "axios";
-import { clearAuthStorage, getAccessToken, setAccessToken } from "@/lib/auth-storage";
-
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
+import axios from "axios";
+import { clearTokens, getAccessToken, setTokens } from "@/lib/auth-storage";
+import { refreshToken } from "@/services/auth.service";
 
 const axiosInstance = axios.create({
-  baseURL: BASE_URL,
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8080/api",
   timeout: 50000,
+  headers: {
+    "Content-Type": "application/json",
+  },
   withCredentials: true,
-  headers: { "Content-Type": "application/json" },
 });
 
-const refreshClient = axios.create({
-  baseURL: BASE_URL,
-  timeout: 10000,
-  withCredentials: true,
-  headers: { "Content-Type": "application/json" },
+axiosInstance.interceptors.request.use((config) => {
+  const token = getAccessToken();
+
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  return config;
 });
 
-export const axiosMultipart = axios.create({
-  baseURL: BASE_URL,
-  timeout: 50000,
-  withCredentials: true,
+axiosInstance.interceptors.response.use(
+  (response) => response,
 
-});
-
-let isRefreshing = false;
-let queue: Array<(token: string | null) => void> = [];
-
-const flushQueue = (token: string | null) => {
-  queue.forEach((cb) => cb(token));
-  queue = [];
-};
-
-const forceLogout = async () => {
-  clearAuthStorage();
-  if (window.location.pathname !== "/login") window.location.assign("/login");
-};
-
-function attachAuthInterceptors(client: typeof axiosInstance) {
-  client.interceptors.request.use((config) => {
-    const token = getAccessToken();
-    if (token) {
-      (config.headers as any) = config.headers ?? {};
-      (config.headers as any).Authorization = `Bearer ${token}`;
-    }
-    return config;
-  });
-
-  client.interceptors.response.use(
-    (res) => res,
-    async (error: AxiosError) => {
-      if (!error.response) return Promise.reject(error);
-
-      const status = error.response.status;
-      const original = error.config as AxiosRequestConfig & { _retry?: boolean };
-      const url = String(original?.url ?? "");
-
-      if (url.includes("/auth/")) return Promise.reject(error);
-
-      // Không xử lý refresh cho TH nay
-      if (status !== 401 || original._retry) return Promise.reject(error);
-
-      if (isRefreshing) {
-        console.log("Dang refresh token");
-        return new Promise((resolve, reject) => {
-          queue.push((token) => {
-            if (!token) return reject(error);
-            (original.headers as any) = original.headers ?? {};
-            (original.headers as any).Authorization = `Bearer ${token}`;
-            resolve(client(original));
-          });
-        });
-      }
-
-      original._retry = true;
-      isRefreshing = true;
+  async (error) => {
+    const originalRequest = error.config;
+    // nếu token hết hạn
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      console.log(error.response?.status);
+      originalRequest._retry = true;
 
       try {
-        const rr = await refreshClient.post(
-          "/auth/refresh"
-        );
-        const accessToken = rr.data?.accessToken ?? rr.data?.data?.accessToken as string | undefined;
-        if (!accessToken) throw new Error("No accessToken in refresh response");
+        const res = await refreshToken();
 
-        setAccessToken(accessToken);
-        flushQueue(accessToken);
+        const { accessToken } = res;
+        console.log("Token refreshed", accessToken);
+        // lưu token mới
+        setTokens(accessToken);
 
-        (original.headers as any) = original.headers ?? {};
-        (original.headers as any).Authorization = `Bearer ${accessToken}`;
-        return client(original);
-      } catch (refreshErr) {
-        flushQueue(null);
-        forceLogout();
-        return Promise.reject(refreshErr);
-      } finally {
-        isRefreshing = false;
+        // gắn token mới cho request cũ
+        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+
+        // gọi lại request ban đầu
+        return axiosInstance(originalRequest);
+      } catch (err) {
+        clearTokens();
+        window.location.href = "/login";
+        return Promise.reject(err);
       }
-    },
-  );
-}
+    }
 
-attachAuthInterceptors(axiosInstance);
-attachAuthInterceptors(axiosMultipart);
+    return Promise.reject(error);
+  },
+);
 
 export default axiosInstance;

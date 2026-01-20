@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { Plus, Printer, FileDown, Trash2 } from "lucide-react";
 import PageHeader from "@/components/common/PageHeader";
 import ActionDropdown from "@/components/common/ActionDropdown";
@@ -10,14 +10,14 @@ import { invoiceColumns } from "./columns";
 import { clientInvoiceColumns } from "./clientInvoiceColumns";
 import type { ActionOption } from "@/types";
 import { normalizeString } from "@/utils/string";
-import { useInvoices } from "@/hooks/data/useInvoices";
-import type { Invoice, InvoiceDetail } from "@/types/invoice";
+import { useInvoices, useInvoicesByClient } from "@/hooks/data/useInvoices";
+import type { Invoice, InvoiceDetailWithMeterReadings } from "@/types/invoice";
 import { useNavigate } from "react-router-dom";
 import CreateInvoiceModal from "@/pages/Invoices/create-invoice";
 import DeleteInvoice from "@/pages/Invoices/delete-invoice";
+import DeleteManyInvoiceModal from "@/pages/Invoices/multiple-delete-invoices";
 import UpdateInvoiceModal from "@/pages/Invoices/update-invoice";
 import VerifyInvoiceModal from "@/pages/Invoices/verify-invoice";
-import { getInvoicesMadeByClient } from "@/services/invoices.service";
 
 const InvoicesPage = () => {
   const navigate = useNavigate();
@@ -31,11 +31,11 @@ const InvoicesPage = () => {
   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
   const [updatedInvoice, setUpdatedInvoice] = useState<number>();
 
-  // Client Invoice states
-  const [clientInvoices, setClientInvoices] = useState<InvoiceDetail[]>([]);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [isDeleteManyOpen, setIsDeleteManyOpen] = useState(false);
   const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
-  const [selectedClientInvoice, setSelectedClientInvoice] = useState<InvoiceDetail | null>(null);
-  const [isLoadingClientInvoices, setIsLoadingClientInvoices] = useState(false);
+  const [selectedClientInvoice, setSelectedClientInvoice] =
+    useState<InvoiceDetailWithMeterReadings | null>(null);
 
   // Lấy dữ liệu từ Hooks
   const {
@@ -46,24 +46,7 @@ const InvoicesPage = () => {
     refetch: refetchInvoices,
   } = useInvoices();
 
-  // Load client invoices when tab changes
-  useEffect(() => {
-    if (activeTab === "clientInvoices") {
-      const loadClientInvoices = async () => {
-        setIsLoadingClientInvoices(true);
-        try {
-          const data = await getInvoicesMadeByClient();
-          setClientInvoices(data);
-        } catch (error) {
-          console.error("Error loading client invoices:", error);
-          setClientInvoices([]);
-        } finally {
-          setIsLoadingClientInvoices(false);
-        }
-      };
-      loadClientInvoices();
-    }
-  }, [activeTab]);
+  const { data: clientInvoices = [], isLoading: isLoadingClientInvoices } = useInvoicesByClient();
 
   // Logic lọc dữ liệu Invoices
   const filteredInvoices = useMemo(() => {
@@ -136,14 +119,24 @@ const InvoicesPage = () => {
           subtitle="Quản lý danh sách các hóa đơn thanh toán"
           actions={
             <div className="flex items-center gap-2">
-              {activeTab === "invoices" && (
+              {selectedIds.length > 0 ? (
                 <button
-                  onClick={() => setNewIsModalOpen(true)}
-                  className="flex items-center gap-2 bg-main text-white px-4 py-2 rounded-lg hover:bg-main/90 transition-colors text-sm font-medium"
+                  onClick={() => setIsDeleteManyOpen(true)}
+                  className="flex items-center gap-2 bg-destructive text-destructive-foreground px-4 py-2 rounded-lg hover:bg-destructive/90 transition-colors text-sm font-medium animate-in fade-in zoom-in-95 shadow-sm"
                 >
-                  <Plus className="w-4 h-4" />
-                  Tạo hóa đơn
+                  <Trash2 className="w-4 h-4" />
+                  Xóa ({selectedIds.length})
                 </button>
+              ) : (
+                activeTab === "invoices" && (
+                  <button
+                    onClick={() => setNewIsModalOpen(true)}
+                    className="flex items-center gap-2 bg-main text-white px-4 py-2 rounded-lg hover:bg-main/90 transition-colors text-sm font-medium"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Tạo hóa đơn
+                  </button>
+                )
               )}
 
               <ActionDropdown
@@ -203,6 +196,8 @@ const InvoicesPage = () => {
                   data={filteredInvoices}
                   columns={invoiceColumns}
                   defaultPageSize={10}
+                  onSelectionChange={setSelectedIds}
+                  selection={selectedIds}
                   onEdit={(row) => {
                     setIsUpdateOpen(true);
                     setUpdatedInvoice((row as Invoice).id);
@@ -232,7 +227,7 @@ const InvoicesPage = () => {
                   columns={clientInvoiceColumns}
                   defaultPageSize={10}
                   onView={(row) => {
-                    setSelectedClientInvoice(row as InvoiceDetail);
+                    setSelectedClientInvoice(row as InvoiceDetailWithMeterReadings);
                     setIsVerifyModalOpen(true);
                   }}
                 />
@@ -258,6 +253,12 @@ const InvoicesPage = () => {
         open={isVerifyModalOpen}
         setOpen={setIsVerifyModalOpen}
         invoice={selectedClientInvoice}
+      />
+      <DeleteManyInvoiceModal
+        open={isDeleteManyOpen}
+        setOpen={setIsDeleteManyOpen}
+        selectedIds={selectedIds}
+        onSuccess={() => setSelectedIds([])}
       />
     </>
   );

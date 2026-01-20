@@ -46,7 +46,7 @@ export const createResident = async (residentData: {
   console.log("Created resident response:", response.data);
   return response.data.data as Resident;
 };
-export const updateAsset = async ({
+export const updateResident = async ({
   id,
   residentData,
 }: {
@@ -81,14 +81,93 @@ export const updateAsset = async ({
   if (residentData.image) {
     formData.append("image", residentData.image);
   }
-  const response = await axiosInstance.patch(`/residents/${id}`, formData);
+  const response = await axiosInstance.patch(`/residents/${id}`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
   return response.data.data as Resident;
 };
 export const deleteResident = async (residentId: number) => {
   const response = await axiosInstance.delete(`/residents/${residentId}`);
   return response.data;
 };
+
+export const deleteManyResidents = async (ids: number[]) => {
+  const response = await axiosInstance.post(`/residents/delete-many`, { ids });
+  return response.data;
+};
+
 export const getResidentById = async (id: number) => {
   const response = await axiosInstance.get(`/residents/${id}`);
   return response.data.data as ResidentDetail;
+};
+export const getInvoicesAndPaymentsByResidentId = async (id: number) => {
+  const response = await axiosInstance.get(`/residents/${id}/invoices`);
+  return response.data as {
+    invoices: {
+      id: number;
+      invoiceCode: string;
+      apartmentId: number;
+      period: string;
+      subtotalAmount: number;
+      vatAmount: number;
+      totalAmount: number;
+      status: string;
+      dueDate: string;
+      createdAt: string;
+      updatedAt: string;
+    }[];
+    payments: {
+      id: number;
+      txnRef: string;
+      targetType: string;
+      targetId: number;
+      amount: number;
+      currency: string;
+      paymentMethod: string;
+      status: string;
+      description: string;
+      paymentUrl: string;
+      expiresAt: string;
+      createdAt: string;
+      updatedAt: string;
+      payDate: string;
+    }[];
+  };
+};
+
+export const getAdminInvoicesAndPaymentsByResidentId = async (id: number) => {
+  const response = await axiosInstance.get(`/admin/residents/${id}/invoices`);
+  return response.data as {
+    invoices: {
+      id: number;
+      invoiceCode: string;
+      apartmentId: number;
+      period: string;
+      subtotalAmount: number;
+      vatAmount: number;
+      totalAmount: number;
+      status: string;
+      dueDate: string;
+      createdAt: string;
+      updatedAt: string;
+    }[];
+    payments: {
+      id: number;
+      txnRef: string;
+      targetType: string;
+      targetId: number;
+      amount: number;
+      currency: string;
+      paymentMethod: string;
+      status: string;
+      description: string;
+      paymentUrl: string;
+      expiresAt: string;
+      createdAt: string;
+      updatedAt: string;
+      payDate: string;
+    }[];
+  };
 };

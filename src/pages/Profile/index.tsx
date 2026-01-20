@@ -7,7 +7,7 @@ import { changePassword } from "@/services/auth.service";
 
 import PageHeader from "@components/common/PageHeader";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "./components/Card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "./components/Card";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import z from "zod";
@@ -21,7 +21,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-
 
 const formatDDMMYYYY = (iso?: string) => {
   if (!iso) return "—";
@@ -69,7 +68,7 @@ export default function ProfilePage() {
       confirmPassword: "",
     },
   });
-  
+
   const displayEmail = React.useMemo(() => {
     if (!user) return "—";
     return user.email;
@@ -88,15 +87,12 @@ export default function ProfilePage() {
       form.reset();
     } catch (err: any) {
       const msg =
-        err?.response?.data?.message ||
-        err?.message ||
-        "Đổi mật khẩu thất bại. Vui lòng thử lại.";
+        err?.response?.data?.message || err?.message || "Đổi mật khẩu thất bại. Vui lòng thử lại.";
       toast.error(msg);
     } finally {
       setChanging(false);
     }
   };
-
 
   const handleLogout = () => {
     logout();
@@ -124,13 +120,11 @@ export default function ProfilePage() {
               <div className="font-semibold text-neutral-800">{displayEmail}</div>
             </div>
             <div className="space-y-2">
-
               <div className="text-xs text-neutral-500">Vai trò</div>
               <div className="font-semibold text-neutral-800">{user?.role ?? "—"}</div>
             </div>
 
             <div className="space-y-2">
-
               <div className="text-xs text-neutral-500">Trạng thái</div>
               <div
                 className={cn(
@@ -143,7 +137,6 @@ export default function ProfilePage() {
             </div>
 
             <div className="space-y-2">
-
               <div className="text-xs text-neutral-500">Ngày tạo</div>
               <div className="font-semibold text-neutral-800">
                 {formatDDMMYYYY((user as any)?.createdAt)}
@@ -151,7 +144,6 @@ export default function ProfilePage() {
             </div>
 
             <div className="space-y-2">
-
               <div className="text-xs text-neutral-500">Cập nhật</div>
               <div className="font-semibold text-neutral-800 mb-4">
                 {formatDDMMYYYY((user as any)?.updatedAt)}

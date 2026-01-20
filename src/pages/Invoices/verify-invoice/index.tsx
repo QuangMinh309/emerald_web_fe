@@ -14,7 +14,6 @@ import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
-import type { InvoiceDetail } from "@/types/invoice";
 import { useVerifyInvoice } from "@/hooks/data/useInvoices";
 import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
@@ -23,14 +22,18 @@ import { Info } from "@/pages/Invoices/detail-invoice";
 interface VerifyInvoiceModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
-  invoice: InvoiceDetail | null;
+  invoice: any;
 }
 
 /* ================= Schema ================= */
 
 const VerifyInvoiceSchema = z.object({
-  waterIndex: z.number().min(0, "Chỉ số nước phải >= 0"),
-  electricityIndex: z.number().min(0, "Chỉ số điện phải >= 0"),
+  meterReadings: z.array(
+    z.object({
+      feeTypeId: z.number(),
+      newIndex: z.number().min(0, "Chỉ số phải >= 0"),
+    }),
+  ),
 });
 
 type VerifyInvoiceFormValues = z.infer<typeof VerifyInvoiceSchema>;
@@ -38,25 +41,53 @@ type VerifyInvoiceFormValues = z.infer<typeof VerifyInvoiceSchema>;
 /* ================= Component ================= */
 
 const VerifyInvoiceModal = ({ open, setOpen, invoice }: VerifyInvoiceModalProps) => {
+  console.log(invoice);
   const { mutate: verifyInvoice, isPending } = useVerifyInvoice();
 
   const form = useForm<VerifyInvoiceFormValues>({
     resolver: zodResolver(VerifyInvoiceSchema),
     defaultValues: {
-      waterIndex: 0,
-      electricityIndex: 0,
+      meterReadings: [],
     },
   });
 
   /* Init form when modal opens */
   useEffect(() => {
-    if (open && invoice?.invoiceDetails) {
-      form.reset({
-        waterIndex:
-          Number(invoice.invoiceDetails.find((d) => d.feeTypeName === "Tiền nước")?.amount) || 0,
-        electricityIndex:
-          Number(invoice.invoiceDetails.find((d) => d.feeTypeName === "Tiền điện")?.amount) || 0,
-      });
+    if (open && invoice?.id) {
+      // For client invoices with meterReadings
+      if (invoice?.meterReadings && Array.isArray(invoice.meterReadings)) {
+        form.reset({
+          meterReadings: invoice.meterReadings.map((reading: any) => ({
+            feeTypeId: reading.feeTypeId,
+            newIndex: reading.newIndex || 0,
+          })),
+        });
+      }
+      // For invoices with invoiceDetails (traditional structure)
+      else if (invoice?.invoiceDetails) {
+        const waterDetail = invoice.invoiceDetails.find((d: any) => d.feeTypeName === "Tiền nước");
+        const electricityDetail = invoice.invoiceDetails.find(
+          (d: any) => d.feeTypeName === "Tiền điện",
+        );
+
+        const meterReadings = [];
+        if (waterDetail) {
+          meterReadings.push({
+            feeTypeId: waterDetail.feeTypeId,
+            newIndex: Number(waterDetail.amount) || 0,
+          });
+        }
+        if (electricityDetail) {
+          meterReadings.push({
+            feeTypeId: electricityDetail.feeTypeId,
+            newIndex: Number(electricityDetail.amount) || 0,
+          });
+        }
+
+        form.reset({
+          meterReadings,
+        });
+      }
     }
   }, [open, invoice, form]);
 
@@ -67,12 +98,6 @@ const VerifyInvoiceModal = ({ open, setOpen, invoice }: VerifyInvoiceModalProps)
 
   function onSubmit(values: VerifyInvoiceFormValues) {
     if (!invoice?.id) return;
-    const waterIndexId = invoice.invoiceDetails.find(
-      (d) => d.feeTypeName === "Tiền nước",
-    )?.feeTypeId;
-    const electricityIndexId = invoice.invoiceDetails.find(
-      (d) => d.feeTypeName === "Tiền điện",
-    )?.feeTypeId;
 
     const data: {
       invoiceId: number;
@@ -82,17 +107,9 @@ const VerifyInvoiceModal = ({ open, setOpen, invoice }: VerifyInvoiceModalProps)
       }[];
     } = {
       invoiceId: invoice.id,
-      meterReadings: [
-        {
-          feeTypeId: waterIndexId!,
-          newIndex: values.waterIndex,
-        },
-        {
-          feeTypeId: electricityIndexId!,
-          newIndex: values.electricityIndex,
-        },
-      ],
+      meterReadings: values.meterReadings,
     };
+
     verifyInvoice(data, {
       onSuccess: () => {
         toast.success("Xác nhận chỉ số thành công");
@@ -106,6 +123,7 @@ const VerifyInvoiceModal = ({ open, setOpen, invoice }: VerifyInvoiceModalProps)
 
   return (
     <Modal
+      showFooter={!invoice?.meterReadingsVerified}
       open={open}
       setOpen={setOpen}
       title="Xác nhận chỉ số hóa đơn"
@@ -134,47 +152,47 @@ const VerifyInvoiceModal = ({ open, setOpen, invoice }: VerifyInvoiceModalProps)
           )}
           {/* Danh sách chỉ số */}
           <div className="space-y-3">
-            {/* Chỉ số nước */}
-            <FormField
-              disabled={isPending}
-              control={form.control}
-              name="waterIndex"
-              render={({ field }) => (
-                <FormItem className="space-y-1.5">
-                  <FormLabel isRequired>Chỉ số nước (m³)</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      placeholder="Nhập chỉ số nước"
-                      value={field.value ?? ""}
-                      onChange={(e) => field.onChange(Number(e.target.value))}
-                    />
-                  </FormControl>
-                  <FormMessage className="text-xs" />
-                </FormItem>
-              )}
-            />
+            {form.watch("meterReadings").length > 0 ? (
+              form.watch("meterReadings").map((reading: any, index: number) => {
+                // Find fee type name from the original invoice data
+                const feeTypeName =
+                  invoice?.meterReadings?.find((m: any) => m.feeTypeId === reading.feeTypeId)
+                    ?.feeType?.name || `Loại phí ${reading.feeTypeId}`;
 
-            {/* Chỉ số điện */}
-            <FormField
-              disabled={isPending}
-              control={form.control}
-              name="electricityIndex"
-              render={({ field }) => (
-                <FormItem className="space-y-1.5">
-                  <FormLabel isRequired>Chỉ số điện (kWh)</FormLabel>
-                  <FormControl>
-                    <Input
-                      value={field.value ?? ""}
-                      type="number"
-                      placeholder="Nhập chỉ số điện"
-                      onChange={(e) => field.onChange(Number(e.target.value))}
-                    />
-                  </FormControl>
-                  <FormMessage className="text-xs" />
-                </FormItem>
-              )}
-            />
+                const labelMap: { [key: string]: string } = {
+                  "Tiền nước": "Chỉ số nước (m³)",
+                  "Tiền điện": "Chỉ số điện (kWh)",
+                };
+
+                const label = labelMap[feeTypeName] || feeTypeName;
+
+                return (
+                  <FormField
+                    key={index}
+                    disabled={isPending || invoice.meterReadingsVerified}
+                    control={form.control}
+                    name={`meterReadings.${index}.newIndex`}
+                    render={({ field }) => (
+                      <FormItem className="space-y-1.5">
+                        <FormLabel isRequired>{label}</FormLabel>
+                        <FormControl>
+                          <Input
+                            disabled={isPending || invoice.meterReadingsVerified}
+                            type="number"
+                            placeholder={`Nhập ${label.toLowerCase()}`}
+                            value={field.value ?? ""}
+                            onChange={(e) => field.onChange(Number(e.target.value))}
+                          />
+                        </FormControl>
+                        <FormMessage className="text-xs" />
+                      </FormItem>
+                    )}
+                  />
+                );
+              })
+            ) : (
+              <div className="text-sm text-gray-500">Không có chỉ số để xác nhận</div>
+            )}
           </div>
         </form>
       </Form>

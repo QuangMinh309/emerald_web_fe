@@ -5,8 +5,7 @@ const USER_KEY = "auth_user";
 
 export const getAccessToken = () => localStorage.getItem(ACCESS_TOKEN_KEY);
 
-
-export const setAccessToken = (accessToken: string) => {
+export const setTokens = (accessToken: string) => {
   localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
 };
 

@@ -5,7 +5,7 @@ import { InvoiceStatusMap } from "@/constants/invoiceStatus";
 import { formatVND } from "@/utils/money";
 
 export const invoiceColumns: TableColumn<Invoice>[] = [
-  { key: "id", label: "ID", align: "center", width: "60px" },
+  { key: "stt", label: "STT", align: "center" },
   { key: "invoiceCode", label: "Mã hóa đơn", sortable: true },
   { key: "apartmentId", label: "Mã căn hộ", sortable: true, align: "center" },
   {

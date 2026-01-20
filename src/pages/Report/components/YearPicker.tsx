@@ -25,10 +25,7 @@ export function YearPicker({ value, onChange, yearRange = 6, className }: YearPi
   );
 
   return (
-    <Select
-      value={String(value || currentYear)}
-      onValueChange={(v) => onChange(Number(v))}
-    >
+    <Select value={String(value || currentYear)} onValueChange={(v) => onChange(Number(v))}>
       <SelectTrigger
         className={cn(
           "h-9 w-[140px] bg-white border-neutral-200 rounded-lg text-sm shadow-sm " +
@@ -49,9 +46,7 @@ export function YearPicker({ value, onChange, yearRange = 6, className }: YearPi
         avoidCollisions
         className="z-50 max-h-72"
       >
-        <div className="px-2 py-2 border-b text-xs font-semibold text-neutral-600">
-          Chọn năm
-        </div>
+        <div className="px-2 py-2 border-b text-xs font-semibold text-neutral-600">Chọn năm</div>
         {years.map((yy) => (
           <SelectItem key={yy} value={String(yy)} className="cursor-pointer">
             <div className="flex items-center justify-between w-full">

@@ -11,6 +11,7 @@ import { normalizeString } from "@/utils/string";
 import { useApartments } from "@/hooks/data/useApartments";
 import CreateApartmentModal from "@/pages/Apartments/create-apartment";
 import DeleteApartment from "@/pages/Apartments/delete-apartment";
+import DeleteManyApartmentModal from "@/pages/Apartments/multiple-delete-apartments";
 import type { Apartment } from "@/types/apartment";
 import UpdateApartmentModal from "@/pages/Apartments/update-apartment";
 import { useNavigate } from "react-router-dom";
@@ -25,6 +26,9 @@ const ApartmentsPage = () => {
   const [deletedApartment, setDeletedApartment] = useState<Apartment>();
   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
   const [updatedApartment, setUpdatedApartment] = useState<number>();
+
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [isDeleteManyOpen, setIsDeleteManyOpen] = useState(false);
 
   // Lấy dữ liệu từ Hooks
   const { data: apartments = [], isLoading, isError, error, refetch } = useApartments();
@@ -83,13 +87,23 @@ const ApartmentsPage = () => {
           subtitle="Quản lý danh sách các căn hộ trong chung cư"
           actions={
             <div className="flex items-center gap-2">
-              <button
-                onClick={() => setNewIsModalOpen(true)}
-                className="flex items-center gap-2 bg-main text-white px-4 py-2 rounded-lg hover:bg-main/90 transition-colors text-sm font-medium"
-              >
-                <Plus className="w-4 h-4" />
-                Tạo căn hộ
-              </button>
+              {selectedIds.length > 0 ? (
+                <button
+                  onClick={() => setIsDeleteManyOpen(true)}
+                  className="flex items-center gap-2 bg-destructive text-destructive-foreground px-4 py-2 rounded-lg hover:bg-destructive/90 transition-colors text-sm font-medium animate-in fade-in zoom-in-95 shadow-sm"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Xóa ({selectedIds.length})
+                </button>
+              ) : (
+                <button
+                  onClick={() => setNewIsModalOpen(true)}
+                  className="flex items-center gap-2 bg-main text-white px-4 py-2 rounded-lg hover:bg-main/90 transition-colors text-sm font-medium"
+                >
+                  <Plus className="w-4 h-4" />
+                  Tạo căn hộ
+                </button>
+              )}
 
               <ActionDropdown
                 options={actions}
@@ -129,6 +143,8 @@ const ApartmentsPage = () => {
               data={filteredApartments}
               columns={apartmentColumns}
               defaultPageSize={10}
+              onSelectionChange={setSelectedIds}
+              selection={selectedIds}
               onEdit={(row) => {
                 setIsUpdateOpen(true);
                 setUpdatedApartment((row as Apartment).id);
@@ -154,6 +170,12 @@ const ApartmentsPage = () => {
         open={isUpdateOpen}
         setOpen={setIsUpdateOpen}
         apartmentId={updatedApartment!}
+      />
+      <DeleteManyApartmentModal
+        open={isDeleteManyOpen}
+        setOpen={setIsDeleteManyOpen}
+        selectedIds={selectedIds}
+        onSuccess={() => setSelectedIds([])}
       />
     </>
   );

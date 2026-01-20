@@ -65,9 +65,8 @@ const DetailServicePage = () => {
         startTime: t.startTime,
         endTime: t.endTime,
         slotIndex: idx,
-      }))
+      })),
     ) ?? [];
-
 
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -207,7 +206,6 @@ const DetailServicePage = () => {
         setOpen={setIsDeleteOpen}
         selectedService={service}
         onDeleted={() => navigate("/services", { replace: true })}
-
       />
       <UpdateServiceModal
         open={isUpdateOpen}

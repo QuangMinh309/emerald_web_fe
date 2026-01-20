@@ -1,8 +1,16 @@
 import PageHeader from "@/components/common/PageHeader";
 import Spinner from "@/components/common/Spinner";
 import StatusBadge from "@/components/common/StatusBadge";
-import { useGetResidentById } from "@/hooks/data/useResidents";
+import CustomTable from "@/components/common/CustomTable";
+import {
+  useGetInvoicesAndPaymentsByResidentId,
+  useGetResidentById,
+} from "@/hooks/data/useResidents";
 import { useParams } from "react-router-dom";
+import type { TableColumn } from "@/types";
+import type { Invoice } from "@/types/invoice";
+import { formatVND } from "@/utils/money";
+import { InvoiceStatusMap } from "@/constants/invoiceStatus";
 const livingInformation = [
   {
     apartmentName: "A1",
@@ -16,10 +24,50 @@ const livingInformation = [
   },
 ];
 
+const invoiceColumns: TableColumn<Invoice>[] = [
+  { key: "stt", label: "STT", align: "center" },
+  { key: "invoiceCode", label: "Mã hóa đơn", sortable: true },
+  { key: "apartmentId", label: "Mã căn hộ", sortable: true, align: "center" },
+  {
+    key: "period",
+    label: "Kỳ thanh toán",
+    sortable: true,
+    render: (row) =>
+      new Date(row.period).toLocaleDateString("vi-VN", {
+        year: "numeric",
+        month: "2-digit",
+      }),
+  },
+  {
+    key: "totalAmount",
+    label: "Tổng tiền",
+    align: "right",
+    sortable: true,
+    render: (row) => formatVND(Number(row.totalAmount)),
+  },
+  {
+    key: "status",
+    label: "Trạng thái",
+    align: "center",
+    width: "150px",
+    render: (row) => {
+      const config = InvoiceStatusMap[row.status];
+      return <StatusBadge label={config.label} type={config.type} />;
+    },
+  },
+  {
+    key: "createdAt",
+    label: "Ngày tạo",
+    sortable: true,
+    render: (row) => new Date(row.createdAt).toLocaleDateString("vi-VN"),
+  },
+];
+
 const DetailResidentPage = () => {
   const { id } = useParams();
   const { data: resident, isLoading } = useGetResidentById(Number(id));
-
+  const { data: invoicesAndPayments = [], isLoading: isInvoicesLoading } =
+    useGetInvoicesAndPaymentsByResidentId(Number(id));
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-[500px] ">
@@ -126,11 +174,6 @@ const DetailResidentPage = () => {
             </div>
 
             <div>
-              <h3 className="display-label">Quận/Huyện</h3>
-              <p className="display-text">{resident?.district}</p>
-            </div>
-
-            <div>
               <h3 className="display-label">Phường/Xã</h3>
               <p className="display-text">{resident?.ward}</p>
             </div>
@@ -189,6 +232,23 @@ const DetailResidentPage = () => {
         <div>
           <h2 className="title-text">Hóa đơn </h2>
         </div>
+        {isInvoicesLoading ? (
+          <div className="bg-white p-12 text-center text-gray-500 border rounded shadow-sm">
+            Đang tải dữ liệu hóa đơn...
+          </div>
+        ) : invoicesAndPayments &&
+          "invoices" in invoicesAndPayments &&
+          invoicesAndPayments.invoices.length > 0 ? (
+          <CustomTable
+            data={invoicesAndPayments.invoices as any}
+            columns={invoiceColumns}
+            defaultPageSize={10}
+          />
+        ) : (
+          <div className="bg-gray-50 border border-gray-200 p-8 rounded text-center text-gray-600">
+            Không có hóa đơn nào
+          </div>
+        )}
       </div>
     </div>
   );
