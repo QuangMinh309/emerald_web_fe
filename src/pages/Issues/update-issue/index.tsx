@@ -7,6 +7,7 @@ import z from "zod";
 import { toast } from "sonner";
 import { ArrowRight, Ticket, CheckCircle2, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import axiosInstance from "@/lib/axios";
 
 import { Modal } from "@/components/common/Modal";
 import {
@@ -79,6 +80,12 @@ const UpdateIssueModal = ({ open, setOpen, issueId, onSuccess }: UpdateModalProp
 
   const [isAssignConfirmOpen, setIsAssignConfirmOpen] = useState(false);
   const [isCreateTicketOpen, setIsCreateTicketOpen] = useState(false);
+  const [pendingTicketData, setPendingTicketData] = useState<{
+    title: string;
+    description?: string;
+    priority?: string;
+    assetId: number;
+  } | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(UpdateSchema),
@@ -125,27 +132,27 @@ const UpdateIssueModal = ({ open, setOpen, issueId, onSuccess }: UpdateModalProp
     const isValidDate = await form.trigger("estimatedCompletionDate");
     if (!isValidDate) return;
 
-    const dateValue = form.getValues("estimatedCompletionDate");
+    // const dateValue = form.getValues("estimatedCompletionDate");
 
-    const payload = {
-      status: "PROCESSING" as any,
-      estimatedCompletionDate: dateValue.toISOString(),
-    };
+    // const payload = {
+    //   status: "PROCESSING" as any,
+    //   estimatedCompletionDate: dateValue.toISOString(),
+    // };
 
-    updateIssue(
-      { id: issueId, data: payload },
-      {
-        onSuccess: () => {
-          toast.success("Đã xác nhận ngày dự kiến. Đang mở phiếu...");
-          form.setValue("status", "PROCESSING");
-          setIsCreateTicketOpen(true);
-        },
-        onError: (err: any) => {
-          const msg = err?.response?.data?.message;
-          toast.error(msg || "Lỗi cập nhật ngày");
-        },
-      },
-    );
+    // updateIssue(
+    //   { id: issueId, data: payload },
+    //   {
+    //     onSuccess: () => {
+    //       toast.success("Đã xác nhận ngày dự kiến. Đang mở phiếu...");
+    //       form.setValue("status", "PROCESSING");
+    setIsCreateTicketOpen(true);
+    //     },
+    //     onError: (err: any) => {
+    //       const msg = err?.response?.data?.message;
+    //       toast.error(msg || "Lỗi cập nhật ngày");
+    //     },
+    //   },
+    // );
   };
 
   const onSubmit = (values: FormValues) => {
@@ -160,6 +167,15 @@ const UpdateIssueModal = ({ open, setOpen, issueId, onSuccess }: UpdateModalProp
       payload.status = values.status;
     }
 
+    // Nếu có pending ticket data, tạo ticket trước rồi mới update issue
+    if (pendingTicketData) {
+      createTicketAndLinkToIssue(payload);
+    } else {
+      updateIssueOnly(payload);
+    }
+  };
+
+  const updateIssueOnly = (payload: any) => {
     updateIssue(
       { id: issueId, data: payload },
       {
@@ -177,18 +193,56 @@ const UpdateIssueModal = ({ open, setOpen, issueId, onSuccess }: UpdateModalProp
     );
   };
 
-  const handleTicketCreated = (newTicketId: number) => {
-    updateIssue(
-      { id: issueId, data: { maintenanceTicketId: newTicketId } as any },
-      {
-        onSuccess: () => {
-          toast.success("Liên kết phiếu thành công!");
-          setIsCreateTicketOpen(false);
-          refetch();
+  const createTicketAndLinkToIssue = async (issuePayload: any) => {
+    if (!pendingTicketData) return;
+
+    try {
+      // Bước 1: Tạo maintenance ticket
+      const ticketResponse = await axiosInstance.post("/maintenance-tickets/incident", {
+        ...pendingTicketData,
+        type: "INCIDENT",
+      });
+
+      const newTicketId = ticketResponse?.data?.data?.id;
+
+      if (!newTicketId) {
+        throw new Error("Không nhận được ID phiếu bảo trì");
+      }
+
+      // Bước 2: Update issue với ticket ID và thông tin khác
+      updateIssue(
+        {
+          id: issueId,
+          data: { ...issuePayload, maintenanceTicketId: newTicketId },
         },
-        onError: (err: any) => toast.error(err?.message || "Lỗi liên kết"),
-      },
-    );
+        {
+          onSuccess: () => {
+            toast.success("Tạo phiếu và cập nhật thành công!");
+            setPendingTicketData(null);
+            setOpen(false);
+            onSuccess?.();
+            refetch();
+          },
+          onError: (err: any) => {
+            const msg = err?.response?.data?.message;
+            toast.error(msg || "Lỗi liên kết phiếu bảo trì");
+          },
+        },
+      );
+    } catch (error: any) {
+      toast.error(error.message || "Lỗi tạo phiếu bảo trì");
+    }
+  };
+
+  const handleTicketDataSaved = (data: {
+    title: string;
+    description?: string;
+    priority?: string;
+    assetId: number;
+  }) => {
+    setPendingTicketData(data);
+    setIsCreateTicketOpen(false);
+    toast.success("Đã lưu thông tin phiếu. Nhấn 'Lưu thay đổi' để hoàn tất.");
   };
 
   const handleAssignConfirm = () => {
@@ -355,14 +409,39 @@ const UpdateIssueModal = ({ open, setOpen, issueId, onSuccess }: UpdateModalProp
                     </Button>
                   </div>
                 ) : (
-                  <Button
-                    type="button"
-                    onClick={handleCreateTicketClick}
-                    className="w-full bg-[#DFA975] hover:bg-[#d4965c] text-black font-semibold h-10 border-none"
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Tạo phiếu xử lý sự cố
-                  </Button>
+                  <>
+                    {pendingTicketData ? (
+                      <div className="border border-orange-200 bg-orange-50 rounded-lg p-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-semibold text-orange-800">Phiếu chưa lưu</p>
+                            <p className="text-sm text-orange-600">{pendingTicketData.title}</p>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setPendingTicketData(null);
+                              setIsCreateTicketOpen(true);
+                            }}
+                            className="text-orange-700 hover:text-orange-800 hover:bg-orange-100"
+                          >
+                            Chỉnh sửa
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <Button
+                        type="button"
+                        onClick={handleCreateTicketClick}
+                        className="w-full bg-[#DFA975] hover:bg-[#d4965c] text-black font-semibold h-10 border-none"
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Tạo phiếu xử lý sự cố
+                      </Button>
+                    )}
+                  </>
                 )}
               </div>
             </form>
@@ -381,7 +460,7 @@ const UpdateIssueModal = ({ open, setOpen, issueId, onSuccess }: UpdateModalProp
       <CreateIncidentMaintenanceModal
         open={isCreateTicketOpen}
         setOpen={setIsCreateTicketOpen}
-        onSuccess={handleTicketCreated}
+        onDataSubmit={handleTicketDataSaved}
         initialData={{
           title: `Xử lý yêu cầu: ${issue?.title}`,
           description: issue?.description,
