@@ -37,6 +37,7 @@ function attachAuthInterceptors(client: typeof axiosInstance) {
   client.interceptors.request.use((config) => {
     const token = getAccessToken();
     if (token) {
+      console.log("Co token: ", token);
       config.headers = config.headers ?? {};
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -61,7 +62,10 @@ function attachAuthInterceptors(client: typeof axiosInstance) {
       if (status !== 401 || original._retry) return Promise.reject(error);
 
       const refreshToken = getRefreshToken();
+      console.log("Refresh token khi 401:", refreshToken);
+
       if (!refreshToken) {
+        console.log("Refresh token khong ton tai");
         forceLogout();
         return Promise.reject(error);
       }
@@ -87,11 +91,11 @@ function attachAuthInterceptors(client: typeof axiosInstance) {
           {},
           { headers: { Authorization: `Bearer ${refreshToken}` } },
         );
-
         const { accessToken, refreshToken: newRefresh } = rr.data.data as {
           accessToken: string;
           refreshToken: string;
         };
+        console.log("Vua refresh token, co accessToken va newRefresh: ", accessToken, newRefresh);
 
         setTokens(accessToken, newRefresh);
         flushQueue(accessToken);
