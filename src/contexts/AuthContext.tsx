@@ -2,7 +2,13 @@ import type { ReactNode } from "react";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { AuthUser } from "@/types/auth";
 import { getProfile, login as loginRequest } from "@/services/auth.service";
-import { clearAuthStorage, getAccessToken, setStoredUser, setTokens } from "@/lib/auth-storage";
+import {
+  clearAuthStorage,
+  getAccessToken,
+  getStoredUser,
+  setStoredUser,
+  setTokens,
+} from "@/lib/auth-storage";
 import { connectSocket, disconnectSocket } from "@/sockets/socket";
 
 type AuthContextValue = {
