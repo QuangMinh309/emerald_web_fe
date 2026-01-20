@@ -66,4 +66,5 @@ export interface InvoiceDetailWithMeterReadings {
   }[];
   createdAt: string;
   updatedAt: string;
+  meterReadingsVerified: boolean;
 }

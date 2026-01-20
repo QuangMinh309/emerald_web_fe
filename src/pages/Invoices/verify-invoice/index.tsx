@@ -41,6 +41,7 @@ type VerifyInvoiceFormValues = z.infer<typeof VerifyInvoiceSchema>;
 /* ================= Component ================= */
 
 const VerifyInvoiceModal = ({ open, setOpen, invoice }: VerifyInvoiceModalProps) => {
+  console.log(invoice);
   const { mutate: verifyInvoice, isPending } = useVerifyInvoice();
 
   const form = useForm<VerifyInvoiceFormValues>({
@@ -122,6 +123,7 @@ const VerifyInvoiceModal = ({ open, setOpen, invoice }: VerifyInvoiceModalProps)
 
   return (
     <Modal
+      showFooter={!invoice?.meterReadingsVerified}
       open={open}
       setOpen={setOpen}
       title="Xác nhận chỉ số hóa đơn"
@@ -167,7 +169,7 @@ const VerifyInvoiceModal = ({ open, setOpen, invoice }: VerifyInvoiceModalProps)
                 return (
                   <FormField
                     key={index}
-                    disabled={isPending}
+                    disabled={isPending || invoice.meterReadingsVerified}
                     control={form.control}
                     name={`meterReadings.${index}.newIndex`}
                     render={({ field }) => (
@@ -175,6 +177,7 @@ const VerifyInvoiceModal = ({ open, setOpen, invoice }: VerifyInvoiceModalProps)
                         <FormLabel isRequired>{label}</FormLabel>
                         <FormControl>
                           <Input
+                            disabled={isPending || invoice.meterReadingsVerified}
                             type="number"
                             placeholder={`Nhập ${label.toLowerCase()}`}
                             value={field.value ?? ""}

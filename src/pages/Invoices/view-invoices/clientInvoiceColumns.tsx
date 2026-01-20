@@ -23,6 +23,12 @@ export const clientInvoiceColumns: TableColumn<InvoiceDetailWithMeterReadings>[]
       }),
   },
   {
+    key: "meterReadingsVerified",
+    label: "Chỉ số đã xác nhận",
+    filterable: true,
+    render: (row) => (row.meterReadingsVerified ? "Đã xác nhận" : "Chưa xác nhận"),
+  },
+  {
     key: "totalAmount",
     label: "Tổng tiền",
     align: "right",

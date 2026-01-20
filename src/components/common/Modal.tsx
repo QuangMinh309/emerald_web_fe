@@ -21,9 +21,11 @@ interface ModalProps {
   className?: string;
   titleClassName?: string;
   submitButtonClassName?: string;
+  showFooter?: boolean;
 }
 
 export function Modal({
+  showFooter = true,
   open,
   setOpen,
   title,
@@ -49,25 +51,26 @@ export function Modal({
         </div>
 
         <div className="flex-1 overflow-y-auto px-4 py-4 custom-scrollbar">{children}</div>
-
-        <div className="p-4 border-t border-gray-400 bg-gray-50/50 rounded-b-lg">
-          <DialogFooter className="gap-2 sm:justify-end">
-            <DialogClose disabled={onLoading} asChild>
-              <Button variant="outline" type="button">
-                Hủy
+        {showFooter && (
+          <div className="p-4 border-t border-gray-400 bg-gray-50/50 rounded-b-lg">
+            <DialogFooter className="gap-2 sm:justify-end">
+              <DialogClose disabled={onLoading} asChild>
+                <Button variant="outline" type="button">
+                  Hủy
+                </Button>
+              </DialogClose>
+              <Button
+                disabled={onLoading}
+                onClick={onSubmit}
+                type="submit"
+                className={cn("bg-main hover:bg-main/90 text-white", submitButtonClassName)}
+              >
+                {onLoading && <LoaderCircle className="animate-spin mr-2 h-4 w-4" />}
+                {submitText}
               </Button>
-            </DialogClose>
-            <Button
-              disabled={onLoading}
-              onClick={onSubmit}
-              type="submit"
-              className={cn("bg-main hover:bg-main/90 text-white", submitButtonClassName)}
-            >
-              {onLoading && <LoaderCircle className="animate-spin mr-2 h-4 w-4" />}
-              {submitText}
-            </Button>
-          </DialogFooter>
-        </div>
+            </DialogFooter>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
