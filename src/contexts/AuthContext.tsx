@@ -1,84 +1,41 @@
 import type { ReactNode } from "react";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { AuthUser } from "@/types/auth";
-import { getProfile, login as loginRequest } from "@/services/auth.service";
+import { getProfile, login as loginRequest, logout as logoutRequest } from "@/services/auth.service";
 import {
   clearAuthStorage,
   getAccessToken,
-  getRefreshToken,
   getStoredUser,
-  isJwtExpired,
   setStoredUser,
-  setTokens,
+  setAccessToken,
 } from "@/lib/auth-storage";
-import axios from "axios";
-import { connectSocket, disconnectSocket } from "@/sockets/socket";
 
 type AuthContextValue = {
   user: AuthUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<AuthUser>;
-  logout: () => void;
+  logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 };
-const refreshClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:4000/api",
-});
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
 const [user, setUser] = useState<AuthUser | null>(() => getStoredUser());
   const [isLoading, setIsLoading] = useState(true);
-  useEffect(() => {
-  }, [user]);
+  
   useEffect(() => {
     const boot = async () => {
       try {
         let access = getAccessToken();
-        const refresh = getRefreshToken();
-        if (access && refresh && isJwtExpired(access)) {
-          const rr = await refreshClient.post(
-            "/auth/refresh",
-            {},
-            { headers: { Authorization: `Bearer ${refresh}` } },
-          );
-          const { accessToken, refreshToken: newRefresh } = rr.data.data;
-          setTokens(accessToken, newRefresh);
-          access = accessToken;
-        }
-
         if (!access) return;
-
-        try {
           const profile = await getProfile();
           setStoredUser(profile);
           setUser(profile);
-          return;
-        } catch (e: any) {
-          const status = e?.response?.status;
-
-          // Nếu 401 mà có refresh -> refresh rồi lấy profile lại 1 lần
-          if (status === 401 && refresh) {
-            const rr = await refreshClient.post(
-              "/auth/refresh",
-              {},
-              { headers: { Authorization: `Bearer ${refresh}` } },
-            );
-            const { accessToken, refreshToken: newRefresh } = rr.data.data;
-            setTokens(accessToken, newRefresh);
-
-            const profile = await getProfile();
-            setStoredUser(profile);
-            setUser(profile);
-            return;
-          }
-
-          throw e;
-        }
       } catch {
         clearAuthStorage();
+        setUser(null);
       } finally {
         setIsLoading(false);
       }
@@ -89,18 +46,25 @@ const [user, setUser] = useState<AuthUser | null>(() => getStoredUser());
 
   const login = async (email: string, password: string) => {
     const data = await loginRequest(email, password);
-    const { accessToken, refreshToken, ...profile } = data;
-    setTokens(accessToken, refreshToken);
+    const { accessToken, ...profile } = data;
+    console.log("accessToken trong login: ", accessToken);
+    if (!accessToken) throw new Error("Missing accessToken from login");
+
+    setAccessToken(accessToken);
     setStoredUser(profile);
     setUser(profile);
-    connectSocket();
+
     return profile;
   };
 
-  const logout = () => {
-    clearAuthStorage();
-    disconnectSocket();
-    setUser(null);
+  const logout = async () => {
+    try {
+      await logoutRequest();
+    } catch {
+    } finally {
+      clearAuthStorage();
+      setUser(null);
+    }
   };
 
   const refreshProfile = async () => {

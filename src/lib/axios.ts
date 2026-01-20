@@ -1,23 +1,27 @@
 import axios, { type AxiosError, type AxiosRequestConfig } from "axios";
-import { clearAuthStorage, getAccessToken, getRefreshToken, setTokens } from "@/lib/auth-storage";
+import { clearAuthStorage, getAccessToken, setAccessToken } from "@/lib/auth-storage";
 
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
 
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
   timeout: 50000,
+  withCredentials: true,
+  headers: { "Content-Type": "application/json" },
+});
+
+const refreshClient = axios.create({
+  baseURL: BASE_URL,
+  timeout: 10000,
+  withCredentials: true,
   headers: { "Content-Type": "application/json" },
 });
 
 export const axiosMultipart = axios.create({
   baseURL: BASE_URL,
   timeout: 50000,
-});
+  withCredentials: true,
 
-const refreshClient = axios.create({
-  baseURL: BASE_URL,
-  timeout: 10000,
-  headers: { "Content-Type": "application/json" },
 });
 
 let isRefreshing = false;
@@ -28,7 +32,7 @@ const flushQueue = (token: string | null) => {
   queue = [];
 };
 
-const forceLogout = () => {
+const forceLogout = async () => {
   clearAuthStorage();
   if (window.location.pathname !== "/login") window.location.assign("/login");
 };
@@ -37,9 +41,8 @@ function attachAuthInterceptors(client: typeof axiosInstance) {
   client.interceptors.request.use((config) => {
     const token = getAccessToken();
     if (token) {
-      console.log("Co token: ", token);
-      config.headers = config.headers ?? {};
-      config.headers.Authorization = `Bearer ${token}`;
+      (config.headers as any) = config.headers ?? {};
+      (config.headers as any).Authorization = `Bearer ${token}`;
     }
     return config;
   });
@@ -53,30 +56,18 @@ function attachAuthInterceptors(client: typeof axiosInstance) {
       const original = error.config as AxiosRequestConfig & { _retry?: boolean };
       const url = String(original?.url ?? "");
 
-      const isAuthEndpoint = url.includes("/auth/login") || url.includes("/auth/refresh");
+      if (url.includes("/auth/")) return Promise.reject(error);
 
-      // 1) Không xử lý refresh cho chính login/refresh
-      if (isAuthEndpoint) return Promise.reject(error);
-
-      // 2) Chỉ xử lý 401, và chỉ retry 1 lần
+      // Không xử lý refresh cho TH nay
       if (status !== 401 || original._retry) return Promise.reject(error);
 
-      const refreshToken = getRefreshToken();
-      console.log("Refresh token khi 401:", refreshToken);
-
-      if (!refreshToken) {
-        console.log("Refresh token khong ton tai");
-        forceLogout();
-        return Promise.reject(error);
-      }
-
-      // 3) Nếu đang refresh => chờ
       if (isRefreshing) {
+        console.log("Dang refresh token");
         return new Promise((resolve, reject) => {
           queue.push((token) => {
             if (!token) return reject(error);
-            original.headers = original.headers ?? {};
-            original.headers.Authorization = `Bearer ${token}`;
+            (original.headers as any) = original.headers ?? {};
+            (original.headers as any).Authorization = `Bearer ${token}`;
             resolve(client(original));
           });
         });
@@ -87,21 +78,16 @@ function attachAuthInterceptors(client: typeof axiosInstance) {
 
       try {
         const rr = await refreshClient.post(
-          "/auth/refresh",
-          {},
-          { headers: { Authorization: `Bearer ${refreshToken}` } },
+          "/auth/refresh"
         );
-        const { accessToken, refreshToken: newRefresh } = rr.data.data as {
-          accessToken: string;
-          refreshToken: string;
-        };
-        console.log("Vua refresh token, co accessToken va newRefresh: ", accessToken, newRefresh);
+        const accessToken = rr.data?.accessToken ?? rr.data?.data?.accessToken as string | undefined;
+        if (!accessToken) throw new Error("No accessToken in refresh response");
 
-        setTokens(accessToken, newRefresh);
+        setAccessToken(accessToken);
         flushQueue(accessToken);
 
-        original.headers = original.headers ?? {};
-        original.headers.Authorization = `Bearer ${accessToken}`;
+        (original.headers as any) = original.headers ?? {};
+        (original.headers as any).Authorization = `Bearer ${accessToken}`;
         return client(original);
       } catch (refreshErr) {
         flushQueue(null);

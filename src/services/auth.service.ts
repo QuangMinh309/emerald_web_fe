@@ -11,6 +11,9 @@ export const getProfile = async () => {
   return response.data.data as AuthUser;
 };
 
+export const logout = async () => {
+  await axiosInstance.post("/auth/logout");
+};
 export async function changePassword(payload: ChangePasswordPayload) {
   const res = await axiosInstance.post("/auth/change-password", payload);
   return res.data.data;
