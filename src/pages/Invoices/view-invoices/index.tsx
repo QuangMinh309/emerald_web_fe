@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { Plus, Printer, FileDown, Trash2 } from "lucide-react";
 import PageHeader from "@/components/common/PageHeader";
 import ActionDropdown from "@/components/common/ActionDropdown";
@@ -10,15 +10,14 @@ import { invoiceColumns } from "./columns";
 import { clientInvoiceColumns } from "./clientInvoiceColumns";
 import type { ActionOption } from "@/types";
 import { normalizeString } from "@/utils/string";
-import { useInvoices } from "@/hooks/data/useInvoices";
-import type { Invoice, InvoiceDetail } from "@/types/invoice";
+import { useInvoices, useInvoicesByClient } from "@/hooks/data/useInvoices";
+import type { Invoice, InvoiceDetailWithMeterReadings } from "@/types/invoice";
 import { useNavigate } from "react-router-dom";
 import CreateInvoiceModal from "@/pages/Invoices/create-invoice";
 import DeleteInvoice from "@/pages/Invoices/delete-invoice";
 import DeleteManyInvoiceModal from "@/pages/Invoices/multiple-delete-invoices";
 import UpdateInvoiceModal from "@/pages/Invoices/update-invoice";
 import VerifyInvoiceModal from "@/pages/Invoices/verify-invoice";
-import { getInvoicesMadeByClient } from "@/services/invoices.service";
 
 const InvoicesPage = () => {
   const navigate = useNavigate();
@@ -34,12 +33,9 @@ const InvoicesPage = () => {
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isDeleteManyOpen, setIsDeleteManyOpen] = useState(false);
-
-  // Client Invoice states
-  const [clientInvoices, setClientInvoices] = useState<InvoiceDetail[]>([]);
   const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
-  const [selectedClientInvoice, setSelectedClientInvoice] = useState<InvoiceDetail | null>(null);
-  const [isLoadingClientInvoices, setIsLoadingClientInvoices] = useState(false);
+  const [selectedClientInvoice, setSelectedClientInvoice] =
+    useState<InvoiceDetailWithMeterReadings | null>(null);
 
   // Lấy dữ liệu từ Hooks
   const {
@@ -50,24 +46,7 @@ const InvoicesPage = () => {
     refetch: refetchInvoices,
   } = useInvoices();
 
-  // Load client invoices when tab changes
-  useEffect(() => {
-    if (activeTab === "clientInvoices") {
-      const loadClientInvoices = async () => {
-        setIsLoadingClientInvoices(true);
-        try {
-          const data = await getInvoicesMadeByClient();
-          setClientInvoices(data);
-        } catch (error) {
-          console.error("Error loading client invoices:", error);
-          setClientInvoices([]);
-        } finally {
-          setIsLoadingClientInvoices(false);
-        }
-      };
-      loadClientInvoices();
-    }
-  }, [activeTab]);
+  const { data: clientInvoices = [], isLoading: isLoadingClientInvoices } = useInvoicesByClient();
 
   // Logic lọc dữ liệu Invoices
   const filteredInvoices = useMemo(() => {
@@ -248,7 +227,7 @@ const InvoicesPage = () => {
                   columns={clientInvoiceColumns}
                   defaultPageSize={10}
                   onView={(row) => {
-                    setSelectedClientInvoice(row as InvoiceDetail);
+                    setSelectedClientInvoice(row as InvoiceDetailWithMeterReadings);
                     setIsVerifyModalOpen(true);
                   }}
                 />

@@ -4,8 +4,8 @@ import {
   deleteManyResidents,
   getResidentById,
   getResidents,
-  updateAsset,
   getInvoicesAndPaymentsByResidentId,
+  updateResident,
 } from "@/services/residents.service";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -38,7 +38,7 @@ export const useCreateResident = () => {
 export const useUpdateResident = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: updateAsset,
+    mutationFn: updateResident,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["residents"] });
       queryClient.invalidateQueries({ queryKey: ["resident"] });

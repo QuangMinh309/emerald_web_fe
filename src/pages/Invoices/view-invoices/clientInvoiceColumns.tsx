@@ -1,11 +1,17 @@
 import type { TableColumn } from "@/types";
-import type { InvoiceDetail } from "@/types/invoice";
+import type { InvoiceDetailWithMeterReadings } from "@/types/invoice";
 import { formatVND } from "@/utils/money";
 
-export const clientInvoiceColumns: TableColumn<InvoiceDetail>[] = [
+export const clientInvoiceColumns: TableColumn<InvoiceDetailWithMeterReadings>[] = [
   { key: "stt", label: "STT", align: "center" },
   { key: "invoiceCode", label: "Mã hóa đơn", sortable: true },
-  { key: "apartmentId", label: "Mã căn hộ", sortable: true, align: "center" },
+  {
+    key: "apartment.name",
+    label: "Căn hộ",
+    sortable: true,
+    align: "center",
+    render: (row) => row.apartment?.name || `#${row.apartmentId}`,
+  },
   {
     key: "period",
     label: "Kỳ thanh toán",
@@ -16,20 +22,6 @@ export const clientInvoiceColumns: TableColumn<InvoiceDetail>[] = [
         month: "2-digit",
       }),
   },
-  // {
-  //   key: "waterIndex",
-  //   label: "Chỉ số nước",
-  //   align: "center",
-  //   sortable: true,
-  //   render: (row) => row.invoiceDetails.find((d) => d.feeTypeName === "Tiền nước")?.amount || 0,
-  // },
-  // {
-  //   key: "electricityIndex",
-  //   label: "Chỉ số điện",
-  //   align: "center",
-  //   sortable: true,
-  //   render: (row) => row.invoiceDetails.find((d) => d.feeTypeName === "Tiền điện")?.amount || 0,
-  // },
   {
     key: "totalAmount",
     label: "Tổng tiền",

@@ -4,9 +4,9 @@ import {
   deleteManyInvoices,
   getInvoiceById,
   getInvoices,
+  getInvoicesMadeByClient,
   updateInvoice,
   verifyInvoice,
-  getInvoiceDetailMadeByClient,
 } from "@/services/invoices.service";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -15,6 +15,13 @@ export const useInvoices = () => {
   return useQuery({
     queryKey: ["invoices"],
     queryFn: getInvoices,
+  });
+};
+
+export const useInvoicesByClient = () => {
+  return useQuery({
+    queryKey: ["invoices-client"],
+    queryFn: getInvoicesMadeByClient,
   });
 };
 
@@ -73,15 +80,7 @@ export const useVerifyInvoice = () => {
     mutationFn: verifyInvoice,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
-      queryClient.invalidateQueries({ queryKey: ["invoice"] });
+      queryClient.invalidateQueries({ queryKey: ["invoices-client"] });
     },
-  });
-};
-
-export const useGetInvoiceDetailMadeByClient = (id: number) => {
-  return useQuery({
-    queryKey: ["invoice-client-detail", id],
-    queryFn: () => getInvoiceDetailMadeByClient(id),
-    enabled: !!id,
   });
 };

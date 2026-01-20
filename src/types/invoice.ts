@@ -34,3 +34,36 @@ export interface InvoiceDetail {
   createdAt: string;
   updatedAt: string;
 }
+export interface InvoiceDetailWithMeterReadings {
+  id: number;
+  invoiceCode: string;
+  apartmentId: number;
+  apartment: {
+    id: number;
+    name: string;
+  };
+  period: string;
+  subtotalAmount: number;
+  vatAmount: number;
+  totalAmount: number;
+  status: string;
+  dueDate: string;
+  meterReadings: {
+    id: number;
+    feeTypeId: number;
+    feeType: {
+      id: number;
+      name: string;
+    };
+    readingDate: string;
+    billingMonth: string;
+    oldIndex: number;
+    newIndex: number;
+    usageAmount: number;
+    imageProofUrl: string;
+    isVerified: boolean;
+    createdAt: string;
+  }[];
+  createdAt: string;
+  updatedAt: string;
+}

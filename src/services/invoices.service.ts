@@ -1,5 +1,5 @@
 import axiosInstance from "@/lib/axios";
-import type { Invoice, InvoiceDetail } from "@/types/invoice";
+import type { Invoice, InvoiceDetail, InvoiceDetailWithMeterReadings } from "@/types/invoice";
 
 // nao chi can sua service là xong
 export const getInvoices = async () => {
@@ -57,20 +57,20 @@ export const verifyInvoice = async (data: {
   return response.data.data as Invoice;
 };
 export const getInvoicesMadeByClient = async () => {
-  const response = await axiosInstance.get("/invoices/made-by-client/list");
-  return response.data.data as InvoiceDetail[];
-};
+  const response = await axiosInstance.get("/invoices/client-created/list");
+  const data = response.data.data as InvoiceDetailWithMeterReadings[];
 
-export const getInvoiceDetailMadeByClient = async (id: number) => {
-  const response = await axiosInstance.get(`/invoices/client-created/${id}`);
-  return response.data.data as InvoiceDetail & {
-    meterReadings?: Array<{
-      id: number;
-      feeTypeId: number;
-      feeTypeName?: string;
-      oldIndex: number;
-      newIndex: number;
-      imageProofUrl: string | null;
-    }>;
-  };
+  // Convert string values to numbers
+  return data.map((invoice) => ({
+    ...invoice,
+    subtotalAmount: Number(invoice.subtotalAmount),
+    vatAmount: Number(invoice.vatAmount),
+    totalAmount: Number(invoice.totalAmount),
+    meterReadings: invoice.meterReadings.map((reading) => ({
+      ...reading,
+      oldIndex: Number(reading.oldIndex),
+      newIndex: Number(reading.newIndex),
+      usageAmount: Number(reading.usageAmount),
+    })),
+  })) as InvoiceDetailWithMeterReadings[];
 };

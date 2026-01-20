@@ -46,7 +46,7 @@ export const createResident = async (residentData: {
   console.log("Created resident response:", response.data);
   return response.data.data as Resident;
 };
-export const updateAsset = async ({
+export const updateResident = async ({
   id,
   residentData,
 }: {
@@ -81,7 +81,11 @@ export const updateAsset = async ({
   if (residentData.image) {
     formData.append("image", residentData.image);
   }
-  const response = await axiosInstance.patch(`/residents/${id}`, formData);
+  const response = await axiosInstance.patch(`/residents/${id}`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
   return response.data.data as Resident;
 };
 export const deleteResident = async (residentId: number) => {
