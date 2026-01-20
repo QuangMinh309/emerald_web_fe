@@ -23,9 +23,8 @@ import {
 import { DatePicker } from "@/components/common/DatePicker";
 import { useGetResidentById, useUpdateResident } from "@/hooks/data/useResidents";
 import { toast } from "sonner";
-import { useEffect, useState } from "react";
-import { address } from "@/lib/address";
-import { Label } from "@/components/ui/label";
+import { useEffect, useState, useMemo } from "react";
+import { useProvinces, useProvinceDetails } from "@/hooks/useLocation";
 import { GenderTypeOptions } from "@/constants/genderType";
 import { UploadImages } from "@/components/common/UploadImages";
 
@@ -46,7 +45,6 @@ const UpdateResidentSchema = z.object({
   phoneNumber: z.string().min(1, "Vui lòng nhập số điện thoại"),
   nationality: z.string().min(1, "Vui lòng nhập quốc tịch"),
   ward: z.string().min(1, "Vui lòng nhập phường/xã"),
-  district: z.string().min(1, "Vui lòng nhập quận/huyện"),
   province: z.string().min(1, "Vui lòng nhập tỉnh/thành phố"),
   detailAddress: z.string().optional(),
   image: z.instanceof(File).optional(),
@@ -70,7 +68,6 @@ const UpdateResidentModal = ({ open, setOpen, residentId }: UpdateModalProps) =>
       phoneNumber: "",
       nationality: "",
       ward: "",
-      district: "",
       province: "",
     },
   });
@@ -87,7 +84,6 @@ const UpdateResidentModal = ({ open, setOpen, residentId }: UpdateModalProps) =>
         phoneNumber: resident.phoneNumber,
         nationality: resident.nationality,
         ward: resident.ward,
-        district: resident.district,
         province: resident.province,
         detailAddress: resident.detailAddress ?? undefined,
       });
@@ -115,7 +111,7 @@ const UpdateResidentModal = ({ open, setOpen, residentId }: UpdateModalProps) =>
           phoneNumber: values.phoneNumber,
           nationality: values.nationality,
           ward: values.ward,
-          district: values.district,
+          district: "",
           province: values.province,
           image: values.image,
           detailAddress: values.detailAddress,
@@ -133,13 +129,23 @@ const UpdateResidentModal = ({ open, setOpen, residentId }: UpdateModalProps) =>
     );
   }
   const selectedProvince = form.watch("province");
-  const selectedDistrict = form.watch("district");
 
-  const provinces = address;
+  // Lấy danh sách tỉnh từ API
+  const { data: provinces = [], isLoading: isLoadingProvinces } = useProvinces();
 
-  const districts = address.find((p) => p.province === selectedProvince)?.districts || [];
+  // Lấy code của tỉnh đã chọn
+  const selectedProvinceCode = useMemo(() => {
+    const province = provinces.find((p) => p.name === selectedProvince);
+    return province?.code || null;
+  }, [selectedProvince, provinces]);
 
-  const communes = districts.find((d) => d.district === selectedDistrict)?.communes || [];
+  // Lấy chi tiết tỉnh (bao gồm danh sách wards)
+  const { data: provinceDetails } = useProvinceDetails(selectedProvinceCode);
+
+  // Lấy danh sách wards từ provinceDetails
+  const wards = useMemo(() => {
+    return provinceDetails?.wards || [];
+  }, [provinceDetails]);
   return (
     <Modal
       open={open}
@@ -294,56 +300,26 @@ const UpdateResidentModal = ({ open, setOpen, residentId }: UpdateModalProps) =>
               name="province"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel isRequired>Tỉnh / Thành phố</FormLabel>
+                  <FormLabel isRequired>Tễnh / Thành phố</FormLabel>
                   <Select
                     value={field.value}
                     onValueChange={(value) => {
                       field.onChange(value);
-                      form.setValue("district", "");
                       form.setValue("ward", "");
                     }}
+                    disabled={isLoadingProvinces}
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Chọn tỉnh" />
+                        <SelectValue
+                          placeholder={isLoadingProvinces ? "Đang tải..." : "Chọn tỉnh"}
+                        />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       {provinces.map((p) => (
-                        <SelectItem key={p.province} value={p.province}>
-                          {p.province}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="district"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel isRequired>Quận / Huyện</FormLabel>
-                  <Select
-                    value={field.value}
-                    onValueChange={(value) => {
-                      field.onChange(value);
-                      form.setValue("ward", "");
-                    }}
-                    disabled={!selectedProvince}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Chọn quận / huyện" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {districts.map((d) => (
-                        <SelectItem key={d.district} value={d.district}>
-                          {d.district}
+                        <SelectItem key={p.code} value={p.name}>
+                          {p.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -362,7 +338,7 @@ const UpdateResidentModal = ({ open, setOpen, residentId }: UpdateModalProps) =>
                   <Select
                     value={field.value}
                     onValueChange={field.onChange}
-                    disabled={!selectedDistrict}
+                    disabled={!selectedProvince || wards.length === 0}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -370,9 +346,9 @@ const UpdateResidentModal = ({ open, setOpen, residentId }: UpdateModalProps) =>
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {communes.map((c) => (
-                        <SelectItem key={c.commune} value={c.commune}>
-                          {c.name}
+                      {wards.map((w) => (
+                        <SelectItem key={w.code} value={w.name}>
+                          {w.name}
                         </SelectItem>
                       ))}
                     </SelectContent>

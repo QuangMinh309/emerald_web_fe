@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Modal } from "@/components/common/Modal";
 import {
   Form,
@@ -15,7 +15,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
 import type { InvoiceDetail } from "@/types/invoice";
-import { useVerifyInvoice } from "@/hooks/data/useInvoices";
+import { useVerifyInvoice, useGetInvoiceDetailMadeByClient } from "@/hooks/data/useInvoices";
 import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
 import { Info } from "@/pages/Invoices/detail-invoice";
@@ -39,6 +39,11 @@ type VerifyInvoiceFormValues = z.infer<typeof VerifyInvoiceSchema>;
 
 const VerifyInvoiceModal = ({ open, setOpen, invoice }: VerifyInvoiceModalProps) => {
   const { mutate: verifyInvoice, isPending } = useVerifyInvoice();
+  const [fullInvoiceDetails, setFullInvoiceDetails] = useState<any>(null);
+
+  // Fetch full invoice details if it's a client invoice
+  const { data: clientInvoiceData, isLoading: isLoadingClientDetails } =
+    useGetInvoiceDetailMadeByClient(open && invoice?.imageUrl ? invoice.id : -1);
 
   const form = useForm<VerifyInvoiceFormValues>({
     resolver: zodResolver(VerifyInvoiceSchema),
@@ -51,28 +56,50 @@ const VerifyInvoiceModal = ({ open, setOpen, invoice }: VerifyInvoiceModalProps)
   /* Init form when modal opens */
   useEffect(() => {
     if (open && invoice?.invoiceDetails) {
+      // For client invoices, use data from API if available
+      const dataToUse = clientInvoiceData || invoice;
+
       form.reset({
         waterIndex:
-          Number(invoice.invoiceDetails.find((d) => d.feeTypeName === "Tiền nước")?.amount) || 0,
+          Number(
+            dataToUse.invoiceDetails?.find((d: any) => d.feeTypeName === "Tiền nước")?.amount,
+          ) || 0,
         electricityIndex:
-          Number(invoice.invoiceDetails.find((d) => d.feeTypeName === "Tiền điện")?.amount) || 0,
+          Number(
+            dataToUse.invoiceDetails?.find((d: any) => d.feeTypeName === "Tiền điện")?.amount,
+          ) || 0,
       });
+
+      // Store full details for reference
+      if (clientInvoiceData) {
+        setFullInvoiceDetails(clientInvoiceData);
+      }
     }
-  }, [open, invoice, form]);
+  }, [open, invoice, form, clientInvoiceData]);
 
   const handleClose = () => {
     setOpen(false);
     form.reset();
+    setFullInvoiceDetails(null);
   };
 
   function onSubmit(values: VerifyInvoiceFormValues) {
     if (!invoice?.id) return;
-    const waterIndexId = invoice.invoiceDetails.find(
-      (d) => d.feeTypeName === "Tiền nước",
+
+    // Use full details if available (client invoice)
+    const detailsToUse = fullInvoiceDetails || invoice;
+
+    const waterIndexId = detailsToUse.invoiceDetails?.find(
+      (d: any) => d.feeTypeName === "Tiền nước",
     )?.feeTypeId;
-    const electricityIndexId = invoice.invoiceDetails.find(
-      (d) => d.feeTypeName === "Tiền điện",
+    const electricityIndexId = detailsToUse.invoiceDetails?.find(
+      (d: any) => d.feeTypeName === "Tiền điện",
     )?.feeTypeId;
+
+    if (!waterIndexId || !electricityIndexId) {
+      toast.error("Không tìm thấy loại phí nước hoặc điện");
+      return;
+    }
 
     const data: {
       invoiceId: number;
@@ -84,11 +111,11 @@ const VerifyInvoiceModal = ({ open, setOpen, invoice }: VerifyInvoiceModalProps)
       invoiceId: invoice.id,
       meterReadings: [
         {
-          feeTypeId: waterIndexId!,
+          feeTypeId: waterIndexId,
           newIndex: values.waterIndex,
         },
         {
-          feeTypeId: electricityIndexId!,
+          feeTypeId: electricityIndexId,
           newIndex: values.electricityIndex,
         },
       ],
@@ -111,7 +138,7 @@ const VerifyInvoiceModal = ({ open, setOpen, invoice }: VerifyInvoiceModalProps)
       title="Xác nhận chỉ số hóa đơn"
       submitText="Xác nhận"
       onSubmit={form.handleSubmit(onSubmit)}
-      onLoading={isPending}
+      onLoading={isPending || isLoadingClientDetails}
     >
       <Form {...form}>
         <form className="space-y-4">
@@ -136,7 +163,7 @@ const VerifyInvoiceModal = ({ open, setOpen, invoice }: VerifyInvoiceModalProps)
           <div className="space-y-3">
             {/* Chỉ số nước */}
             <FormField
-              disabled={isPending}
+              disabled={isPending || isLoadingClientDetails}
               control={form.control}
               name="waterIndex"
               render={({ field }) => (
@@ -157,7 +184,7 @@ const VerifyInvoiceModal = ({ open, setOpen, invoice }: VerifyInvoiceModalProps)
 
             {/* Chỉ số điện */}
             <FormField
-              disabled={isPending}
+              disabled={isPending || isLoadingClientDetails}
               control={form.control}
               name="electricityIndex"
               render={({ field }) => (

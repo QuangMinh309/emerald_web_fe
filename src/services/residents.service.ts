@@ -98,3 +98,72 @@ export const getResidentById = async (id: number) => {
   const response = await axiosInstance.get(`/residents/${id}`);
   return response.data.data as ResidentDetail;
 };
+export const getInvoicesAndPaymentsByResidentId = async (id: number) => {
+  const response = await axiosInstance.get(`/residents/${id}/invoices`);
+  return response.data as {
+    invoices: {
+      id: number;
+      invoiceCode: string;
+      apartmentId: number;
+      period: string;
+      subtotalAmount: number;
+      vatAmount: number;
+      totalAmount: number;
+      status: string;
+      dueDate: string;
+      createdAt: string;
+      updatedAt: string;
+    }[];
+    payments: {
+      id: number;
+      txnRef: string;
+      targetType: string;
+      targetId: number;
+      amount: number;
+      currency: string;
+      paymentMethod: string;
+      status: string;
+      description: string;
+      paymentUrl: string;
+      expiresAt: string;
+      createdAt: string;
+      updatedAt: string;
+      payDate: string;
+    }[];
+  };
+};
+
+export const getAdminInvoicesAndPaymentsByResidentId = async (id: number) => {
+  const response = await axiosInstance.get(`/admin/residents/${id}/invoices`);
+  return response.data as {
+    invoices: {
+      id: number;
+      invoiceCode: string;
+      apartmentId: number;
+      period: string;
+      subtotalAmount: number;
+      vatAmount: number;
+      totalAmount: number;
+      status: string;
+      dueDate: string;
+      createdAt: string;
+      updatedAt: string;
+    }[];
+    payments: {
+      id: number;
+      txnRef: string;
+      targetType: string;
+      targetId: number;
+      amount: number;
+      currency: string;
+      paymentMethod: string;
+      status: string;
+      description: string;
+      paymentUrl: string;
+      expiresAt: string;
+      createdAt: string;
+      updatedAt: string;
+      payDate: string;
+    }[];
+  };
+};

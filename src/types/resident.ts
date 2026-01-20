@@ -19,7 +19,6 @@ export interface Resident {
   phoneNumber: string;
   nationality: string;
   province: string;
-  district: string;
   ward: string;
   detailAddress: null | string;
   isActive: boolean;
@@ -46,7 +45,6 @@ export interface ResidentDetail {
   phoneNumber: string;
   nationality: string;
   province: string;
-  district: string;
   ward: string;
   detailAddress: null;
   isActive: boolean;
