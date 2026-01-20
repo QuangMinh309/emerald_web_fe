@@ -9,7 +9,6 @@ import {
   setStoredUser,
   setTokens,
 } from "@/lib/auth-storage";
-import { connectSocket, disconnectSocket } from "@/sockets/socket";
 
 type AuthContextValue = {
   user: AuthUser | null;

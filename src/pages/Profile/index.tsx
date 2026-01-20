@@ -101,7 +101,10 @@ export default function ProfilePage() {
 
   return (
     <div className="p-1.5 pt-0 space-y-4">
-      <PageHeader title="Tài khoản" />
+      <PageHeader 
+        title="Tài khoản" 
+        subtitle="Thông tin tài khoản và đổi mật khẩu"
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* LEFT: Thông tin tài khoản */}
@@ -116,16 +119,16 @@ export default function ProfilePage() {
 
           <CardContent className="space-y-6">
             <div className="space-y-2">
-              <div className="text-xs text-neutral-500">Email</div>
-              <div className="font-semibold text-neutral-800">{displayEmail}</div>
+              <div className="display-label text-neutral-500">Email</div>
+              <div className="display-text">{displayEmail}</div>
             </div>
             <div className="space-y-2">
-              <div className="text-xs text-neutral-500">Vai trò</div>
-              <div className="font-semibold text-neutral-800">{user?.role ?? "—"}</div>
+              <div className="display-label text-neutral-500">Vai trò</div>
+              <div className="display-text">{user?.role ?? "—"}</div>
             </div>
 
             <div className="space-y-2">
-              <div className="text-xs text-neutral-500">Trạng thái</div>
+              <div className="display-label text-neutral-500">Trạng thái</div>
               <div
                 className={cn(
                   "font-semibold",
@@ -137,15 +140,15 @@ export default function ProfilePage() {
             </div>
 
             <div className="space-y-2">
-              <div className="text-xs text-neutral-500">Ngày tạo</div>
-              <div className="font-semibold text-neutral-800">
+              <div className="display-label text-neutral-500">Ngày tạo</div>
+              <div className="display-text">
                 {formatDDMMYYYY((user as any)?.createdAt)}
               </div>
             </div>
 
             <div className="space-y-2">
-              <div className="text-xs text-neutral-500">Cập nhật</div>
-              <div className="font-semibold text-neutral-800 mb-4">
+              <div className="display-label text-neutral-500">Cập nhật</div>
+              <div className="display-text mb-4">
                 {formatDDMMYYYY((user as any)?.updatedAt)}
               </div>
             </div>
