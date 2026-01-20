@@ -230,9 +230,14 @@ const UpdateIssueModal = ({ open, setOpen, issueId, onSuccess }: UpdateModalProp
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel isRequired>Trạng thái</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value || ""}>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value || ""}
+                          // disable nếu đã có ticket liên kết
+                          disabled={!!issue.maintenanceTicket}
+                        >
                           <FormControl>
-                            <SelectTrigger className="h-10 bg-white">
+                            <SelectTrigger className="h-10 bg-white disabled:opacity-90 disabled:bg-gray-100 disabled:cursor-not-allowed">
                               <SelectValue placeholder="Chọn trạng thái">
                                 <span className={getStatusTextColor(field.value)}>
                                   {IssueStatusOptions.find((o) => o.value === field.value)?.label}
@@ -248,6 +253,13 @@ const UpdateIssueModal = ({ open, setOpen, issueId, onSuccess }: UpdateModalProp
                             ))}
                           </SelectContent>
                         </Select>
+
+                        {issue.maintenanceTicket && (
+                          <p className="text-[11px] text-main mt-1 font-medium italic">
+                            * Trạng thái được quản lý bởi phiếu bảo trì đã liên kết.
+                          </p>
+                        )}
+
                         <FormMessage />
                       </FormItem>
                     )}
