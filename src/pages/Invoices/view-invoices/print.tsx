@@ -18,8 +18,8 @@ export const PrintableInvoiceList = ({ data }: PrintableInvoiceListProps) => {
       className="hidden print:block p-8 bg-white text-black"
       style={{ fontFamily: '"Times New Roman", Times, serif' }}
     >
-      <div className="flex flex-col items-center mb-5">
-        <h1 className="text-2xl font-bold uppercase mb-2" style={{ color: mainColor }}>
+      <div className="flex flex-col items-center mb-6">
+        <h1 className="text-xl font-bold uppercase mb-2" style={{ color: mainColor }}>
           Bảng Kê Danh Sách Công Nợ
         </h1>
 

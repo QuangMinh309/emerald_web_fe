@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Plus, Printer, FileDown, Trash2 } from "lucide-react";
+import { Plus, Printer, Trash2 } from "lucide-react";
 import PageHeader from "@/components/common/PageHeader";
 import ActionDropdown from "@/components/common/ActionDropdown";
 import CustomTable from "@/components/common/CustomTable";
@@ -15,6 +15,7 @@ import DeleteManyResidentModal from "@/pages/Residents/multiple-delete-residents
 import type { Resident } from "@/types/resident";
 import UpdateResidentModal from "@/pages/Residents/update-resident";
 import { useNavigate } from "react-router-dom";
+import { PrintableResidentList } from "./print";
 
 const ResidentsPage = () => {
   const navigate = useNavigate();
@@ -61,20 +62,6 @@ const ResidentsPage = () => {
   const actions: ActionOption[] = useMemo(
     () => [
       {
-        id: "delete_all",
-        label: "Xóa tất cả",
-        icon: <Trash2 className="w-4 h-4" />,
-        variant: "danger",
-        onClick: () => confirm("Xóa toàn bộ dữ liệu?") && console.log("Delete All"),
-        disabled: residents.length === 0,
-      },
-      {
-        id: "import",
-        label: "Import Excel",
-        icon: <FileDown className="w-4 h-4" />,
-        onClick: () => console.log("Importing..."),
-      },
-      {
         id: "print",
         label: "In danh sách",
         icon: <Printer className="w-4 h-4" />,
@@ -87,7 +74,8 @@ const ResidentsPage = () => {
 
   return (
     <>
-      <div className="p-1.5 pt-0 space-y-4">
+      <PrintableResidentList data={filteredResidents} />
+      <div className="p-1.5 pt-0 space-y-4 print:hidden">
         <PageHeader
           title="Cư dân"
           subtitle="Quản lý danh sách cư dân trong tòa nhà"
