@@ -89,21 +89,21 @@ const UpdateApartmentModal = ({ open, setOpen, apartmentId }: UpdateModalProps) 
   useEffect(() => {
     if (apartment && open) {
       // Lấy thông tin từ apartment detail
-      const residentsList =
+      let residentsList =
         apartment.residents?.map((r) => ({
           id: r.id,
           relationship: r.relationship,
         })) || [];
-
+      residentsList = residentsList.filter((r) => r.relationship !== "OWNER");
       setSelectedResidents(residentsList);
 
       form.reset({
         roomName: apartment.generalInfo.apartmentName,
         type: apartment.generalInfo.type,
         floor: apartment.generalInfo.floor.toString(),
-        blockId: "1", // Cần điều chỉnh để lấy đúng blockId
+        blockId: String(apartment.generalInfo.blockId), // Cần điều chỉnh để lấy đúng blockId
         area: parseFloat(apartment.generalInfo.area),
-        owner_id: "1", // Cần điều chỉnh để lấy đúng owner_id
+        owner_id: String(apartment.generalInfo.ownerId), // Cần điều chỉnh để lấy đúng owner_id
         residents: residentsList,
       });
     }
@@ -183,7 +183,7 @@ const UpdateApartmentModal = ({ open, setOpen, apartmentId }: UpdateModalProps) 
           handleClose();
         },
         onError: (error: any) => {
-          toast.error(`Lỗi cập nhật: ${error.message}`);
+          toast.error(error.response?.data?.message || "Lỗi cập nhật căn hộ");
         },
       },
     );

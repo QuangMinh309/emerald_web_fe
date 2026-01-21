@@ -222,7 +222,7 @@ const UpdateServiceModal = ({ open, setOpen, serviceId }: UpdateModalProps) => {
           handleClose();
         },
         onError: (error: any) => {
-          toast.error(`Lỗi cập nhật: ${error?.message ?? "Có lỗi xảy ra"}`);
+          toast.error(error.response?.data?.message || "Lỗi cập nhật dịch vụ");
         },
       },
     );

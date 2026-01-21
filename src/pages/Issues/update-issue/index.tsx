@@ -230,7 +230,7 @@ const UpdateIssueModal = ({ open, setOpen, issueId, onSuccess }: UpdateModalProp
         },
       );
     } catch (error: any) {
-      toast.error(error.message || "Lỗi tạo phiếu bảo trì");
+      toast.error(error.response?.data?.message || "Lỗi tạo phiếu bảo trì");
     }
   };
 

@@ -69,8 +69,8 @@ const UpdateAssetTypeModal = ({ open, setOpen, assetTypeId }: UpdateModalProps) 
           toast.success("Cập nhật loại tài sản thành công");
           handleClose();
         },
-        onError: (error) => {
-          toast.error(`Lỗi cập nhật: ${error.message}`);
+        onError: (error: any) => {
+          toast.error(error.response?.data?.message || "Lỗi cập nhật loại tài sản");
         },
       },
     );

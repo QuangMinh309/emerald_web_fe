@@ -40,8 +40,8 @@ const StepThree = ({ setStep }: StepThreeProps) => {
           toast.success("Tòa nha đã được tạo thành công");
           handleClose();
         },
-        onError: (error) => {
-          toast.error(`Lỗi: ${error.message}`);
+        onError: (error: any) => {
+          toast.error(error.response?.data?.message || "Lỗi khi tạo tòa nhà");
         },
       },
     );

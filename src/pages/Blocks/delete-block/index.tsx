@@ -1,13 +1,13 @@
 import PopConfirm from "@/components/common/PopConfirm";
 import { useDeleteBlock } from "@/hooks/data/useBlocks";
 
-import type { BlockDetail } from "@/types/block";
+import type { Block, BlockDetail } from "@/types/block";
 import { toast } from "sonner";
 
 interface DeleteBlockProps {
   open: boolean;
   setOpen: (value: boolean) => void;
-  seclectedBlock: BlockDetail | undefined;
+  seclectedBlock: BlockDetail | undefined | Block;
 }
 
 const DeleteBlock = ({ open, setOpen, seclectedBlock }: DeleteBlockProps) => {
@@ -21,8 +21,8 @@ const DeleteBlock = ({ open, setOpen, seclectedBlock }: DeleteBlockProps) => {
         toast.success("Khối nhà đã được xóa thành công");
         setOpen(false);
       },
-      onError: (error) => {
-        toast.error(`Lỗi: ${error.message}`);
+      onError: (error: any) => {
+        toast.error(error.response?.data?.message || "Lỗi khi xóa khối nhà");
       },
     });
   };

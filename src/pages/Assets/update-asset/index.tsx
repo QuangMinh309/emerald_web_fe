@@ -142,7 +142,7 @@ const UpdateAssetModal = ({ open, setOpen, assetId }: UpdateModalProps) => {
           handleClose();
         },
         onError: (error: any) => {
-          toast.error(`Lỗi cập nhật: ${error.message}`);
+          toast.error(error.response?.data?.message || "Lỗi cập nhật tài sản");
         },
       },
     );

@@ -18,7 +18,21 @@ const residentColumns = [
   { key: "fullName", label: "Họ và tên", sortable: true },
   { key: "gender", label: "Giới tính", align: "center" as const },
   { key: "phone", label: "Số điện thoại" },
-  { key: "relationship", label: "Quan hệ", sortable: true },
+  {
+    key: "relationship",
+    label: "Quan hệ",
+    sortable: true,
+    align: "center" as const,
+    render: (row: any) => {
+      const relationshipMap: Record<string, string> = {
+        SPOUSE: "Vợ/Chồng",
+        CHILD: "Con",
+        PARTNER: "Ở ghép",
+        OWNER: "Chủ hộ",
+      };
+      return relationshipMap[row.relationship] || row.relationship;
+    },
+  },
 ];
 
 const DetailApartmentPage = () => {
@@ -146,6 +160,7 @@ const DetailApartmentPage = () => {
           <div>
             {apartment?.residents && apartment.residents.length > 0 ? (
               <CustomTable
+                showCheckbox={false}
                 data={filteredResidents}
                 columns={residentColumns}
                 defaultPageSize={10}

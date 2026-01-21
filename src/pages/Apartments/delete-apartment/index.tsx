@@ -20,8 +20,8 @@ const DeleteApartment = ({ open, setOpen, selectedApartment }: DeleteApartmentPr
         toast.success("Căn hộ đã được xóa thành công");
         setOpen(false);
       },
-      onError: (error) => {
-        toast.error(`Lỗi: ${error.message}`);
+      onError: (error: any) => {
+        toast.error(error.response?.data?.message || "Lỗi khi xóa căn hộ");
       },
     });
   };

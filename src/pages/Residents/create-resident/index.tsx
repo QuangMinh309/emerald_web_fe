@@ -148,8 +148,8 @@ const CreateResidentModal = ({ open, setOpen }: ModalProps) => {
           toast.success("Cư dân đã được tạo thành công");
           handleClose();
         },
-        onError: (error) => {
-          toast.error(`Lỗi: ${error.message}`);
+        onError: (error: any) => {
+          toast.error(error.response?.data?.message || "Lỗi khi tạo cư dân");
         },
       },
     );

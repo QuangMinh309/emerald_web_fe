@@ -21,7 +21,7 @@ const DeleteService = ({ open, setOpen, selectedService, onDeleted }: DeleteServ
         onDeleted?.();
       },
       onError: (error: any) => {
-        toast.error(`Ohh!!! ${error?.message ?? "Có lỗi xảy ra"}`);
+        toast.error(error.response?.data?.message || "Lỗi khi xóa dịch vụ");
       },
     });
   };

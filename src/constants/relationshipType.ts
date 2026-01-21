@@ -1,13 +1,11 @@
 export const RelationshipType = {
-  PARTNER: "PARTNER",
+  SPOUSE: "SPOUSE",
   CHILD: "CHILD",
-  PARENT: "PARENT",
-  MEMBER: "MEMBER",
+  PARTNER: "PARTNER",
 } as const;
 // cái này dành cho select option
 export const RelationshipTypeOptions = [
-  { value: RelationshipType.PARTNER, label: "Vợ/Chồng" },
+  { value: RelationshipType.SPOUSE, label: "Vợ/Chồng" },
   { value: RelationshipType.CHILD, label: "Con" },
-  { value: RelationshipType.PARENT, label: "Bố/Mẹ" },
-  { value: RelationshipType.MEMBER, label: "Thành viên khác" },
+  { value: RelationshipType.PARTNER, label: "Ở ghép" },
 ];

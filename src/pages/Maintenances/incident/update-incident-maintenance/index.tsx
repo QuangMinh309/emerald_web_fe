@@ -124,7 +124,7 @@ const UpdateIncidentMaintenanceModal = ({ open, setOpen, ticketId }: UpdateModal
           handleClose();
         },
         onError: (error: any) => {
-          toast.error(`Lỗi cập nhật: ${error.message}`);
+          toast.error(error.response?.data?.message || "Lỗi cập nhật yêu cầu bảo trì");
         },
       },
     );

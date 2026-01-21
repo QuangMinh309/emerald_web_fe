@@ -12,6 +12,8 @@ export interface Apartment {
 }
 export interface ApartmentDetail {
   generalInfo: {
+    ownerId: number;
+    blockId: number;
     apartmentName: string;
     building: string;
     floor: number;

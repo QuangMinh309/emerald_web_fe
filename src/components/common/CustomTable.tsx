@@ -45,6 +45,7 @@ interface CustomTableProps<T> {
   isEditable?: (item: T) => boolean;
   defaultPageSize?: number;
   paginationAlign?: "start" | "center" | "end";
+  showCheckbox?: boolean;
 }
 
 function CustomTable<T extends { id: string | number }>({
@@ -58,6 +59,7 @@ function CustomTable<T extends { id: string | number }>({
   isEditable,
   defaultPageSize = 10,
   paginationAlign = "center",
+  showCheckbox = true,
 }: CustomTableProps<T>) {
   const [selectedIds, setSelectedIds] = useState<(string | number)[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -165,15 +167,17 @@ function CustomTable<T extends { id: string | number }>({
         <Table>
           <TableHeader className="bg-third">
             <TableRow className="hover:bg-third border-b border-gray-300/50">
-              <TableHead className="w-12 border-r p-0 border-gray-300/50">
-                <div className="flex items-center justify-center">
-                  <Checkbox
-                    checked={data.length > 0 && selectedIds.length === data.length}
-                    onCheckedChange={(c) => handleCheckAll(c as boolean)}
-                    className="data-[state=checked]:bg-main data-[state=checked]:border-main border-gray-400"
-                  />
-                </div>
-              </TableHead>
+              {showCheckbox && (
+                <TableHead className="w-12 border-r p-0 border-gray-300/50">
+                  <div className="flex items-center justify-center">
+                    <Checkbox
+                      checked={data.length > 0 && selectedIds.length === data.length}
+                      onCheckedChange={(c) => handleCheckAll(c as boolean)}
+                      className="data-[state=checked]:bg-main data-[state=checked]:border-main border-gray-400"
+                    />
+                  </div>
+                </TableHead>
+              )}
 
               {columns.map((col) => (
                 <TableHead
@@ -256,15 +260,17 @@ function CustomTable<T extends { id: string | number }>({
                   key={row.id}
                   className="hover:bg-gray-50 border-b border-gray-300/50 last:border-0"
                 >
-                  <TableCell className="border-r border-gray-300/50 p-0 text-center align-middle w-12 min-w-12">
-                    <div className="flex items-center justify-center">
-                      <Checkbox
-                        checked={selectedIds.includes(row.id)}
-                        onCheckedChange={(c) => handleCheckRow(row.id, c as boolean)}
-                        className="data-[state=checked]:bg-main data-[state=checked]:border-main border-gray-300"
-                      />
-                    </div>
-                  </TableCell>
+                  {showCheckbox && (
+                    <TableCell className="border-r border-gray-300/50 p-0 text-center align-middle w-12 min-w-12">
+                      <div className="flex items-center justify-center">
+                        <Checkbox
+                          checked={selectedIds.includes(row.id)}
+                          onCheckedChange={(c) => handleCheckRow(row.id, c as boolean)}
+                          className="data-[state=checked]:bg-main data-[state=checked]:border-main border-gray-300"
+                        />
+                      </div>
+                    </TableCell>
+                  )}
 
                   {columns.map((col) => (
                     <TableCell
@@ -361,7 +367,12 @@ function CustomTable<T extends { id: string | number }>({
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length + 2} className="h-32 text-center text-gray-500">
+                <TableCell
+                  colSpan={
+                    columns.length + (showCheckbox ? 1 : 0) + (onEdit || onDelete || onView ? 1 : 0)
+                  }
+                  className="h-32 text-center text-gray-500"
+                >
                   Không tìm thấy dữ liệu phù hợp
                 </TableCell>
               </TableRow>
