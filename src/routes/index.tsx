@@ -28,6 +28,7 @@ import DetailFeePage from "@/pages/Fees/detail-fee";
 
 const Assets = lazy(() => import("@/pages/Assets/view-assets"));
 const Notifications = lazy(() => import("@/pages/Notifications/view-notifications"));
+const SystemNotifications = lazy(() => import("@/pages/SystemNotifications"));
 const Services = lazy(() => import("@/pages/Services"));
 const Report = lazy(() => import("@/pages/Report"));
 const DetailServicePage = lazy(() => import("@/pages/Services/DetailService"));
@@ -55,6 +56,7 @@ export const routes = createBrowserRouter([
       { path: "assets", element: <Assets /> },
       { path: "notifications", element: <Notifications /> },
       { path: "notifications/:id", element: <DetailNotificationPage /> },
+      { path: "system-notifications", element: <SystemNotifications /> },
       { path: "assets/:id", element: <DetailAssetPage /> },
       { path: "residents", element: <ResidentsPage /> },
       { path: "residents/:id", element: <DetailResidentPage /> },

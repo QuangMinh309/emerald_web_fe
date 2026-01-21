@@ -1,7 +1,11 @@
 import type { ReactNode } from "react";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { AuthUser } from "@/types/auth";
-import { getProfile, login as loginRequest, logout as logoutRequest } from "@/services/auth.service";
+import {
+  getProfile,
+  login as loginRequest,
+  logout as logoutRequest,
+} from "@/services/auth.service";
 import {
   clearAuthStorage,
   getAccessToken,
@@ -14,7 +18,7 @@ type AuthContextValue = {
   user: AuthUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<AuthUser>;
+  login: (accessToken: string, profile: AuthUser) => Promise<AuthUser>;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 };
@@ -50,9 +54,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     void boot();
   }, []);
 
-  const login = async (email: string, password: string) => {
-    const data = await loginRequest(email, password);
-    const { accessToken, refreshToken, ...profile } = data;
+  const login = async (accessToken: string, profile: AuthUser) => {
     setTokens(accessToken);
     setStoredUser(profile);
     setUser(profile);

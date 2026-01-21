@@ -70,4 +70,44 @@ export interface SystemNotification {
   createdAt: Date;
 
   updatedAt: Date;
+
+  /**
+   * Đường dẫn điều hướng khi click vào thông báo
+   * Được tính toán từ actionUrl hoặc metadata
+   */
+  navigationPath?: string | null;
+
+  /**
+   * Dữ liệu bổ sung cho việc điều hướng
+   */
+  navigationData?: Record<string, any>;
+}
+
+// API Response types
+export interface GetUserNotificationsResponse {
+  data: SystemUserNotification[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    currentPage: number;
+  };
+}
+
+export interface UnreadCountResponse {
+  unreadCount: number;
+}
+
+export interface UserNotificationStatsResponse {
+  total: number;
+  unread: number;
+  read: number;
+  byType: Record<SystemNotificationType, number>;
+  byPriority: Record<SystemNotificationPriorityType, number>;
+}
+
+export interface MarkAsReadResponse {
+  success: boolean;
+  message: string;
 }

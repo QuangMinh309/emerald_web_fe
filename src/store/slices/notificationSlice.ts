@@ -32,13 +32,26 @@ const notificationSlice = createSlice({
 
     markAllRead(state) {
       state.unreadCount = 0;
-      state.items.forEach((n) => (n.isRead = true));
+      state.items.forEach((n) => {
+        n.isRead = true;
+        n.readAt = new Date();
+      });
     },
     markOneRead(state, action: PayloadAction<number>) {
-      const notificationId = action.payload;
-      const notification = state.items.find((n) => n.id === notificationId);
+      const userNotificationId = action.payload;
+      const notification = state.items.find((n) => n.id === userNotificationId);
       if (notification && !notification.isRead) {
         notification.isRead = true;
+        notification.readAt = new Date();
+        state.unreadCount = Math.max(0, state.unreadCount - 1);
+      }
+    },
+    markOneReadByNotificationId(state, action: PayloadAction<number>) {
+      const notificationId = action.payload;
+      const notification = state.items.find((n) => n.notificationId === notificationId);
+      if (notification && !notification.isRead) {
+        notification.isRead = true;
+        notification.readAt = new Date();
         state.unreadCount = Math.max(0, state.unreadCount - 1);
       }
     },
@@ -49,6 +62,11 @@ const notificationSlice = createSlice({
   },
 });
 
-export const { markOneRead, pushNotification, initializeNotifications, markAllRead } =
-  notificationSlice.actions;
+export const {
+  markOneRead,
+  markOneReadByNotificationId,
+  pushNotification,
+  initializeNotifications,
+  markAllRead,
+} = notificationSlice.actions;
 export default notificationSlice.reducer;

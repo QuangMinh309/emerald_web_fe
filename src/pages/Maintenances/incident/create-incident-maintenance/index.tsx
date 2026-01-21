@@ -22,10 +22,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { TicketPriority, TicketPriorityOptions } from "@/constants/ticketPriority";
+import {
+  TicketPriority,
+  TicketPriorityOptions,
+} from "@/constants/ticketPriority";
 import { Textarea } from "@/components/ui/textarea";
 import { useCreateIncidentTicket } from "@/hooks/data/useMaintenance";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -42,6 +49,12 @@ interface ModalProps {
   open: boolean;
   setOpen: (value: boolean) => void;
   onSuccess?: (ticketId: number) => void;
+  onDataSubmit?: (data: {
+    title: string;
+    description?: string;
+    priority?: string;
+    assetId: number;
+  }) => void;
   initialData?: {
     title?: string;
     description?: string;
@@ -55,9 +68,17 @@ const CreateIncidentMaintenanceSchema = z.object({
   assetId: z.string().min(1, "Vui lòng chọn tài sản"),
 });
 
-type IncidentMaintenanceFormValues = z.infer<typeof CreateIncidentMaintenanceSchema>;
+type IncidentMaintenanceFormValues = z.infer<
+  typeof CreateIncidentMaintenanceSchema
+>;
 
-const CreateIncidentMaintenanceModal = ({ open, setOpen, onSuccess, initialData }: ModalProps) => {
+const CreateIncidentMaintenanceModal = ({
+  open,
+  setOpen,
+  onSuccess,
+  onDataSubmit,
+  initialData,
+}: ModalProps) => {
   const { mutate: createTicket, isPending } = useCreateIncidentTicket();
   const { data: assets } = useAssets();
   const form = useForm<IncidentMaintenanceFormValues>({
@@ -94,7 +115,21 @@ const CreateIncidentMaintenanceModal = ({ open, setOpen, onSuccess, initialData 
     value: asset.id.toString(),
     label: `${asset.name} - Toà ${asset.blockName} - Tầng ${asset.floor}`,
   }));
+
   function onSubmit(values: IncidentMaintenanceFormValues) {
+    // Nếu có onDataSubmit, chỉ trả về data thay vì tạo ticket
+    if (onDataSubmit) {
+      onDataSubmit({
+        title: values.title,
+        description: values.description,
+        assetId: parseInt(values.assetId),
+        priority: values.priority,
+      });
+      handleClose();
+      return;
+    }
+
+    // Logic tạo ticket bình thường
     createTicket(
       {
         title: values.title,
@@ -158,7 +193,9 @@ const CreateIncidentMaintenanceModal = ({ open, setOpen, onSuccess, initialData 
               control={form.control}
               name="assetId"
               render={({ field }) => {
-                const selectedAsset = assetOptions?.find((r) => r.value === field.value);
+                const selectedAsset = assetOptions?.find(
+                  (r) => r.value === field.value,
+                );
 
                 return (
                   <FormItem className="space-y-1.5  col-span-2">
@@ -172,7 +209,9 @@ const CreateIncidentMaintenanceModal = ({ open, setOpen, onSuccess, initialData 
                             role="combobox"
                             className="w-full justify-between font-normal"
                           >
-                            {selectedAsset ? selectedAsset.label : "Chọn tài sản"}
+                            {selectedAsset
+                              ? selectedAsset.label
+                              : "Chọn tài sản"}
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
@@ -217,7 +256,11 @@ const CreateIncidentMaintenanceModal = ({ open, setOpen, onSuccess, initialData 
                 <FormItem className="space-y-1.5 col-span-2">
                   <FormLabel>Mô tả chi tiết</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Nhập mô tả chi tiết (nếu có)" rows={3} {...field} />
+                    <Textarea
+                      placeholder="Nhập mô tả chi tiết (nếu có)"
+                      rows={3}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage className="text-xs" />
                 </FormItem>
@@ -231,7 +274,10 @@ const CreateIncidentMaintenanceModal = ({ open, setOpen, onSuccess, initialData 
               render={({ field }) => (
                 <FormItem className="space-y-1.5">
                   <FormLabel>Độ ưu tiên</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Chọn độ ưu tiên" />

@@ -1,8 +1,8 @@
-import axiosInstance from "@/lib/axios";
+import axiosInstance, { refreshAxios } from "@/lib/axios";
 import type { AuthResponse, AuthUser, ChangePasswordPayload } from "@/types/auth";
 
-export const login = async (email: string, password: string) => {
-  const response = await axiosInstance.post("/auth/login", { email, password });
+export const login = async ({ email, password }: { email: string; password: string }) => {
+  const response = await refreshAxios.post("/auth/login", { email, password });
   return response.data.data as AuthResponse;
 };
 
@@ -11,7 +11,7 @@ export const getProfile = async () => {
   return response.data.data as AuthUser;
 };
 export const refreshToken = async () => {
-  const response = await axiosInstance.post("/auth/refresh");
+  const response = await refreshAxios.post("/auth/refresh");
   console.log("Refresh token response:", response.data);
   return response.data.data as { accessToken: string };
 };

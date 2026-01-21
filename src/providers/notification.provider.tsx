@@ -11,7 +11,7 @@ const NotificationContext = createContext(socket);
 
 export const NotificationProvider = ({ children }: { children: React.ReactNode }) => {
   const dispatch = useAppDispatch();
-  const { data: notifications } = useMySystemNotifications();
+  const { data: notificationData } = useMySystemNotifications();
 
   useEffect(() => {
     const socket = getSocket();
@@ -52,10 +52,11 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
   }, [dispatch]);
 
   useEffect(() => {
-    if (notifications) {
-      dispatch(initializeNotifications(notifications));
+    // notificationData is array of SystemUserNotification from useMySystemNotifications
+    if (notificationData && Array.isArray(notificationData)) {
+      dispatch(initializeNotifications(notificationData));
     }
-  }, [notifications, dispatch]);
+  }, [notificationData, dispatch]);
 
   return <NotificationContext.Provider value={socket}>{children}</NotificationContext.Provider>;
 };
