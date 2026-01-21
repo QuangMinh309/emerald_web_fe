@@ -4,13 +4,18 @@ import type { Resident } from "@/types/resident";
 export const residentColumns: TableColumn<Resident>[] = [
   { key: "stt", label: "STT", align: "center" },
   { key: "fullName", label: "Họ và tên", sortable: true },
-  { key: "citizenId", label: "CCCD", sortable: true },
+  { key: "citizenId", label: "CCCD", align: "center", sortable: true },
   {
     key: "dob",
     label: "Ngày sinh",
     sortable: true,
     align: "center",
-    render: (row) => new Date(row.dob).toLocaleDateString("vi-VN"),
+    render: (row) =>
+      new Date(row.dob).toLocaleDateString("vi-VN", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      }),
   },
   {
     key: "gender",
