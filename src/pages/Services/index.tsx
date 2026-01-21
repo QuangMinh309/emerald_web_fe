@@ -6,7 +6,6 @@ import PageHeader from "@/components/common/PageHeader";
 import ActionDropdown from "@/components/common/ActionDropdown";
 import CustomTable from "@/components/common/CustomTable";
 import { SearchBar } from "@/components/common/SearchBar";
-// import { TabNavigation } from "@/components/common/TabNavigation"; // nếu bạn muốn lọc theo tab
 
 import { normalizeString } from "@/utils/string";
 import type { ActionOption } from "@/types";
@@ -14,10 +13,11 @@ import type { ActionOption } from "@/types";
 import type { Service } from "@/types/service";
 import { serviceColumns } from "./columns";
 
-import { useServices, useServiceDetail } from "@/hooks/data/useServices";
+import { useServices } from "@/hooks/data/useServices";
 import DeleteService from "./delete-service";
 import CreateServiceModal from "./create-service";
 import UpdateServiceModal from "./update-service";
+import DeleteManyServiceModal from "./multiple-delete-services";
 
 const ServicesPage = () => {
   const navigate = useNavigate();
@@ -30,6 +30,9 @@ const ServicesPage = () => {
 
   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
   const [serviceToEdit, setServiceToEdit] = useState<Service | null>(null);
+
+  const [isDeleteManyOpen, setIsDeleteManyOpen] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   const { data: services = [], isLoading, isError, error, refetch } = useServices();
   // Filter theo search (bạn có thể thêm lọc theo tab/status sau)
@@ -51,6 +54,14 @@ const ServicesPage = () => {
 
   const actions: ActionOption[] = useMemo(
     () => [
+      // {
+      //   id: "delete_more",
+      //   label: "Xóa tất cả",
+      //   icon: <Trash2 className="w-4 h-4" />,
+      //   variant: "danger",
+      //   onClick: () => console.log("Xóa nhiều"),
+      //   disabled: services.length === 0,
+      // },
       {
         id: "import",
         label: "Import Excel",
@@ -64,17 +75,11 @@ const ServicesPage = () => {
         onClick: () => window.print(),
         disabled: services.length === 0,
       },
-      {
-        id: "delete_more",
-        label: "Xóa nhiều",
-        icon: <Trash2 className="w-4 h-4" />,
-        variant: "danger",
-        onClick: () => console.log("Xóa nhiều"),
-        disabled: services.length === 0,
-      },
     ],
     [services.length],
   );
+
+  const handleSelectionChange = (ids: string[]) => setSelectedIds(ids);
 
   return (
     <>
@@ -84,14 +89,24 @@ const ServicesPage = () => {
           subtitle="Quản lý danh sách các dịch vụ của chung cư"
           actions={
             <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setNewIsModalOpen(true)}
-                className="flex items-center gap-2 bg-main text-white px-4 py-2 rounded-lg hover:bg-main/90 transition-colors text-sm font-medium"
-              >
-                <Plus className="w-4 h-4" /> Thêm dịch vụ
-              </button>
-
+              {selectedIds.length > 0 ? (
+                <button
+                  className="flex items-center gap-2 bg-destructive text-destructive-foreground px-4 py-2 rounded-lg hover:bg-destructive/90 transition-colors text-sm font-medium animate-in fade-in zoom-in-95 shadow-sm"
+                  onClick={() => setIsDeleteManyOpen(true)}
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Xóa ({selectedIds.length})
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setNewIsModalOpen(true)}
+                  className="flex items-center gap-2 bg-main text-white px-4 py-2 rounded-lg hover:bg-main/90 transition-colors text-sm font-medium"
+                >
+                  <Plus className="w-4 h-4" /> Thêm dịch vụ
+                </button>
+              )
+              }
               <ActionDropdown
                 options={actions}
                 sampleFileUrl="/template/service_import_template.xlsx"
@@ -129,6 +144,8 @@ const ServicesPage = () => {
               data={filteredData}
               columns={serviceColumns}
               defaultPageSize={10}
+              onSelectionChange={handleSelectionChange}
+              selection={selectedIds}
               onEdit={(row) => {
                 setServiceToEdit(row);
                 setIsUpdateOpen(true);
@@ -160,8 +177,14 @@ const ServicesPage = () => {
           if (!open) setServiceToEdit(null);
         }}
         serviceId={serviceToEdit?.id}
-        // nếu modal hỗ trợ callback:
-        // onUpdated={() => { setIsUpdateOpen(false); setServiceToEdit(null); refetch(); }}
+      // nếu modal hỗ trợ callback:
+      // onUpdated={() => { setIsUpdateOpen(false); setServiceToEdit(null); refetch(); }}
+      />
+      <DeleteManyServiceModal
+        open={isDeleteManyOpen}
+        setOpen={setIsDeleteManyOpen}
+        selectedIds={selectedIds}
+        onSuccess={() => setSelectedIds([])}
       />
     </>
   );

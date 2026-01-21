@@ -16,6 +16,9 @@ export const refreshToken = async () => {
   return response.data.data as { accessToken: string };
 };
 
+export const logout = async () => {
+  await axiosInstance.post("/auth/logout");
+};
 export async function changePassword(payload: ChangePasswordPayload) {
   const res = await axiosInstance.post("/auth/change-password", payload);
   return res.data.data;

@@ -7,11 +7,16 @@ import {
 import { useAppDispatch } from "@/store/hooks";
 import { markAllRead, markOneRead } from "@/store/slices/notificationSlice";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/contexts/AuthContext";
 
 export const useMySystemNotifications = () => {
+  const { isAuthenticated } = useAuth();
+
   return useQuery({
     queryKey: ["systemNotifications"],
     queryFn: getMyNotifications,
+    enabled: isAuthenticated,
+
   });
 };
 export const useMarkAsRead = () => {

@@ -14,11 +14,11 @@ type Props = {
 export default function RevenueExpenseChart({
   revenue,
   expense,
-  width = 1200,
+  width = 1100,
   height = 280,
   ariaLabel = "Doanh thu và chi phí",
 }: Props) {
-  const padding = { l: 54, r: 18, t: 16, b: 42 };
+  const padding = { l: 44, r: 18, t: 16, b: 42 };
   const innerW = width - padding.l - padding.r;
   const innerH = height - padding.t - padding.b;
 
