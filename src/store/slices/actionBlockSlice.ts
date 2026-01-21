@@ -17,6 +17,8 @@ interface ActionBlockState {
   areasPerApartment: number;
   typesOfApartment: string;
   hasResidents: boolean;
+  isImported: boolean; // Track if data was imported from file
+  importedFileName?: string; // Store the imported file name
 }
 
 const initialState: ActionBlockState = {
@@ -31,6 +33,8 @@ const initialState: ActionBlockState = {
   areasPerApartment: 1,
   typesOfApartment: "",
   hasResidents: false,
+  isImported: false,
+  importedFileName: undefined,
 };
 
 const actionBlockSlice = createSlice({
@@ -65,6 +69,30 @@ const actionBlockSlice = createSlice({
       state.areasPerApartment = action.payload.areasPerApartment;
       state.typesOfApartment = action.payload.typesOfApartment;
     },
+    handleImportApartments: (
+      state,
+      action: PayloadAction<{
+        apartments: ActionBlockState["apartments"];
+        totalFloors: number;
+        apartmentsPerFloor: number;
+        areasPerApartment: number;
+        typesOfApartment: string;
+        fileName: string;
+      }>,
+    ) => {
+      state.apartments = action.payload.apartments;
+      state.totalFloors = action.payload.totalFloors;
+      state.apartmentsPerFloor = action.payload.apartmentsPerFloor;
+      state.areasPerApartment = action.payload.areasPerApartment;
+      state.typesOfApartment = action.payload.typesOfApartment;
+      state.isImported = true;
+      state.importedFileName = action.payload.fileName;
+    },
+    clearImportedData: (state) => {
+      state.isImported = false;
+      state.importedFileName = undefined;
+      state.apartments = [];
+    },
     handleStepTwo: (
       state,
       action: PayloadAction<{ apartments: ActionBlockState["apartments"] }>,
@@ -86,7 +114,9 @@ const actionBlockSlice = createSlice({
         (state.apartmentsPerFloor = 1),
         (state.areasPerApartment = 1),
         (state.typesOfApartment = ""),
-        (state.hasResidents = false);
+        (state.hasResidents = false),
+        (state.isImported = false),
+        (state.importedFileName = undefined);
     },
     setHasResidents: (state, action: PayloadAction<boolean>) => {
       state.hasResidents = action.payload;
@@ -124,5 +154,7 @@ export const {
   handleStepThree,
   setHasResidents,
   initializeUpdateBlock,
+  handleImportApartments,
+  clearImportedData,
 } = actionBlockSlice.actions;
 export default actionBlockSlice.reducer;

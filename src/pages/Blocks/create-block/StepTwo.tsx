@@ -10,7 +10,20 @@ interface StepOneProps {
 const StepTwo = ({ setStep }: StepOneProps) => {
   const value = useAppSelector((state) => state.actionBlock);
   const dispatch = useAppDispatch();
-  const [apartments, setApartments] = useState<Apartment[]>([]);
+
+  // Initialize apartments from Redux if already imported
+  const initialApartments: Apartment[] = value.isImported
+    ? value.apartments.map((apt, idx) => ({
+        id: apt.id?.toString() || crypto.randomUUID(),
+        code: apt.roomName,
+        floor: apt.floor,
+        index: idx + 1,
+        area: apt.area,
+        type: apt.type as ApartmentType,
+      }))
+    : [];
+
+  const [apartments, setApartments] = useState<Apartment[]>(initialApartments);
 
   const handleApartmentsChange = useCallback((newApartments: Apartment[]) => {
     setApartments(newApartments);

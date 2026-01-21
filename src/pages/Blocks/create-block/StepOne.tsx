@@ -19,11 +19,21 @@ import {
 import { ApartmentTypeOptions } from "@/constants/apartmentType";
 import { BlockStatusOption } from "@/constants/blockStatus";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { handleStepOne } from "@/store/slices/actionBlockSlice";
+import {
+  handleStepOne,
+  handleImportApartments,
+  clearImportedData,
+} from "@/store/slices/actionBlockSlice";
+import {
+  downloadSampleFile,
+  parseImportedFile,
+  type ImportedApartment,
+} from "@/utils/apartmentImport";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FileDown } from "lucide-react";
-import { useEffect } from "react";
+import { FileDown, Upload, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import z from "zod";
 const StepOneSchema = z.object({
   buildingName: z.string().min(1, "Vui lòng nhập tên khối nhà"),
@@ -42,6 +52,9 @@ interface StepOneProps {
 const StepOne = ({ setStep }: StepOneProps) => {
   const value = useAppSelector((state) => state.actionBlock);
   const dispatch = useAppDispatch();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
+
   const form = useForm<StepOneFormValues>({
     resolver: zodResolver(StepOneSchema),
     defaultValues: {
@@ -55,6 +68,81 @@ const StepOne = ({ setStep }: StepOneProps) => {
       typesOfApartment: "",
     },
   });
+
+  const handleDownloadSample = () => {
+    try {
+      downloadSampleFile();
+      toast.success("Tải file mẫu thành công!");
+    } catch (error) {
+      toast.error("Lỗi khi tải file mẫu");
+      console.error(error);
+    }
+  };
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const validTypes = [
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "application/vnd.ms-excel",
+    ];
+    if (!validTypes.includes(file.type)) {
+      toast.error("Vui lòng chọn file Excel (.xlsx hoặc .xls)");
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const result = await parseImportedFile(file);
+
+      // Transform to format expected by Redux
+      const apartments = result.apartments.map((apt) => ({
+        roomName: apt.roomName,
+        type: apt.type,
+        area: apt.area,
+        floor: apt.floor,
+      }));
+
+      // Dispatch to Redux
+      dispatch(
+        handleImportApartments({
+          apartments,
+          totalFloors: result.totalFloors,
+          apartmentsPerFloor: result.apartmentsPerFloor,
+          areasPerApartment: result.areasPerApartment,
+          typesOfApartment: result.typesOfApartment,
+          fileName: file.name,
+        }),
+      );
+
+      // Update form values
+      form.setValue("totalFloors", result.totalFloors);
+      form.setValue("apartmentsPerFloor", result.apartmentsPerFloor);
+      form.setValue("areasPerApartment", result.areasPerApartment);
+      form.setValue("typesOfApartment", result.typesOfApartment);
+
+      toast.success(
+        `Import thành công ${result.totalApartments} căn hộ từ ${result.totalFloors} tầng!`,
+      );
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Lỗi khi import file");
+      console.error(error);
+    } finally {
+      setIsUploading(false);
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
+  const handleClearImport = () => {
+    dispatch(clearImportedData());
+    toast.info("Đã xóa dữ liệu import");
+  };
+
   const onSubmit = (data: StepOneFormValues) => {
     console.log("Step One Data:", data);
     dispatch(handleStepOne(data));
@@ -152,10 +240,62 @@ const StepOne = ({ setStep }: StepOneProps) => {
             </div>
             <div className="w-full bg-gray-200 h-[1px]"></div>
             <div className="p-6 pt-2">
-              <Label>Danh sách phòng (nhập để tạo danh sách các tầng, phòng)</Label>
-              <div className="w-fit cursor-pointer ml-auto flex items-center gap-2 bg-main text-white px-4 py-2 rounded-lg hover:bg-main/90 transition-colors text-sm font-medium">
-                <FileDown className="w-4 h-4" /> Import
+              <div className="flex items-center justify-between mb-4">
+                <Label>Danh sách phòng (nhập để tạo danh sách các tầng, phòng)</Label>
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleDownloadSample}
+                    className="flex items-center gap-2"
+                  >
+                    <FileDown className="w-4 h-4" />
+                    Tải file mẫu
+                  </Button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".xlsx,.xls"
+                    onChange={handleFileChange}
+                    className="hidden"
+                    id="apartment-file-input"
+                  />
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploading}
+                    className="flex items-center gap-2"
+                  >
+                    <Upload className="w-4 h-4" />
+                    {isUploading ? "Đang import..." : "Import"}
+                  </Button>
+                </div>
               </div>
+              {value.isImported && value.importedFileName && (
+                <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-sm text-green-700">
+                      Đã import từ file:{" "}
+                      <span className="font-medium">{value.importedFileName}</span>
+                    </span>
+                    <span className="text-xs text-green-600">
+                      ({value.apartments.length} căn hộ)
+                    </span>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleClearImport}
+                    className="h-6 w-6 p-0 text-green-700 hover:text-green-900 hover:bg-green-100"
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              )}
               <div className="grid grid-cols-2 gap-x-4 gap-y-4 mt-4">
                 <FormField
                   control={form.control}
@@ -169,6 +309,8 @@ const StepOne = ({ setStep }: StepOneProps) => {
                           placeholder="Nhập tổng số tầng"
                           value={field.value}
                           onChange={(e) => field.onChange(Number(e.target.value) || 0)}
+                          disabled={value.isImported}
+                          className={value.isImported ? "bg-gray-100 cursor-not-allowed" : ""}
                         />
                       </FormControl>
                       <FormMessage className="text-xs" />
@@ -187,6 +329,8 @@ const StepOne = ({ setStep }: StepOneProps) => {
                           placeholder="Nhập diện tích mỗi căn hộ"
                           value={field.value}
                           onChange={(e) => field.onChange(Number(e.target.value) || 0)}
+                          disabled={value.isImported}
+                          className={value.isImported ? "bg-gray-100 cursor-not-allowed" : ""}
                         />
                       </FormControl>
                       <FormMessage className="text-xs" />
@@ -205,6 +349,8 @@ const StepOne = ({ setStep }: StepOneProps) => {
                           placeholder="Nhập số căn hộ mỗi tầng"
                           value={field.value}
                           onChange={(e) => field.onChange(Number(e.target.value) || 0)}
+                          disabled={value.isImported}
+                          className={value.isImported ? "bg-gray-100 cursor-not-allowed" : ""}
                         />
                       </FormControl>
                       <FormMessage className="text-xs" />
@@ -222,9 +368,12 @@ const StepOne = ({ setStep }: StepOneProps) => {
                         defaultValue={field.value}
                         onValueChange={field.onChange}
                         value={field.value || ""}
+                        disabled={value.isImported}
                       >
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger
+                            className={value.isImported ? "bg-gray-100 cursor-not-allowed" : ""}
+                          >
                             <SelectValue placeholder="Chọn loại căn hộ" />
                           </SelectTrigger>
                         </FormControl>
