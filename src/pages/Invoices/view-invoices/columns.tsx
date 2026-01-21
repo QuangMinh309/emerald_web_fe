@@ -11,17 +11,19 @@ export const invoiceColumns: TableColumn<Invoice>[] = [
   {
     key: "period",
     label: "Kỳ thanh toán",
+    align: "center",
     sortable: true,
-    render: (row) =>
-      new Date(row.period).toLocaleDateString("vi-VN", {
-        year: "numeric",
-        month: "2-digit",
-      }),
+    render: (row) => {
+      const d = new Date(row.period);
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const year = d.getFullYear();
+      return `${month}/${year}`;
+    },
   },
   {
     key: "totalAmount",
     label: "Tổng tiền",
-    align: "right",
+    align: "center",
     sortable: true,
     render: (row) => formatVND(Number(row.totalAmount)),
   },
@@ -38,6 +40,7 @@ export const invoiceColumns: TableColumn<Invoice>[] = [
   {
     key: "createdAt",
     label: "Ngày tạo",
+    align: "center",
     sortable: true,
     render: (row) => new Date(row.createdAt).toLocaleDateString("vi-VN"),
   },
