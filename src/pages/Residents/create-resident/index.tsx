@@ -27,6 +27,10 @@ import { useState, useMemo } from "react";
 import { useProvinces, useProvinceDetails } from "@/hooks/useLocation";
 import { GenderTypeOptions } from "@/constants/genderType";
 import { UploadImages } from "@/components/common/UploadImages";
+import { readIdentity } from "@/services/ai.service";
+import { Button } from "@/components/ui/button";
+import { Scan, Loader2 } from "lucide-react";
+import { Label } from "@/components/ui/label";
 
 interface ModalProps {
   open: boolean;
@@ -55,6 +59,9 @@ type ResidentFormValues = z.infer<typeof CreateResidentSchema>;
 const CreateResidentModal = ({ open, setOpen }: ModalProps) => {
   const { mutate: createResident, isPending } = useCreateResident();
   const [image, setImage] = useState<File[]>([]);
+  const [cccdImage, setCccdImage] = useState<File | null>(null);
+  const [isScanning, setIsScanning] = useState(false);
+
   const form = useForm<ResidentFormValues>({
     resolver: zodResolver(CreateResidentSchema),
     defaultValues: {
@@ -69,6 +76,55 @@ const CreateResidentModal = ({ open, setOpen }: ModalProps) => {
       province: "",
     },
   });
+
+  // Hàm xử lý OCR CCCD
+  const handleScanCCCD = async () => {
+    if (!cccdImage) {
+      toast.error("Vui lòng chọn ảnh căn cước trước");
+      return;
+    }
+
+    setIsScanning(true);
+    try {
+      const result = await readIdentity(cccdImage);
+      console.log("OCR result:", result);
+      // Tự động điền vào form (ngoại trừ địa chỉ)
+      if (result.name) {
+        form.setValue("fullName", result.name);
+      }
+      if (result.id_number) {
+        form.setValue("citizenId", result.id_number);
+      }
+      if (result.date_of_birth) {
+        // Parse date từ format DD/MM/YYYY
+        const [day, month, year] = result.date_of_birth.split("/");
+        const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+        form.setValue("dob", date);
+      }
+      if (result.gender) {
+        // Map giới tính từ OCR sang giá trị form
+        const genderMap: Record<string, string> = {
+          Nam: "MALE",
+          Nữ: "FEMALE",
+          Male: "MALE",
+          Female: "FEMALE",
+        };
+        const mappedGender = genderMap[result.gender] || result.gender;
+        form.setValue("gender", mappedGender);
+      }
+      if (result.nationality) {
+        form.setValue("nationality", result.nationality);
+      }
+
+      toast.success(
+        `Đã quét thông tin thành công (độ chính xác: ${Math.round(result.overall_confidence * 100)}%)`,
+      );
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Lỗi khi quét căn cước");
+    } finally {
+      setIsScanning(false);
+    }
+  };
 
   function onSubmit(values: ResidentFormValues) {
     console.log("images", image);
@@ -102,6 +158,7 @@ const CreateResidentModal = ({ open, setOpen }: ModalProps) => {
     setOpen(false);
     form.reset();
     setImage([]);
+    setCccdImage(null);
   };
 
   const selectedProvince = form.watch("province");
@@ -142,6 +199,46 @@ const CreateResidentModal = ({ open, setOpen }: ModalProps) => {
             }}
             maxImages={1}
           />
+
+          {/* Upload và quét CCCD */}
+          <div className="space-y-3">
+            <Label>Ảnh căn cước công dân (CCCD)</Label>
+            <div className="flex items-center gap-3">
+              <Input
+                type="file"
+                accept="image/*"
+                disabled={isPending || isScanning}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    setCccdImage(file);
+                  }
+                }}
+                className="flex-1"
+              />
+              <Button
+                type="button"
+                onClick={handleScanCCCD}
+                disabled={!cccdImage || isPending || isScanning}
+                className="bg-secondary hover:bg-secondary/90 text-white"
+              >
+                {isScanning ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Đang quét...
+                  </>
+                ) : (
+                  <>
+                    <Scan className="mr-2 h-4 w-4" />
+                    Quét CCCD
+                  </>
+                )}
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Chọn ảnh CCCD rồi nhấn "Quét CCCD" để tự động điền thông tin
+            </p>
+          </div>
 
           <div className="grid grid-cols-2 gap-x-4 gap-y-4">
             {/* Email */}
@@ -216,7 +313,7 @@ const CreateResidentModal = ({ open, setOpen }: ModalProps) => {
               render={({ field }) => (
                 <FormItem className="space-y-1.5">
                   <FormLabel isRequired>Giới tính</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Chọn giới tính" />
