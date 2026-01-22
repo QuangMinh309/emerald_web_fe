@@ -31,19 +31,10 @@ export type ServiceBookingRawItem = {
   bookingCount: number;
 };
 
-/**
- * API hiện trả về:
- * - brokenAssets
- * - maintenanceAssets
- * - workingAssets
- *
- * File cũ đang có maintenancedAssets (sai key).
- * Để không vỡ code cũ + code mới dùng được, giữ cả 2.
- */
 export type AssetStatus = {
   brokenAssets?: number;
-  maintenanceAssets?: number;     // ✅ key đúng theo API mới
-  maintenancedAssets?: number;    // ✅ giữ lại để trang cũ không lỗi (nếu có)
+  maintenanceAssets?: number;     
+  maintenancedAssets?: number;    
   workingAssets?: number;
 };
 
@@ -52,14 +43,12 @@ export type DashboardReport = {
   debt?: DebtBlock;
   maintenance?: MaintenanceBlock;
 
-  // nên để optional để tránh crash nếu API/old data không trả về 2 mảng này
   revenueExpenseChart?: RevenueExpenseRawItem[];
   serviceBookingChart?: ServiceBookingRawItem[];
 
   assetStatus?: AssetStatus;
 };
 
-/** Nếu bạn có wrapper response chuẩn như ví dụ API */
 export type DashboardReportResponse = {
   statusCode: number;
   message: string;
