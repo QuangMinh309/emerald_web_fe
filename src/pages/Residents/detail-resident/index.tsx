@@ -240,6 +240,7 @@ const DetailResidentPage = () => {
           "invoices" in invoicesAndPayments &&
           invoicesAndPayments.invoices.length > 0 ? (
           <CustomTable
+            showCheckbox={false}
             data={invoicesAndPayments.invoices as any}
             columns={invoiceColumns}
             defaultPageSize={10}
