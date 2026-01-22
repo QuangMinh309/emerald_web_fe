@@ -25,7 +25,7 @@ const StepTwo = ({ setStep, blockId }: StepTwoProps) => {
         area: apt.area,
         floor: apt.floor,
         index: Number(apt.roomName.split(".")[1]) || 1,
-        hasResidents: false, // Mock data - BE will return actual value
+        hasResidents: apt.hasResidents || false, // Use actual value from API
       }));
       setApartments(mappedApartments);
     }
