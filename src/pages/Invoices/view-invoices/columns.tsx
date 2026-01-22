@@ -30,8 +30,10 @@ export const invoiceColumns: TableColumn<Invoice>[] = [
   {
     key: "status",
     label: "Trạng thái",
+    filterable: true,
     align: "center",
     width: "150px",
+    filterAccessor: (row) => InvoiceStatusMap[row.status].label,
     render: (row) => {
       const config = InvoiceStatusMap[row.status];
       return <StatusBadge label={config.label} type={config.type} />;
