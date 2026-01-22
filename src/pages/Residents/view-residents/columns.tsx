@@ -38,4 +38,25 @@ export const residentColumns: TableColumn<Resident>[] = [
     label: "Email",
     render: (row) => row.account.email,
   },
+  {
+    key: "residences",
+    label: "Căn hộ đang ở",
+    render: (row) => {
+      if (!row.residences || row.residences.length === 0) {
+        return <span className="text-gray-400">Không có</span>;
+      }
+      return (
+        <div className="space-y-1">
+          {row.residences.map((residence) => (
+            <div key={residence.id} className="text-sm">
+              <span className="font-medium">{residence.apartment.blockName}</span>
+              {" - "}
+              <span>{residence.apartment.roomNumber}</span>
+              <span className="text-gray-500 text-xs ml-1">({residence.relationship})</span>
+            </div>
+          ))}
+        </div>
+      );
+    },
+  },
 ];

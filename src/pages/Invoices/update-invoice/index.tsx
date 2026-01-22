@@ -18,7 +18,11 @@ import { useApartments } from "@/hooks/data/useApartments";
 import { toast } from "sonner";
 import { useEffect } from "react";
 import { DatePicker } from "@/components/common/DatePicker";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -71,9 +75,11 @@ const UpdateInvoiceModal = ({ open, setOpen, invoiceId }: UpdateModalProps) => {
         periodDate.getMonth() + 1,
       ).padStart(2, "0")}`;
       const waterIndex =
-        invoice.invoiceDetails.find((d) => d.feeTypeName === "Tiền nước")?.amount || 0;
+        invoice.invoiceDetails.find((d) => d.feeTypeName === "Tiền nước")
+          ?.amount || 0;
       const electricityIndex =
-        invoice.invoiceDetails.find((d) => d.feeTypeName === "Tiền điện")?.amount || 0;
+        invoice.invoiceDetails.find((d) => d.feeTypeName === "Tiền điện")
+          ?.amount || 0;
       form.reset({
         apartmentId: invoice.apartmentId.toString(),
         period: new Date(periodString),
@@ -139,7 +145,9 @@ const UpdateInvoiceModal = ({ open, setOpen, invoiceId }: UpdateModalProps) => {
               control={form.control}
               name="apartmentId"
               render={({ field }) => {
-                const selectedOwner = apartmentOptions?.find((r) => r.value === field.value);
+                const selectedOwner = apartmentOptions?.find(
+                  (r) => r.value === field.value,
+                );
 
                 return (
                   <FormItem className="space-y-1.5">
@@ -153,7 +161,9 @@ const UpdateInvoiceModal = ({ open, setOpen, invoiceId }: UpdateModalProps) => {
                             role="combobox"
                             className="w-full justify-between font-normal"
                           >
-                            {selectedOwner ? selectedOwner.label : "Chọn căn hộ"}
+                            {selectedOwner
+                              ? selectedOwner.label
+                              : "Chọn căn hộ"}
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
@@ -199,7 +209,11 @@ const UpdateInvoiceModal = ({ open, setOpen, invoiceId }: UpdateModalProps) => {
                 <FormItem className="space-y-1.5">
                   <FormLabel isRequired>Kỳ thanh toán</FormLabel>
                   <FormControl>
-                    <DatePicker type="month" value={field.value} onChange={field.onChange} />
+                    <DatePicker
+                      type="month"
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
                   </FormControl>
                   <FormMessage className="text-xs" />
                 </FormItem>
@@ -217,6 +231,7 @@ const UpdateInvoiceModal = ({ open, setOpen, invoiceId }: UpdateModalProps) => {
                   <FormControl>
                     <Input
                       type="number"
+                      min="0"
                       placeholder="Nhập chỉ số nước"
                       value={field.value ?? ""}
                       onChange={(e) => field.onChange(Number(e.target.value))}
@@ -239,6 +254,7 @@ const UpdateInvoiceModal = ({ open, setOpen, invoiceId }: UpdateModalProps) => {
                     <Input
                       value={field.value ?? ""}
                       type="number"
+                      min="0"
                       placeholder="Nhập chỉ số điện"
                       onChange={(e) => field.onChange(Number(e.target.value))}
                     />

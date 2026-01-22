@@ -10,12 +10,14 @@ import CustomTable from "@/components/common/CustomTable";
 import { SearchBar } from "@/components/common/SearchBar";
 import { TabNavigation } from "@/components/common/TabNavigation";
 import { Button } from "@/components/ui/button";
+import ModuleAccessGuard from "@/components/auth/ModuleAccessGuard";
 
 import RejectIssueModal from "@/pages/Issues/reject-issue";
 import ReceiveIssueModal from "@/pages/Issues/receive-issue";
 import UpdateIssueModal from "@/pages/Issues/update-issue";
 
 import { useIssues } from "@/hooks/data/useIssues";
+import { usePermission } from "@/hooks/usePermission";
 import { getIssueColumns } from "./columns";
 import { normalizeString } from "@/utils/string";
 import type { IssueListItem } from "@/types/issue";
@@ -23,6 +25,7 @@ import type { TabItem } from "@/types";
 
 const IssuesPage = () => {
   const navigate = useNavigate();
+  const { canUpdate, userRole } = usePermission();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("ALL");
@@ -38,6 +41,12 @@ const IssuesPage = () => {
   const [isEditOpen, setIsEditOpen] = useState(false);
 
   const { data: issues = [], isLoading, isError, refetch } = useIssues();
+
+  // Subtitle thay đổi tuỳ theo role
+  const subtitle =
+    userRole === "TECHNICIAN"
+      ? "Quản lý các phản ánh được chỉ định cho bạn"
+      : "Quản lý tất cả phản ánh và yêu cầu từ cư dân";
 
   // filter
   const filteredData = useMemo(() => {
@@ -113,7 +122,7 @@ const IssuesPage = () => {
       <div className="p-1.5 pt-0 space-y-4">
         <PageHeader
           title="Phản ánh & Yêu cầu"
-          subtitle="Quản lý tất cả phản ánh và yêu cầu từ cư dân"
+          subtitle={subtitle}
           actions={
             <div className="flex items-center gap-2">
               <ActionDropdown options={headerActions} label="Thao tác" />
@@ -154,9 +163,9 @@ const IssuesPage = () => {
               data={filteredData}
               columns={getIssueColumns({
                 onView: (row) => navigate(`/issues/${row.id}`),
-                onEdit: handleEdit,
                 onReceive: handleReceive,
                 onReject: handleReject,
+                onEdit: handleEdit,
               })}
               selection={selectedIds}
               onSelectionChange={(ids) => setSelectedIds(ids as string[])}
@@ -166,32 +175,35 @@ const IssuesPage = () => {
         </div>
       </div>
 
-      {isReceiveOpen && receivingItem && (
-        <ReceiveIssueModal
-          open={isReceiveOpen}
-          setOpen={setIsReceiveOpen}
-          issue={receivingItem}
-          onSuccess={() => setReceivingItem(null)}
-        />
-      )}
+      {/* Chỉ ADMIN và TECHNICIAN mới có quyền update issues */}
+      <ModuleAccessGuard module="issues" action="update">
+        {isReceiveOpen && receivingItem && (
+          <ReceiveIssueModal
+            open={isReceiveOpen}
+            setOpen={setIsReceiveOpen}
+            issue={receivingItem}
+            onSuccess={() => setReceivingItem(null)}
+          />
+        )}
 
-      {isRejectOpen && rejectingItem && (
-        <RejectIssueModal
-          open={isRejectOpen}
-          setOpen={setIsRejectOpen}
-          issue={rejectingItem}
-          onSuccess={() => setRejectingItem(null)}
-        />
-      )}
+        {isRejectOpen && rejectingItem && (
+          <RejectIssueModal
+            open={isRejectOpen}
+            setOpen={setIsRejectOpen}
+            issue={rejectingItem}
+            onSuccess={() => setRejectingItem(null)}
+          />
+        )}
 
-      {isEditOpen && editingItem && (
-        <UpdateIssueModal
-          open={isEditOpen}
-          setOpen={setIsEditOpen}
-          issueId={editingItem.id}
-          onSuccess={() => setEditingItem(null)}
-        />
-      )}
+        {isEditOpen && editingItem && (
+          <UpdateIssueModal
+            open={isEditOpen}
+            setOpen={setIsEditOpen}
+            issueId={editingItem.id}
+            onSuccess={() => setEditingItem(null)}
+          />
+        )}
+      </ModuleAccessGuard>
     </>
   );
 };

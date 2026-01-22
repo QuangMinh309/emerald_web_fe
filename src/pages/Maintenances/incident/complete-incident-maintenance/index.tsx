@@ -23,7 +23,10 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 
-import { MaintenanceResult, MaintenanceResultOptions } from "@/constants/maintenanceResult";
+import {
+  MaintenanceResult,
+  MaintenanceResultOptions,
+} from "@/constants/maintenanceResult";
 import { useCompleteIncidentTicket } from "@/hooks/data/useMaintenance";
 
 interface ModalProps {
@@ -38,14 +41,18 @@ interface ModalProps {
 const CompleteIncidentMaintenanceSchema = z.object({
   result: z.string().min(1, "Vui lòng chọn kết quả"),
   resultNote: z.string().optional(),
-  actualCost: z.number(),
+  actualCost: z.number().min(1, "Chi phí thực tế phải > 0"),
   images: z.array(z.string()).optional(),
   videos: z.array(z.string()).optional(),
 });
 
 type CompleteFormValues = z.infer<typeof CompleteIncidentMaintenanceSchema>;
 
-const CompleteIncidentMaintenanceModal = ({ open, setOpen, ticketId }: ModalProps) => {
+const CompleteIncidentMaintenanceModal = ({
+  open,
+  setOpen,
+  ticketId,
+}: ModalProps) => {
   const { mutate: completeTicket, isPending } = useCompleteIncidentTicket();
 
   const form = useForm<CompleteFormValues>({
@@ -141,7 +148,11 @@ const CompleteIncidentMaintenanceModal = ({ open, setOpen, ticketId }: ModalProp
               <FormItem className="space-y-1.5">
                 <FormLabel>Ghi chú kết quả</FormLabel>
                 <FormControl>
-                  <Textarea rows={3} placeholder="Nhập ghi chú (nếu có)" {...field} />
+                  <Textarea
+                    rows={3}
+                    placeholder="Nhập ghi chú (nếu có)"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage className="text-xs" />
               </FormItem>
@@ -159,10 +170,13 @@ const CompleteIncidentMaintenanceModal = ({ open, setOpen, ticketId }: ModalProp
                 <FormControl>
                   <Input
                     type="number"
+                    min="1"
                     placeholder="0"
                     value={field.value ?? ""}
                     onChange={(e) =>
-                      field.onChange(e.target.value ? Number(e.target.value) : undefined)
+                      field.onChange(
+                        e.target.value ? Number(e.target.value) : undefined,
+                      )
                     }
                   />
                 </FormControl>

@@ -43,9 +43,11 @@ const CreateAssetSchema = z.object({
   installationDate: z.date({
     message: "Vui lòng chọn ngày lắp đặt",
   }),
-  warrantyYears: z.number(),
+  warrantyYears: z.number().min(0, "Năm bảo hành phải >= 0"),
   note: z.string().optional(),
-  maintenanceIntervalMonths: z.number(),
+  maintenanceIntervalMonths: z
+    .number()
+    .min(1, "Khoảng thời gian bảo dưỡng phải > 0"),
 });
 
 type AssetFormValues = z.infer<typeof CreateAssetSchema>;
@@ -83,7 +85,9 @@ const CreateAssetModal = ({ open, setOpen }: ModalProps) => {
     if (!selectedBlockId || !blocks) return [];
 
     // Tìm tòa nhà đang được chọn trong danh sách blocks
-    const selectedBlock = blocks.find((b) => b.id.toString() === selectedBlockId);
+    const selectedBlock = blocks.find(
+      (b) => b.id.toString() === selectedBlockId,
+    );
 
     if (!selectedBlock || !selectedBlock.totalFloors) return [];
 
@@ -170,7 +174,10 @@ const CreateAssetModal = ({ open, setOpen }: ModalProps) => {
               render={({ field }) => (
                 <FormItem className="space-y-1.5">
                   <FormLabel isRequired>Loại thiết bị</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Chọn loại thiết bị" />
@@ -197,7 +204,10 @@ const CreateAssetModal = ({ open, setOpen }: ModalProps) => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel isRequired>Trạng thái</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Chọn trạng thái" />
@@ -205,8 +215,12 @@ const CreateAssetModal = ({ open, setOpen }: ModalProps) => {
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="ACTIVE">Hoạt động (Active)</SelectItem>
-                      <SelectItem value="INACTIVE">Ngưng hoạt động (Inactive)</SelectItem>
-                      <SelectItem value="MAINTENANCE">Bảo trì (Maintenance)</SelectItem>
+                      <SelectItem value="INACTIVE">
+                        Ngưng hoạt động (Inactive)
+                      </SelectItem>
+                      <SelectItem value="MAINTENANCE">
+                        Bảo trì (Maintenance)
+                      </SelectItem>
                       <SelectItem value="BROKEN">Hỏng (Broken)</SelectItem>
                     </SelectContent>
                   </Select>
@@ -312,6 +326,7 @@ const CreateAssetModal = ({ open, setOpen }: ModalProps) => {
                   <FormControl>
                     <Input
                       type="number"
+                      min="0"
                       placeholder="Nhập số năm bảo hành"
                       value={field.value ?? ""}
                       onChange={(e) => field.onChange(Number(e.target.value))}
@@ -328,10 +343,13 @@ const CreateAssetModal = ({ open, setOpen }: ModalProps) => {
               name="maintenanceIntervalMonths"
               render={({ field }) => (
                 <FormItem className="space-y-1.5 col-span-2">
-                  <FormLabel isRequired>Khoảng thời gian bảo trì (tháng)</FormLabel>
+                  <FormLabel isRequired>
+                    Khoảng thời gian bảo trì (tháng)
+                  </FormLabel>
                   <FormControl>
                     <Input
                       type="number"
+                      min="1"
                       placeholder="Nhập khoảng thời gian bảo trì (tháng)"
                       value={field.value ?? ""}
                       onChange={(e) => field.onChange(Number(e.target.value))}
@@ -352,7 +370,11 @@ const CreateAssetModal = ({ open, setOpen }: ModalProps) => {
               <FormItem className="space-y-1.5">
                 <FormLabel>Ghi chú</FormLabel>
                 <FormControl>
-                  <Textarea placeholder="Ghi chú thêm..." className="resize-none h-24" {...field} />
+                  <Textarea
+                    placeholder="Ghi chú thêm..."
+                    className="resize-none h-24"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage className="text-xs" />
               </FormItem>

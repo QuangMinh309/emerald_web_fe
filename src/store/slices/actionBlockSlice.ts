@@ -11,6 +11,7 @@ interface ActionBlockState {
     type: string;
     area: number;
     floor: number;
+    hasResidents?: boolean; // Add field to store residents status
   }[];
   totalFloors: number;
   apartmentsPerFloor: number;

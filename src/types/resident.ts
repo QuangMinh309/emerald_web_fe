@@ -1,5 +1,19 @@
 import type { GenderType } from "@/constants/genderType";
 
+export interface ResidenceApartment {
+  id: number;
+  roomNumber: string;
+  blockName: string;
+  area: number;
+}
+
+export interface ResidenceInfo {
+  id: number;
+  apartmentId: number;
+  apartment: ResidenceApartment;
+  relationship: string;
+}
+
 export interface Resident {
   id: number;
   accountId: number;
@@ -24,6 +38,7 @@ export interface Resident {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  residences?: ResidenceInfo[];
 }
 
 export interface ResidentDetail {
@@ -50,6 +65,7 @@ export interface ResidentDetail {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  residences?: ResidenceInfo[];
 }
 
 export interface ResidenceApartment {
