@@ -66,7 +66,8 @@ const CreateServiceSchema = z
     unitPrice: z
       .string()
       .min(1, "Vui lòng nhập giá")
-      .refine((v) => !Number.isNaN(Number(v)), "Giá không hợp lệ"),
+      .refine((v) => !Number.isNaN(Number(v)), "Giá không hợp lệ")
+      .refine((v) => Number(v) > 0, "Giá phải > 0"),
     unitTimeBlock: z.string().min(1, "Vui lòng chọn đơn vị"),
     openHour: z.string().min(1, "Vui lòng chọn giờ mở cửa"),
     closeHour: z.string().min(1, "Vui lòng chọn giờ đóng cửa"),

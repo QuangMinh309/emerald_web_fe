@@ -38,7 +38,7 @@ interface ModalProps {
 const CompleteIncidentMaintenanceSchema = z.object({
   result: z.string().min(1, "Vui lòng chọn kết quả"),
   resultNote: z.string().optional(),
-  actualCost: z.number(),
+  actualCost: z.number().min(1, "Chi phí thực tế phải > 0"),
   images: z.array(z.string()).optional(),
   videos: z.array(z.string()).optional(),
 });

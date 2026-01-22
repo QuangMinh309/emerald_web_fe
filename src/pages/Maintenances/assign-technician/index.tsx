@@ -36,7 +36,7 @@ interface ModalProps {
 
 const AssignTechnicianSchema = z.object({
   technicianId: z.string().min(1, "Vui lòng chọn kỹ thuật viên"),
-  estimatedCost: z.number(),
+  estimatedCost: z.number().min(1, "Chi phí ước tính phải > 0"),
 });
 
 type AssignFormValues = z.infer<typeof AssignTechnicianSchema>;

@@ -26,7 +26,7 @@ import { useResidents } from "@/hooks/data/useResidents";
 import { toast } from "sonner";
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Check, X } from "lucide-react";
+import { Check, X, Loader2 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
@@ -97,19 +97,34 @@ const UpdateApartmentModal = ({ open, setOpen, apartmentId }: UpdateModalProps) 
       residentsList = residentsList.filter((r) => r.relationship !== "OWNER");
       setSelectedResidents(residentsList);
 
+      const blockId = String(apartment.generalInfo.blockId);
+      const floorStr = apartment.generalInfo.floor.toString();
+
       form.reset({
         roomName: apartment.generalInfo.apartmentName,
         type: apartment.generalInfo.type,
-        floor: apartment.generalInfo.floor.toString(),
-        blockId: String(apartment.generalInfo.blockId), // Cần điều chỉnh để lấy đúng blockId
+        floor: floorStr,
+        blockId: blockId,
         area: parseFloat(apartment.generalInfo.area),
-        owner_id: String(apartment.generalInfo.ownerId), // Cần điều chỉnh để lấy đúng owner_id
+        owner_id: String(apartment.generalInfo.ownerId),
         residents: residentsList,
       });
     }
   }, [apartment, open, form]);
 
   const selectedBlockId = form.watch("blockId");
+
+  // Cập nhật floor khi blockId thay đổi
+  useEffect(() => {
+    if (selectedBlockId && form.watch("floor")) {
+      // Reset floor nếu nó không thuộc block mới
+      const currentFloor = form.watch("floor");
+      const selectedBlock = blocks?.find((b) => b.id.toString() === selectedBlockId);
+      if (selectedBlock && currentFloor && Number(currentFloor) > selectedBlock.totalFloors) {
+        form.setValue("floor", "");
+      }
+    }
+  }, [selectedBlockId, blocks, form]);
 
   const buildingOptions = useMemo(
     () =>
@@ -138,11 +153,16 @@ const UpdateApartmentModal = ({ open, setOpen, apartmentId }: UpdateModalProps) 
 
   const addResident = (residentId: string) => {
     const id = Number(residentId);
+    // Kiểm tra nếu cư dân này đã là chủ hộ
+    if (form.watch("owner_id") === residentId) {
+      toast.error("Chủ hộ không thể là thành viên cư trú");
+      return;
+    }
     if (selectedResidents.some((r) => r.id === id)) {
       toast.error("Cư dân đã được thêm");
       return;
     }
-    setSelectedResidents([...selectedResidents, { id, relationship: "MEMBER" }]);
+    setSelectedResidents([...selectedResidents, { id, relationship: "SPOUSE" }]);
   };
 
   const removeResident = (residentId: number) => {
@@ -194,7 +214,7 @@ const UpdateApartmentModal = ({ open, setOpen, apartmentId }: UpdateModalProps) 
       open={open}
       setOpen={setOpen}
       title="Chỉnh sửa căn hộ"
-      submitText="Lưu thay đổi"
+      submitText={isPending ? "Đang lưu..." : "Lưu thay đổi"}
       onSubmit={form.handleSubmit(onSubmit)}
       onLoading={isPending}
     >
@@ -381,11 +401,19 @@ const UpdateApartmentModal = ({ open, setOpen, apartmentId }: UpdateModalProps) 
                   <SelectValue placeholder="Chọn cư dân để thêm" />
                 </SelectTrigger>
                 <SelectContent>
-                  {residentOptions?.map((resident) => (
-                    <SelectItem key={resident.value} value={resident.value}>
-                      {resident.label}
-                    </SelectItem>
-                  ))}
+                  {residentOptions?.map((resident) => {
+                    // Không hiển thị chủ hộ hoặc người đã được thêm rồi
+                    const isOwner = form.watch("owner_id") === resident.value;
+                    const isAlreadyAdded = selectedResidents.some(
+                      (r) => r.id === Number(resident.value),
+                    );
+                    if (isOwner || isAlreadyAdded) return null;
+                    return (
+                      <SelectItem key={resident.value} value={resident.value}>
+                        {resident.label}
+                      </SelectItem>
+                    );
+                  })}
                 </SelectContent>
               </Select>
             </div>
@@ -410,7 +438,10 @@ const UpdateApartmentModal = ({ open, setOpen, apartmentId }: UpdateModalProps) 
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {RelationshipTypeOptions.map((option) => (
+                          {RelationshipTypeOptions.filter(
+                            (option) =>
+                              option.value !== ("OWNER" as "SPOUSE" | "CHILD" | "PARTNER"),
+                          ).map((option) => (
                             <SelectItem key={option.value} value={option.value}>
                               {option.label}
                             </SelectItem>

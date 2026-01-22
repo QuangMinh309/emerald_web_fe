@@ -42,7 +42,7 @@ const CompleteScheduledMaintenanceSchema = z.object({
   resultNote: z.string().optional(),
   hasIssue: z.boolean(),
   issueDetail: z.string().optional(),
-  actualCost: z.number(),
+  actualCost: z.number().min(1, "Chi phí thực tế phải > 0"),
 });
 
 type CompleteFormValues = z.infer<typeof CompleteScheduledMaintenanceSchema>;

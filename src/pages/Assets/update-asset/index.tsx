@@ -43,9 +43,9 @@ const UpdateAssetSchema = z.object({
   installationDate: z.date({
     message: "Vui lòng chọn ngày lắp đặt",
   }),
-  warrantyYears: z.number(),
+  warrantyYears: z.number().min(0, "Năm bảo hành phải >= 0"),
   note: z.string().optional(),
-  maintenanceIntervalMonths: z.number(),
+  maintenanceIntervalMonths: z.number().min(1, "Khoảng thời gian bảo dưỡng phải > 0"),
 });
 
 type AssetFormValues = z.infer<typeof UpdateAssetSchema>;
