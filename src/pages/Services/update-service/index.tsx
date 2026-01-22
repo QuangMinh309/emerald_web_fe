@@ -100,7 +100,9 @@ const UpdateServiceModal = ({ open, setOpen, serviceId }: UpdateModalProps) => {
   const { mutate: updateService, isPending } = useUpdateService();
 
   const [image, setImage] = useState<File[]>([]);
-  const [existingImageUrl, setExistingImageUrl] = useState(service?.imageUrl ?? "");
+  const [existingImageUrl, setExistingImageUrl] = useState(
+    service?.imageUrl ?? "",
+  );
   const [removeExistingImage, setRemoveExistingImage] = useState(false);
 
   const form = useForm<ServiceFormValues>({
@@ -118,8 +120,10 @@ const UpdateServiceModal = ({ open, setOpen, serviceId }: UpdateModalProps) => {
   });
   const openHour = form.watch("openHour");
   const closeHour = form.watch("closeHour");
-  const isOvernight = openHour && closeHour && toMinutes(closeHour) < toMinutes(openHour);
-  const dur = openHour && closeHour ? durationMinutes(openHour, closeHour) : null;
+  const isOvernight =
+    openHour && closeHour && toMinutes(closeHour) < toMinutes(openHour);
+  const dur =
+    openHour && closeHour ? durationMinutes(openHour, closeHour) : null;
 
   useEffect(() => {
     if (open) {
@@ -270,7 +274,9 @@ const UpdateServiceModal = ({ open, setOpen, serviceId }: UpdateModalProps) => {
                       type="number"
                       placeholder="Nhập giá"
                       value={formatVNDInput(String(field.value ?? ""))}
-                      onChange={(e) => field.onChange(digitsOnly(e.target.value))}
+                      onChange={(e) =>
+                        field.onChange(digitsOnly(e.target.value))
+                      }
                     />
                   </FormControl>
                   <FormMessage className="text-xs" />
@@ -313,7 +319,10 @@ const UpdateServiceModal = ({ open, setOpen, serviceId }: UpdateModalProps) => {
               render={({ field }) => (
                 <FormItem className="space-y-1.5">
                   <FormLabel>Loại dịch vụ</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value ?? "NORMAL"}>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value ?? "NORMAL"}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Chọn loại" />
@@ -342,7 +351,11 @@ const UpdateServiceModal = ({ open, setOpen, serviceId }: UpdateModalProps) => {
               <FormItem className="space-y-1.5">
                 <FormLabel>Mô tả</FormLabel>
                 <FormControl>
-                  <Textarea placeholder="Nhập mô tả..." className="resize-none h-24" {...field} />
+                  <Textarea
+                    placeholder="Nhập mô tả..."
+                    className="resize-none h-24"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage className="text-xs" />
               </FormItem>
@@ -410,7 +423,9 @@ const UpdateServiceModal = ({ open, setOpen, serviceId }: UpdateModalProps) => {
           {openHour && closeHour && (
             <p className="mt-1 text-xs text-neutral-500">
               {isOvernight ? "Dịch vụ qua đêm. " : ""}
-              {dur !== null ? `Tổng thời gian hoạt động: ${formatDuration(dur)}` : ""}
+              {dur !== null
+                ? `Tổng thời gian hoạt động: ${formatDuration(dur)}`
+                : ""}
             </p>
           )}
 
@@ -426,6 +441,7 @@ const UpdateServiceModal = ({ open, setOpen, serviceId }: UpdateModalProps) => {
                   <FormControl>
                     <Input
                       type="number"
+                      min="1"
                       placeholder="VD: 100"
                       value={field.value ?? ""}
                       onChange={(e) => field.onChange(e.target.value)}
@@ -446,7 +462,9 @@ const UpdateServiceModal = ({ open, setOpen, serviceId }: UpdateModalProps) => {
                 setRemoveExistingImage(true);
               }
             }}
-            existingUrls={existingImageUrl && !removeExistingImage ? [existingImageUrl] : []}
+            existingUrls={
+              existingImageUrl && !removeExistingImage ? [existingImageUrl] : []
+            }
             onRemoveExisting={() => setRemoveExistingImage(true)}
             maxImages={1}
           />

@@ -15,7 +15,11 @@ import z from "zod";
 import { Input } from "@/components/ui/input";
 import { useAssignTechnician } from "@/hooks/data/useMaintenance";
 import { toast } from "sonner";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -76,7 +80,10 @@ const AssignTechnicianModal = ({ open, setOpen, ticketId }: ModalProps) => {
           handleClose();
         },
         onError: (error: any) => {
-          toast.error(error.response?.data?.message || "Lỗi khi giao việc cho kỹ thuật viên");
+          toast.error(
+            error.response?.data?.message ||
+              "Lỗi khi giao việc cho kỹ thuật viên",
+          );
         },
       },
     );
@@ -104,7 +111,9 @@ const AssignTechnicianModal = ({ open, setOpen, ticketId }: ModalProps) => {
             control={form.control}
             name="technicianId"
             render={({ field }) => {
-              const selectedTechnician = technicianOptions?.find((r) => r.value === field.value);
+              const selectedTechnician = technicianOptions?.find(
+                (r) => r.value === field.value,
+              );
 
               return (
                 <FormItem className="space-y-1.5  col-span-2">
@@ -118,7 +127,9 @@ const AssignTechnicianModal = ({ open, setOpen, ticketId }: ModalProps) => {
                           role="combobox"
                           className="w-full justify-between font-normal"
                         >
-                          {selectedTechnician ? selectedTechnician.label : "Chọn kỹ thuật viên"}
+                          {selectedTechnician
+                            ? selectedTechnician.label
+                            : "Chọn kỹ thuật viên"}
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
@@ -165,6 +176,7 @@ const AssignTechnicianModal = ({ open, setOpen, ticketId }: ModalProps) => {
                 <FormControl>
                   <Input
                     type="number"
+                    min="1"
                     placeholder="Nhập giá ước tính"
                     value={field.value ?? ""}
                     onChange={(e) => field.onChange(Number(e.target.value))}

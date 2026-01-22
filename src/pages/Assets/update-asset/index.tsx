@@ -22,7 +22,11 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { DatePicker } from "@/components/common/DatePicker";
-import { useAssetTypes, useGetAssetById, useUpdateAsset } from "@/hooks/data/useAssests"; // Đổi hook update
+import {
+  useAssetTypes,
+  useGetAssetById,
+  useUpdateAsset,
+} from "@/hooks/data/useAssests"; // Đổi hook update
 import { useBlocks } from "@/hooks/data/useBlocks";
 import { toast } from "sonner";
 import { useEffect, useMemo } from "react";
@@ -45,7 +49,9 @@ const UpdateAssetSchema = z.object({
   }),
   warrantyYears: z.number().min(0, "Năm bảo hành phải >= 0"),
   note: z.string().optional(),
-  maintenanceIntervalMonths: z.number().min(1, "Khoảng thời gian bảo dưỡng phải > 0"),
+  maintenanceIntervalMonths: z
+    .number()
+    .min(1, "Khoảng thời gian bảo dưỡng phải > 0"),
 });
 
 type AssetFormValues = z.infer<typeof UpdateAssetSchema>;
@@ -84,7 +90,8 @@ const UpdateAssetModal = ({ open, setOpen, assetId }: UpdateModalProps) => {
         locationDetail: asset.location.detail,
         installationDate: new Date(asset.timeline.installationDate),
         warrantyYears: asset.timeline.warrantyExpirationDate ? 1 : 0,
-        maintenanceIntervalMonths: asset.timeline.maintenanceIntervalMonths || 0,
+        maintenanceIntervalMonths:
+          asset.timeline.maintenanceIntervalMonths || 0,
       });
     }
   }, [asset, open, form]);
@@ -102,7 +109,9 @@ const UpdateAssetModal = ({ open, setOpen, assetId }: UpdateModalProps) => {
 
   const floorOptions = useMemo(() => {
     if (!selectedBlockId || !blocks) return [];
-    const selectedBlock = blocks.find((b) => b.id.toString() === selectedBlockId);
+    const selectedBlock = blocks.find(
+      (b) => b.id.toString() === selectedBlockId,
+    );
     if (!selectedBlock || !selectedBlock.totalFloors) return [];
 
     return Array.from({ length: selectedBlock.totalFloors }, (_, i) => ({
@@ -220,8 +229,12 @@ const UpdateAssetModal = ({ open, setOpen, assetId }: UpdateModalProps) => {
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="ACTIVE">Hoạt động (Active)</SelectItem>
-                      <SelectItem value="INACTIVE">Ngưng hoạt động (Inactive)</SelectItem>
-                      <SelectItem value="MAINTENANCE">Bảo trì (Maintenance)</SelectItem>
+                      <SelectItem value="INACTIVE">
+                        Ngưng hoạt động (Inactive)
+                      </SelectItem>
+                      <SelectItem value="MAINTENANCE">
+                        Bảo trì (Maintenance)
+                      </SelectItem>
                       <SelectItem value="BROKEN">Hỏng (Broken)</SelectItem>
                     </SelectContent>
                   </Select>
@@ -322,6 +335,7 @@ const UpdateAssetModal = ({ open, setOpen, assetId }: UpdateModalProps) => {
                   <FormControl>
                     <Input
                       type="number"
+                      min="0"
                       placeholder="Nhập số năm bảo hành"
                       value={field.value ?? ""}
                       onChange={(e) => field.onChange(Number(e.target.value))}
@@ -338,10 +352,13 @@ const UpdateAssetModal = ({ open, setOpen, assetId }: UpdateModalProps) => {
               name="maintenanceIntervalMonths"
               render={({ field }) => (
                 <FormItem className="space-y-1.5 col-span-2">
-                  <FormLabel isRequired>Khoảng thời gian bảo trì (tháng)</FormLabel>
+                  <FormLabel isRequired>
+                    Khoảng thời gian bảo trì (tháng)
+                  </FormLabel>
                   <FormControl>
                     <Input
                       type="number"
+                      min="1"
                       placeholder="Nhập khoảng thời gian bảo trì (tháng)"
                       value={field.value ?? ""}
                       onChange={(e) => field.onChange(Number(e.target.value))}
@@ -360,7 +377,11 @@ const UpdateAssetModal = ({ open, setOpen, assetId }: UpdateModalProps) => {
               <FormItem className="space-y-1.5">
                 <FormLabel>Ghi chú</FormLabel>
                 <FormControl>
-                  <Textarea placeholder="Ghi chú thêm..." className="resize-none h-24" {...field} />
+                  <Textarea
+                    placeholder="Ghi chú thêm..."
+                    className="resize-none h-24"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage className="text-xs" />
               </FormItem>

@@ -47,7 +47,11 @@ const CompleteScheduledMaintenanceSchema = z.object({
 
 type CompleteFormValues = z.infer<typeof CompleteScheduledMaintenanceSchema>;
 
-const CompleteScheduledMaintenanceModal = ({ open, setOpen, ticketId }: ModalProps) => {
+const CompleteScheduledMaintenanceModal = ({
+  open,
+  setOpen,
+  ticketId,
+}: ModalProps) => {
   const { mutate: completeTicket, isPending } = useCompleteScheduledTicket();
 
   const form = useForm<CompleteFormValues>({
@@ -147,7 +151,11 @@ const CompleteScheduledMaintenanceModal = ({ open, setOpen, ticketId }: ModalPro
               <FormItem className="space-y-1.5">
                 <FormLabel>Ghi chú kết quả</FormLabel>
                 <FormControl>
-                  <Textarea rows={3} placeholder="Nhập ghi chú (nếu có)" {...field} />
+                  <Textarea
+                    rows={3}
+                    placeholder="Nhập ghi chú (nếu có)"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage className="text-xs" />
               </FormItem>
@@ -182,7 +190,11 @@ const CompleteScheduledMaintenanceModal = ({ open, setOpen, ticketId }: ModalPro
                 <FormItem className="space-y-1.5">
                   <FormLabel>Chi tiết vấn đề</FormLabel>
                   <FormControl>
-                    <Textarea rows={3} placeholder="Mô tả chi tiết vấn đề" {...field} />
+                    <Textarea
+                      rows={3}
+                      placeholder="Mô tả chi tiết vấn đề"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage className="text-xs" />
                 </FormItem>
@@ -201,10 +213,13 @@ const CompleteScheduledMaintenanceModal = ({ open, setOpen, ticketId }: ModalPro
                 <FormControl>
                   <Input
                     type="number"
+                    min="1"
                     placeholder="0"
                     value={field.value ?? ""}
                     onChange={(e) =>
-                      field.onChange(e.target.value ? Number(e.target.value) : undefined)
+                      field.onChange(
+                        e.target.value ? Number(e.target.value) : undefined,
+                      )
                     }
                   />
                 </FormControl>
