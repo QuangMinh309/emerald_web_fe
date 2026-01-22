@@ -64,6 +64,7 @@ const StepTwo = ({ setStep, blockId }: StepTwoProps) => {
         areasPerApartment={value.areasPerApartment}
         totalFloors={value.totalFloors}
         typesOfApartment={value.typesOfApartment as ApartmentType}
+        blockName={value.buildingName}
         onApartmentsChange={handleApartmentsChange}
         existingApartments={apartments}
         hasResidents={value.hasResidents}

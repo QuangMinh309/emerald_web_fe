@@ -29,6 +29,7 @@ export interface ApartmentMatrixProps {
   areasPerApartment: number;
   totalFloors: number;
   typesOfApartment: ApartmentType;
+  blockName?: string;
   onApartmentsChange?: (apartments: Apartment[]) => void;
 }
 
@@ -66,13 +67,19 @@ export const APARTMENT_TYPE_COLORS: Record<
 /* ================= GENERATOR ================= */
 
 export function generateApartments(props: ApartmentMatrixProps): Apartment[] {
-  const { apartmentsPerFloor, areasPerApartment, totalFloors, typesOfApartment } = props;
+  const {
+    apartmentsPerFloor,
+    areasPerApartment,
+    totalFloors,
+    typesOfApartment,
+    blockName = "A",
+  } = props;
 
   const result: Apartment[] = [];
 
   for (let floor = 1; floor <= totalFloors; floor++) {
     for (let index = 1; index <= apartmentsPerFloor; index++) {
-      const code = `A-${floor.toString().padStart(2, "0")}.${index.toString().padStart(2, "0")}`;
+      const code = `${blockName}-${floor.toString().padStart(2, "0")}.${index.toString().padStart(2, "0")}`;
 
       result.push({
         id: crypto.randomUUID(),
@@ -154,9 +161,10 @@ export const ApartmentMatrix: React.FC<ApartmentMatrixProps> = (props) => {
   const addFloor = useCallback(() => {
     const newFloor = maxFloor + 1;
     const newApartments: Apartment[] = [];
+    const blockName = props.blockName || "A";
 
     for (let index = 1; index <= props.apartmentsPerFloor; index++) {
-      const code = `A-${newFloor.toString().padStart(2, "0")}.${index.toString().padStart(2, "0")}`;
+      const code = `${blockName}-${newFloor.toString().padStart(2, "0")}.${index.toString().padStart(2, "0")}`;
 
       newApartments.push({
         id: crypto.randomUUID(),
@@ -169,14 +177,21 @@ export const ApartmentMatrix: React.FC<ApartmentMatrixProps> = (props) => {
     }
 
     setApartments((prev) => [...prev, ...newApartments]);
-  }, [maxFloor, props.apartmentsPerFloor, props.areasPerApartment, props.typesOfApartment]);
+  }, [
+    maxFloor,
+    props.apartmentsPerFloor,
+    props.areasPerApartment,
+    props.typesOfApartment,
+    props.blockName,
+  ]);
 
   // Add apartment to existing floor
   const addApartmentToFloor = useCallback(
     (floor: number) => {
       const maxIndex = getMaxIndexForFloor(floor);
       const newIndex = maxIndex + 1;
-      const code = `A-${floor.toString().padStart(2, "0")}.${newIndex.toString().padStart(2, "0")}`;
+      const blockName = props.blockName || "A";
+      const code = `${blockName}-${floor.toString().padStart(2, "0")}.${newIndex.toString().padStart(2, "0")}`;
 
       const newApartment: Apartment = {
         id: crypto.randomUUID(),
@@ -189,7 +204,7 @@ export const ApartmentMatrix: React.FC<ApartmentMatrixProps> = (props) => {
 
       setApartments((prev) => [...prev, newApartment]);
     },
-    [getMaxIndexForFloor, props.areasPerApartment, props.typesOfApartment],
+    [getMaxIndexForFloor, props.areasPerApartment, props.typesOfApartment, props.blockName],
   );
 
   // Start editing

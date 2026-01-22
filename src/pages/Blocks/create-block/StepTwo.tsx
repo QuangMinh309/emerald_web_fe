@@ -53,6 +53,7 @@ const StepTwo = ({ setStep }: StepOneProps) => {
         areasPerApartment={value.areasPerApartment}
         totalFloors={value.totalFloors}
         typesOfApartment={value.typesOfApartment as ApartmentType}
+        blockName={value.buildingName}
         onApartmentsChange={handleApartmentsChange}
       />
       <div className="flex items-center justify-end gap-[10px] mt-4">

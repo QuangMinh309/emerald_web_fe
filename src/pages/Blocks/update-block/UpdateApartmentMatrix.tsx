@@ -30,6 +30,7 @@ export interface UpdateApartmentMatrixProps {
   areasPerApartment: number;
   totalFloors: number;
   typesOfApartment: ApartmentType;
+  blockName?: string;
   onApartmentsChange?: (apartments: Apartment[]) => void;
   existingApartments?: Apartment[];
   hasResidents: boolean;
@@ -169,9 +170,10 @@ export const UpdateApartmentMatrix: React.FC<UpdateApartmentMatrixProps> = (prop
 
     const newFloor = maxFloor + 1;
     const newApartments: Apartment[] = [];
+    const blockName = props.blockName || "A";
 
     for (let index = 1; index <= props.apartmentsPerFloor; index++) {
-      const code = `A-${newFloor.toString().padStart(2, "0")}.${index.toString().padStart(2, "0")}`;
+      const code = `${blockName}-${newFloor.toString().padStart(2, "0")}.${index.toString().padStart(2, "0")}`;
 
       newApartments.push({
         id: crypto.randomUUID(),
@@ -190,6 +192,7 @@ export const UpdateApartmentMatrix: React.FC<UpdateApartmentMatrixProps> = (prop
     props.apartmentsPerFloor,
     props.areasPerApartment,
     props.typesOfApartment,
+    props.blockName,
     hasResidents,
   ]);
 
@@ -203,7 +206,8 @@ export const UpdateApartmentMatrix: React.FC<UpdateApartmentMatrixProps> = (prop
 
       const maxIndex = getMaxIndexForFloor(floor);
       const newIndex = maxIndex + 1;
-      const code = `A-${floor.toString().padStart(2, "0")}.${newIndex.toString().padStart(2, "0")}`;
+      const blockName = props.blockName || "A";
+      const code = `${blockName}-${floor.toString().padStart(2, "0")}.${newIndex.toString().padStart(2, "0")}`;
 
       const newApartment: Apartment = {
         id: crypto.randomUUID(),
@@ -217,7 +221,13 @@ export const UpdateApartmentMatrix: React.FC<UpdateApartmentMatrixProps> = (prop
 
       setApartments((prev) => [...prev, newApartment]);
     },
-    [getMaxIndexForFloor, props.areasPerApartment, props.typesOfApartment, hasResidents],
+    [
+      getMaxIndexForFloor,
+      props.areasPerApartment,
+      props.typesOfApartment,
+      props.blockName,
+      hasResidents,
+    ],
   );
 
   // Start editing
