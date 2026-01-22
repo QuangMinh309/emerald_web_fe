@@ -74,7 +74,7 @@ const CreateAssetTypeModal = ({ open, setOpen }: ModalProps) => {
       onSubmit={form.handleSubmit(onSubmit)}
     >
       <Form {...form}>
-        <form className="space-y-4 w-[300px]">
+        <form className="space-y-4">
           {/* Tên loại tài sản */}
           <FormField
             disabled={isPending}

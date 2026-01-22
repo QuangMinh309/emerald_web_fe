@@ -32,6 +32,7 @@ export interface AssetDetail {
     warrantyExpirationDate: string;
     lastMaintenanceDate: null;
     nextMaintenanceDate: string;
+    maintenanceIntervalMonths: number;
   };
   computed: {
     isWarrantyValid: boolean;

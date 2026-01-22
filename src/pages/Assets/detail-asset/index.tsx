@@ -122,10 +122,19 @@ const DetailAssetPage = () => {
           </div>
           <div className="space-y-2">
             {/* 4 cột thông tin */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
               <div>
                 <h3 className="display-label">Ngày lắp đặt</h3>
                 <p className="display-text">{asset?.timeline.installationDate}</p>
+              </div>
+
+              <div>
+                <h3 className="display-label">Chu kỳ bảo trì (tháng)</h3>
+                <p className="display-text">
+                  {asset?.timeline.maintenanceIntervalMonths > 0
+                    ? `${asset?.timeline.maintenanceIntervalMonths} tháng`
+                    : "Không có"}
+                </p>
               </div>
 
               <div>
