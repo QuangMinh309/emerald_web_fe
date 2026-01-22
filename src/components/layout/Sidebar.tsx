@@ -40,7 +40,7 @@ const Sidebar: React.FC = () => {
     { id: "notifications", icon: MessageSquare, label: "Thông báo" },
     { id: "reports", icon: TrendingUp, label: "Báo cáo thống kê" },
     { id: "accounts", icon: UserCog, label: "Tài khoản" },
-    { id: "profile", icon: User2, label: "Tài khoản" },
+    { id: "profile", icon: User2, label: "Trang cá nhân" },
   ] as const;
 
   // Lọc menu items dựa trên quyền của user

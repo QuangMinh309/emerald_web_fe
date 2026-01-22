@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Bell, ChevronDown, LogOut, User, CheckCheck } from "lucide-react";
 import { useAppSelector } from "@/store/hooks";
 import { useMarkAllNotificationsAsRead, useMarkAsRead } from "@/hooks/data/useSystemNotifications";
+import { useNavigate } from "react-router-dom";
 
 interface HeaderProps {
   userName?: string;
@@ -78,6 +79,7 @@ const Header: React.FC<HeaderProps> = ({
   );
 };
 const NotificationBell = () => {
+  const navigate = useNavigate();
   const [showDropdown, setShowDropdown] = useState(false);
   const [filter, setFilter] = useState<"all" | "unread">("all");
   const { items, unreadCount } = useAppSelector((state) => state.notification);
@@ -207,6 +209,7 @@ const NotificationBell = () => {
                   {filteredNotifications.map((notification) => (
                     <div
                       onClick={() => {
+                        navigate(`/system-notifications`);
                         markOneAsRead(notification.notificationId);
                       }}
                       key={notification.id}
