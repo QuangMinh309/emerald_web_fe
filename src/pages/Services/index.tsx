@@ -52,32 +52,32 @@ const ServicesPage = () => {
     return result;
   }, [services, searchTerm]);
 
-  const actions: ActionOption[] = useMemo(
-    () => [
-      // {
-      //   id: "delete_more",
-      //   label: "Xóa tất cả",
-      //   icon: <Trash2 className="w-4 h-4" />,
-      //   variant: "danger",
-      //   onClick: () => console.log("Xóa nhiều"),
-      //   disabled: services.length === 0,
-      // },
-      {
-        id: "import",
-        label: "Import Excel",
-        icon: <FileDown className="w-4 h-4" />,
-        onClick: () => console.log("Importing..."),
-      },
-      {
-        id: "print",
-        label: "In danh sách",
-        icon: <Printer className="w-4 h-4" />,
-        onClick: () => window.print(),
-        disabled: services.length === 0,
-      },
-    ],
-    [services.length],
-  );
+  // const actions: ActionOption[] = useMemo(
+  //   () => [
+  //     // {
+  //     //   id: "delete_more",
+  //     //   label: "Xóa tất cả",
+  //     //   icon: <Trash2 className="w-4 h-4" />,
+  //     //   variant: "danger",
+  //     //   onClick: () => console.log("Xóa nhiều"),
+  //     //   disabled: services.length === 0,
+  //     // },
+  //     {
+  //       id: "import",
+  //       label: "Import Excel",
+  //       icon: <FileDown className="w-4 h-4" />,
+  //       onClick: () => console.log("Importing..."),
+  //     },
+  //     {
+  //       id: "print",
+  //       label: "In danh sách",
+  //       icon: <Printer className="w-4 h-4" />,
+  //       onClick: () => window.print(),
+  //       disabled: services.length === 0,
+  //     },
+  //   ],
+  //   [services.length],
+  // );
 
   const handleSelectionChange = (ids: string[]) => setSelectedIds(ids);
 
@@ -107,10 +107,10 @@ const ServicesPage = () => {
                 </button>
               )
               }
-              <ActionDropdown
+              {/* <ActionDropdown
                 options={actions}
                 sampleFileUrl="/template/service_import_template.xlsx"
-              />
+              /> */}
             </div>
           }
         />
