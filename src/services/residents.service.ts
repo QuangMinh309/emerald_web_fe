@@ -1,5 +1,5 @@
 import axiosInstance from "@/lib/axios";
-import type { Resident, ResidentDetail } from "@/types/resident";
+import type { Resident, ResidentDetail, ResidentResidences } from "@/types/resident";
 // nao chi can sua service là xong
 export const getResidents = async () => {
   const response = await axiosInstance.get("/residents");
@@ -170,4 +170,9 @@ export const getAdminInvoicesAndPaymentsByResidentId = async (id: number) => {
       payDate: string;
     }[];
   };
+};
+
+export const getResidentResidences = async (id: number) => {
+  const response = await axiosInstance.get(`/residents/${id}/apartments`);
+  return response.data.data as ResidentResidences;
 };

@@ -51,3 +51,21 @@ export interface ResidentDetail {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface ResidenceApartment {
+  id: number;
+  roomNumber: string;
+  blockName: string;
+  area: number;
+}
+
+export interface ResidenceInfo {
+  id: number;
+  apartmentId: number;
+  apartment: ResidenceApartment;
+  relationship: string;
+}
+
+export interface ResidentResidences {
+  residences: ResidenceInfo[];
+}
