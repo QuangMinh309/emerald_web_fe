@@ -18,11 +18,14 @@ import {
   Receipt,
 } from "lucide-react";
 import Logo from "@assets/logo.svg";
+import { usePermission } from "@/hooks/usePermission";
 
 const Sidebar: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const menuItems = [
+  const { canView } = usePermission();
+
+  const allMenuItems = [
     { id: "blocks", icon: Building2, label: "Quản lý tòa nhà" },
     { id: "apartments", icon: Home, label: "Căn hộ" },
     { id: "invoices", icon: CircleDollarSign, label: "Công nợ" },
@@ -38,7 +41,10 @@ const Sidebar: React.FC = () => {
     { id: "reports", icon: TrendingUp, label: "Báo cáo thống kê" },
     { id: "accounts", icon: UserCog, label: "Tài khoản" },
     { id: "profile", icon: User2, label: "Tài khoản" },
-  ];
+  ] as const;
+
+  // Lọc menu items dựa trên quyền của user
+  const visibleMenuItems = allMenuItems.filter((item) => canView(item.id as any));
 
   const handleNavigate = (path: string) => {
     navigate(path);
@@ -57,7 +63,7 @@ const Sidebar: React.FC = () => {
       <div className="mb-2 h-px bg-white/50 shrink-0" />
 
       <nav className="flex-1 px-3 pb-6 space-y-1 overflow-y-auto custom-scrollbar">
-        {menuItems.map((item) => {
+        {visibleMenuItems.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname.startsWith(`/${item.id}`);
 

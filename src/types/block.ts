@@ -25,6 +25,7 @@ export interface BlockDetail {
   managerPhone: string;
   totalRooms: number;
   apartments: {
+    hasResidents: boolean;
     id: number;
     roomName: string;
     type: string;

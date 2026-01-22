@@ -16,7 +16,7 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Building2, Eye, EyeOff, Shield, Users } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const LoginSchema = z.object({
   email: z.string().min(1, "Vui lòng nhập email").email("Email không hợp lệ"),
@@ -28,8 +28,15 @@ export type LoginValues = z.infer<typeof LoginSchema>;
 export default function LoginPage() {
   const navigate = useNavigate();
   const { mutate: loginService, isPending } = useLogin();
-  const { login } = useAuth();
+  const { login, isAuthenticated, user } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
+
+  // Nếu đã đăng nhập, redirect đi (không cho xem trang login)
+  useEffect(() => {
+    if (isAuthenticated && user && user.role !== "RESIDENT") {
+      navigate("/profile", { replace: true });
+    }
+  }, [isAuthenticated, user, navigate]);
 
   const form = useForm<LoginValues>({
     resolver: zodResolver(LoginSchema),
@@ -48,9 +55,16 @@ export default function LoginPage() {
       {
         onSuccess(data) {
           const { accessToken, ...profile } = data;
+
+          // Kiểm tra role - chỉ ADMIN và TECHNICIAN được vào web
+          if (profile.role === "RESIDENT") {
+            toast.error("Tài khoản này là của cư dân. Hãy sử dụng ứng dụng di động để đăng nhập.");
+            return;
+          }
+
           login(accessToken, profile);
           toast.success("Đăng nhập thành công");
-          navigate("/");
+          navigate("/profile", { replace: true });
         },
         onError(error: any) {
           toast.error(error.response?.data?.message || "Đăng nhập thất bại");

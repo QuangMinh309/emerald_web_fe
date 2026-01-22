@@ -2,6 +2,7 @@ import { lazy } from "react";
 import { Navigate, createBrowserRouter } from "react-router-dom";
 import MainLayout from "@components/layout/MainLayout";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import RoleBasedRoute from "@/components/auth/RoleBasedRoute";
 import DetailAssetPage from "@/pages/Assets/detail-asset";
 import ResidentsPage from "@/pages/Residents/view-residents";
 import DetailResidentPage from "@/pages/Residents/detail-resident";
@@ -40,12 +41,14 @@ const VerifyEmail = lazy(() => import("@/pages/VerifyEmail"));
 const ResetPassword = lazy(() => import("@/pages/ResetPassword"));
 const VotingsPage = lazy(() => import("@/pages/Votings/view-votings"));
 const ProfilePage = lazy(() => import("@/pages/Profile"));
+const UnauthorizedPage = lazy(() => import("@/pages/Unauthorized"));
 
 export const routes = createBrowserRouter([
   { path: "/login", element: <Login /> },
   { path: "/forgot-password", element: <ForgotPassword /> },
   { path: "/verify-email", element: <VerifyEmail /> },
   { path: "/reset-password", element: <ResetPassword /> },
+  { path: "/unauthorized", element: <UnauthorizedPage /> },
   {
     path: "/",
     element: (
@@ -55,39 +58,295 @@ export const routes = createBrowserRouter([
     ),
     children: [
       { index: true, element: <Navigate to="/blocks" replace /> },
-      { path: "assets", element: <Assets /> },
-      { path: "notifications", element: <Notifications /> },
-      { path: "notifications/:id", element: <DetailNotificationPage /> },
-      { path: "system-notifications", element: <SystemNotifications /> },
-      { path: "assets/:id", element: <DetailAssetPage /> },
-      { path: "residents", element: <ResidentsPage /> },
-      { path: "residents/:id", element: <DetailResidentPage /> },
-      { path: "services", element: <Services /> },
-      { path: "services/:id", element: <DetailServicePage /> },
-      { path: "reports", element: <Report /> },
-      { path: "blocks", element: <BlocksPage /> },
-      { path: "blocks/:id", element: <DetailBlockPage /> },
-      { path: "blocks/create", element: <CreateBlockPage /> },
-      { path: "blocks/update/:id", element: <UpdateBlockPage /> },
-      { path: "apartments/:id", element: <DetailApartmentPage /> },
-      { path: "apartments", element: <ApartmentsPage /> },
-      { path: "votings", element: <VotingsPage /> },
-      { path: "votings/create", element: <CreateVotingPage /> },
-      { path: "votings/update/:id", element: <UpdateVotingPage /> },
-      { path: "votings/:id", element: <DetailVotingPage /> },
-      { path: "invoices", element: <InvoicesPage /> },
-      { path: "invoices/:id", element: <DetailInvoicePage /> },
-      { path: "technicians", element: <TechniciansPage /> },
-      { path: "technicians/:id", element: <DetailTechnicianPage /> },
-      { path: "maintenances", element: <MaintenancesPage /> },
-      { path: "maintenances/:id", element: <DetailMaintenancePage /> },
+
+      // Assets - ADMIN only
+      {
+        path: "assets",
+        element: (
+          <RoleBasedRoute allowedRoles={["ADMIN"]}>
+            <Assets />
+          </RoleBasedRoute>
+        ),
+      },
+      {
+        path: "assets/:id",
+        element: (
+          <RoleBasedRoute allowedRoles={["ADMIN"]}>
+            <DetailAssetPage />
+          </RoleBasedRoute>
+        ),
+      },
+
+      // Notifications - ADMIN & TECHNICIAN
+      {
+        path: "notifications",
+        element: (
+          <RoleBasedRoute allowedRoles={["ADMIN", "TECHNICIAN"]}>
+            <Notifications />
+          </RoleBasedRoute>
+        ),
+      },
+      {
+        path: "notifications/:id",
+        element: (
+          <RoleBasedRoute allowedRoles={["ADMIN", "TECHNICIAN"]}>
+            <DetailNotificationPage />
+          </RoleBasedRoute>
+        ),
+      },
+
+      // System Notifications - ADMIN & TECHNICIAN
+      {
+        path: "system-notifications",
+        element: (
+          <RoleBasedRoute allowedRoles={["ADMIN", "TECHNICIAN"]}>
+            <SystemNotifications />
+          </RoleBasedRoute>
+        ),
+      },
+
+      // Residents - ADMIN only
+      {
+        path: "residents",
+        element: (
+          <RoleBasedRoute allowedRoles={["ADMIN"]}>
+            <ResidentsPage />
+          </RoleBasedRoute>
+        ),
+      },
+      {
+        path: "residents/:id",
+        element: (
+          <RoleBasedRoute allowedRoles={["ADMIN"]}>
+            <DetailResidentPage />
+          </RoleBasedRoute>
+        ),
+      },
+
+      // Services - ADMIN only
+      {
+        path: "services",
+        element: (
+          <RoleBasedRoute allowedRoles={["ADMIN"]}>
+            <Services />
+          </RoleBasedRoute>
+        ),
+      },
+      {
+        path: "services/:id",
+        element: (
+          <RoleBasedRoute allowedRoles={["ADMIN"]}>
+            <DetailServicePage />
+          </RoleBasedRoute>
+        ),
+      },
+
+      // Reports - ADMIN only
+      {
+        path: "reports",
+        element: (
+          <RoleBasedRoute allowedRoles={["ADMIN"]}>
+            <Report />
+          </RoleBasedRoute>
+        ),
+      },
+
+      // Blocks - ADMIN only
+      {
+        path: "blocks",
+        element: (
+          <RoleBasedRoute allowedRoles={["ADMIN"]}>
+            <BlocksPage />
+          </RoleBasedRoute>
+        ),
+      },
+      {
+        path: "blocks/:id",
+        element: (
+          <RoleBasedRoute allowedRoles={["ADMIN"]}>
+            <DetailBlockPage />
+          </RoleBasedRoute>
+        ),
+      },
+      {
+        path: "blocks/create",
+        element: (
+          <RoleBasedRoute allowedRoles={["ADMIN"]}>
+            <CreateBlockPage />
+          </RoleBasedRoute>
+        ),
+      },
+      {
+        path: "blocks/update/:id",
+        element: (
+          <RoleBasedRoute allowedRoles={["ADMIN"]}>
+            <UpdateBlockPage />
+          </RoleBasedRoute>
+        ),
+      },
+
+      // Apartments - ADMIN only
+      {
+        path: "apartments",
+        element: (
+          <RoleBasedRoute allowedRoles={["ADMIN"]}>
+            <ApartmentsPage />
+          </RoleBasedRoute>
+        ),
+      },
+      {
+        path: "apartments/:id",
+        element: (
+          <RoleBasedRoute allowedRoles={["ADMIN"]}>
+            <DetailApartmentPage />
+          </RoleBasedRoute>
+        ),
+      },
+
+      // Votings - ADMIN only
+      {
+        path: "votings",
+        element: (
+          <RoleBasedRoute allowedRoles={["ADMIN"]}>
+            <VotingsPage />
+          </RoleBasedRoute>
+        ),
+      },
+      {
+        path: "votings/create",
+        element: (
+          <RoleBasedRoute allowedRoles={["ADMIN"]}>
+            <CreateVotingPage />
+          </RoleBasedRoute>
+        ),
+      },
+      {
+        path: "votings/update/:id",
+        element: (
+          <RoleBasedRoute allowedRoles={["ADMIN"]}>
+            <UpdateVotingPage />
+          </RoleBasedRoute>
+        ),
+      },
+      {
+        path: "votings/:id",
+        element: (
+          <RoleBasedRoute allowedRoles={["ADMIN"]}>
+            <DetailVotingPage />
+          </RoleBasedRoute>
+        ),
+      },
+
+      // Invoices - ADMIN only
+      {
+        path: "invoices",
+        element: (
+          <RoleBasedRoute allowedRoles={["ADMIN"]}>
+            <InvoicesPage />
+          </RoleBasedRoute>
+        ),
+      },
+      {
+        path: "invoices/:id",
+        element: (
+          <RoleBasedRoute allowedRoles={["ADMIN"]}>
+            <DetailInvoicePage />
+          </RoleBasedRoute>
+        ),
+      },
+
+      // Fees - ADMIN only
+      {
+        path: "fees",
+        element: (
+          <RoleBasedRoute allowedRoles={["ADMIN"]}>
+            <FeesPage />
+          </RoleBasedRoute>
+        ),
+      },
+      {
+        path: "fees/:id",
+        element: (
+          <RoleBasedRoute allowedRoles={["ADMIN"]}>
+            <DetailFeePage />
+          </RoleBasedRoute>
+        ),
+      },
+
+      // Technicians - ADMIN only
+      {
+        path: "technicians",
+        element: (
+          <RoleBasedRoute allowedRoles={["ADMIN"]}>
+            <TechniciansPage />
+          </RoleBasedRoute>
+        ),
+      },
+      {
+        path: "technicians/:id",
+        element: (
+          <RoleBasedRoute allowedRoles={["ADMIN"]}>
+            <DetailTechnicianPage />
+          </RoleBasedRoute>
+        ),
+      },
+
+      // Issues/Requests - ADMIN & TECHNICIAN
+      {
+        path: "issues",
+        element: (
+          <RoleBasedRoute allowedRoles={["ADMIN", "TECHNICIAN"]}>
+            <IssuesPage />
+          </RoleBasedRoute>
+        ),
+      },
+      {
+        path: "issues/:id",
+        element: (
+          <RoleBasedRoute allowedRoles={["ADMIN", "TECHNICIAN"]}>
+            <DetailIssuePage />
+          </RoleBasedRoute>
+        ),
+      },
+
+      // Maintenances - ADMIN & TECHNICIAN
+      {
+        path: "maintenances",
+        element: (
+          <RoleBasedRoute allowedRoles={["ADMIN", "TECHNICIAN"]}>
+            <MaintenancesPage />
+          </RoleBasedRoute>
+        ),
+      },
+      {
+        path: "maintenances/:id",
+        element: (
+          <RoleBasedRoute allowedRoles={["ADMIN", "TECHNICIAN"]}>
+            <DetailMaintenancePage />
+          </RoleBasedRoute>
+        ),
+      },
+
+      // Profile - all authenticated users
       { path: "profile", element: <ProfilePage /> },
-      { path: "issues", element: <IssuesPage /> },
-      { path: "issues/:id", element: <DetailIssuePage /> },
-      { path: "fees", element: <FeesPage /> },
-      { path: "fees/:id", element: <DetailFeePage /> },
-      { path: "accounts", element: <AccountsPage /> },
-      { path: "accounts/:accountId", element: <DetailAccountPage /> },
+
+      // Accounts - ADMIN only
+      {
+        path: "accounts",
+        element: (
+          <RoleBasedRoute allowedRoles={["ADMIN"]}>
+            <AccountsPage />
+          </RoleBasedRoute>
+        ),
+      },
+      {
+        path: "accounts/:accountId",
+        element: (
+          <RoleBasedRoute allowedRoles={["ADMIN"]}>
+            <DetailAccountPage />
+          </RoleBasedRoute>
+        ),
+      },
     ],
   },
 ]);
