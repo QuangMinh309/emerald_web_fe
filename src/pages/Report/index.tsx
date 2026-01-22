@@ -12,6 +12,10 @@ import type { RangeType } from "@/types/report";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import Spinner from "@/components/common/Spinner";
+import { PrintableDashboardReport } from "./print";
+import ActionDropdown from "@/components/common/ActionDropdown";
+import type { ActionOption } from "@/types";
+import { Printer } from "lucide-react";
 
 const DEFAULT_FROM = new Date(2025, 11, 1);
 const DEFAULT_TO = new Date();
@@ -58,7 +62,7 @@ const ReportPage = () => {
     } else {
       const label =
         allFrom && allTo
-          ? `${allFrom.toLocaleDateString()} - ${allTo.toLocaleDateString()}`
+          ? `${allFrom.toLocaleDateString("vi-VN")} - ${allTo.toLocaleDateString("vi-VN")}`
           : "Tất cả";
       return { from: allFrom, to: allTo, label };
     }
@@ -107,9 +111,26 @@ const ReportPage = () => {
       setAllTo((v) => v ?? DEFAULT_TO);
     }
   }, [periodTab]);
+  const actions: ActionOption[] = useMemo(
+    () => [
+      {
+        id: "print",
+        label: "In danh sách",
+        icon: <Printer className="w-4 h-4" />,
+        onClick: () => window.print(),
+        disabled: !hasDataRevenue,
+      },
+    ],
+    [data?.revenueExpenseChart],
+  );
+  const printTitle = useMemo(() => `BÁO CÁO TỔNG HỢP ${dateRange.label}`, [dateRange.label]);
 
   return (
     <div className="p-1.5 pt-0 space-y-4">
+      <div className="print-area">
+        <PrintableDashboardReport report={data} title={printTitle} />
+      </div>
+      <div className="print-hide">
       <PageHeader
         title="Báo cáo thống kê"
         subtitle="Trang báo cáo tổng hợp"
@@ -123,6 +144,9 @@ const ReportPage = () => {
               ]}
               activeTab={periodTab}
               onChange={(tab) => setPeriodTab(tab as any)}
+            />
+            <ActionDropdown
+              options={actions}
             />
           </div>
         }
@@ -222,6 +246,7 @@ const ReportPage = () => {
             </div>
           </>
         )}
+      </div>
       </div>
     </div>
   );

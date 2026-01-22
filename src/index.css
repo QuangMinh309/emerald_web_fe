@@ -128,4 +128,22 @@
   tr, td, th {
     break-inside: avoid;
   }
+
+  .print-hide,
+  .print-hide * {
+    display: none !important;
+  }
+
+  .print-area,
+  .print-area * {
+    visibility: visible !important;
+  }
+
+  .print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+
 }

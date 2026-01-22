@@ -4,8 +4,8 @@ import type { Service } from "@/types/service";
 import { formatVND } from "@/utils/money";
 
 const typeMap: Record<string, { label: string; type?: "success" | "warning" | "error" }> = {
-  NORMAL: { label: "Normal", type: "warning" },
-  COMMUNITY: { label: "Community", type: "success" },
+  NORMAL: { label: "Thông thường", type: "warning" },
+  COMMUNITY: { label: "Cộng đồng", type: "success" },
 };
 
 export const serviceColumns: TableColumn<Service>[] = [
