@@ -27,6 +27,7 @@ export interface ApartmentDetail {
     identityCard: string;
   };
   residents: {
+    identityCard: string;
     id: number;
     fullName: string;
     gender: string;

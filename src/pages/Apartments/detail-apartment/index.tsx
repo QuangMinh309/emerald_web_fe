@@ -14,10 +14,11 @@ import { useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 
 const residentColumns = [
-  { key: "id", label: "ID", align: "center" as const, width: "60px" },
+  { key: "stt", label: "STT", align: "center" as const },
   { key: "fullName", label: "Họ và tên", sortable: true },
   { key: "gender", label: "Giới tính", align: "center" as const },
-  { key: "phone", label: "Số điện thoại" },
+  { key: "phone", label: "Số điện thoại", align: "center" as const },
+  { key: "identityCard", label: "CMND/CCCD", align: "center" as const },
   {
     key: "relationship",
     label: "Quan hệ",

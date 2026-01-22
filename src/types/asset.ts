@@ -39,6 +39,17 @@ export interface AssetDetail {
     isOverdueMaintenance: boolean;
     daysUntilMaintenance: number;
   };
+  recentHistory: [
+    {
+      id: number;
+      title: string;
+      type: string;
+      status: string;
+      date: string;
+      result: string;
+      technicianName: string;
+    },
+  ];
 }
 interface AssetType {
   id: number;
