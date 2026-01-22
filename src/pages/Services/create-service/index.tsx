@@ -66,7 +66,8 @@ const CreateServiceSchema = z
     unitPrice: z
       .string()
       .min(1, "Vui lòng nhập giá")
-      .refine((v) => !Number.isNaN(Number(v)), "Giá không hợp lệ"),
+      .refine((v) => !Number.isNaN(Number(v)), "Giá không hợp lệ")
+      .refine((v) => Number(v) > 0, "Giá phải > 0"),
     unitTimeBlock: z.string().min(1, "Vui lòng chọn đơn vị"),
     openHour: z.string().min(1, "Vui lòng chọn giờ mở cửa"),
     closeHour: z.string().min(1, "Vui lòng chọn giờ đóng cửa"),
@@ -112,8 +113,10 @@ const CreateServiceModal = ({ open, setOpen }: ModalProps) => {
   });
   const openHour = form.watch("openHour");
   const closeHour = form.watch("closeHour");
-  const isOvernight = openHour && closeHour && toMinutes(closeHour) < toMinutes(openHour);
-  const dur = openHour && closeHour ? durationMinutes(openHour, closeHour) : null;
+  const isOvernight =
+    openHour && closeHour && toMinutes(closeHour) < toMinutes(openHour);
+  const dur =
+    openHour && closeHour ? durationMinutes(openHour, closeHour) : null;
 
   const hourOptions = useMemo(() => {
     const options: { value: string; label: string }[] = [];
@@ -242,7 +245,9 @@ const CreateServiceModal = ({ open, setOpen }: ModalProps) => {
                       type="text"
                       inputMode="numeric"
                       value={formatVNDInput(String(field.value ?? ""))}
-                      onChange={(e) => field.onChange(digitsOnly(e.target.value))}
+                      onChange={(e) =>
+                        field.onChange(digitsOnly(e.target.value))
+                      }
                       placeholder="Nhập giá"
                     />
                   </FormControl>
@@ -259,7 +264,10 @@ const CreateServiceModal = ({ open, setOpen }: ModalProps) => {
               render={({ field }) => (
                 <FormItem className="space-y-1.5">
                   <FormLabel isRequired>Đơn vị</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Chọn đơn vị" />
@@ -284,7 +292,10 @@ const CreateServiceModal = ({ open, setOpen }: ModalProps) => {
               render={({ field }) => (
                 <FormItem className="space-y-1.5">
                   <FormLabel>Loại dịch vụ</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value ?? "NORMAL"}>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value ?? "NORMAL"}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Chọn loại" />
@@ -312,7 +323,11 @@ const CreateServiceModal = ({ open, setOpen }: ModalProps) => {
               <FormItem className="space-y-1.5">
                 <FormLabel>Mô tả</FormLabel>
                 <FormControl>
-                  <Textarea placeholder="Nhập mô tả..." className="resize-none h-24" {...field} />
+                  <Textarea
+                    placeholder="Nhập mô tả..."
+                    className="resize-none h-24"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage className="text-xs" />
               </FormItem>
@@ -329,7 +344,10 @@ const CreateServiceModal = ({ open, setOpen }: ModalProps) => {
               render={({ field }) => (
                 <FormItem className="space-y-1.5">
                   <FormLabel isRequired>Giờ mở cửa</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Chọn giờ" />
@@ -356,7 +374,10 @@ const CreateServiceModal = ({ open, setOpen }: ModalProps) => {
               render={({ field }) => (
                 <FormItem className="space-y-1.5">
                   <FormLabel isRequired>Giờ đóng cửa</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Chọn giờ" />
@@ -379,7 +400,9 @@ const CreateServiceModal = ({ open, setOpen }: ModalProps) => {
           {openHour && closeHour && (
             <p className="mt-1 text-xs text-neutral-500">
               {isOvernight ? "Dịch vụ qua đêm. " : ""}
-              {dur !== null ? `Tổng thời gian hoạt động: ${formatDuration(dur)}` : ""}
+              {dur !== null
+                ? `Tổng thời gian hoạt động: ${formatDuration(dur)}`
+                : ""}
             </p>
           )}
 
@@ -395,6 +418,7 @@ const CreateServiceModal = ({ open, setOpen }: ModalProps) => {
                   <FormControl>
                     <Input
                       type="number"
+                      min="1"
                       placeholder="Nhập sức chứa"
                       value={field.value ?? ""}
                       onChange={(e) => field.onChange(e.target.value)}

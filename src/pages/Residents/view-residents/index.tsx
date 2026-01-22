@@ -148,6 +148,10 @@ const ResidentsPage = () => {
                 setDeletedResident(row as Resident);
               }}
               onView={(row) => navigate(`/residents/${row.id}`)}
+              // isEditable={(row) => {
+              //   const resident = row as Resident;
+              //   return !resident.residences || resident.residences.length === 0;
+              // }}
             />
           )}
         </div>

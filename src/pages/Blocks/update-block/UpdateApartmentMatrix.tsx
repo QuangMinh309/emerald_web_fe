@@ -30,6 +30,7 @@ export interface UpdateApartmentMatrixProps {
   areasPerApartment: number;
   totalFloors: number;
   typesOfApartment: ApartmentType;
+  blockName?: string;
   onApartmentsChange?: (apartments: Apartment[]) => void;
   existingApartments?: Apartment[];
   hasResidents: boolean;
@@ -80,12 +81,25 @@ export const UpdateApartmentMatrix: React.FC<UpdateApartmentMatrixProps> = (prop
     type: ApartmentType;
   } | null>(null);
 
+  // Track dynamic totalFloors based on max floor in apartments
+  const [dynamicTotalFloors, setDynamicTotalFloors] = useState(props.totalFloors);
+
   // Initialize with existing apartments
   useEffect(() => {
     if (existingApartments.length > 0) {
       setApartments(existingApartments);
+      const maxFloorFromApts = Math.max(...existingApartments.map((a) => a.floor));
+      setDynamicTotalFloors(Math.max(maxFloorFromApts, props.totalFloors));
     }
-  }, [existingApartments]);
+  }, [existingApartments, props.totalFloors]);
+
+  // Update totalFloors when apartments change
+  useEffect(() => {
+    if (apartments.length > 0) {
+      const maxFloorFromApts = Math.max(...apartments.map((a) => a.floor));
+      setDynamicTotalFloors(Math.max(maxFloorFromApts, props.totalFloors));
+    }
+  }, [apartments, props.totalFloors]);
 
   // Notify parent when apartments change
   useEffect(() => {
@@ -94,17 +108,28 @@ export const UpdateApartmentMatrix: React.FC<UpdateApartmentMatrixProps> = (prop
 
   const floors = useMemo(() => {
     const map = new Map<number, Apartment[]>();
+
+    // Add all apartments to their floors
     apartments.forEach((a) => {
       if (!map.has(a.floor)) map.set(a.floor, []);
       map.get(a.floor)!.push(a);
     });
-    return Array.from(map.entries()).sort((a, b) => b[0] - a[0]);
-  }, [apartments]);
 
-  // Get max floor number
+    // Also include empty floors up to dynamicTotalFloors
+    for (let i = 1; i <= dynamicTotalFloors; i++) {
+      if (!map.has(i)) {
+        map.set(i, []);
+      }
+    }
+
+    return Array.from(map.entries()).sort((a, b) => b[0] - a[0]);
+  }, [apartments, dynamicTotalFloors]);
+
+  // Get max floor number (include dynamicTotalFloors)
   const maxFloor = useMemo(() => {
-    return floors.length > 0 ? Math.max(...floors.map(([f]) => f)) : 0;
-  }, [floors]);
+    const maxFromApts = apartments.length > 0 ? Math.max(...apartments.map((a) => a.floor)) : 0;
+    return Math.max(maxFromApts, dynamicTotalFloors);
+  }, [apartments, dynamicTotalFloors]);
 
   // Get max index per floor
   const getMaxIndexForFloor = useCallback(
@@ -129,7 +154,9 @@ export const UpdateApartmentMatrix: React.FC<UpdateApartmentMatrixProps> = (prop
     (id: string | number) => {
       const apt = apartments.find((a) => a.id === id);
       if (apt?.hasResidents && hasResidents) {
-        alert("Không thể xóa căn hộ đã có người ở!");
+        alert(
+          "⚠️ Không thể xóa căn hộ đã có người ở!\n\nLý do: Căn hộ này đang có cư dân sinh sống. Vui lòng chuyển cư dân đi trước khi xóa.",
+        );
         return;
       }
 
@@ -143,35 +170,37 @@ export const UpdateApartmentMatrix: React.FC<UpdateApartmentMatrixProps> = (prop
     [selected, editingId, apartments, hasResidents],
   );
 
-  // Delete entire floor
+  // Delete all apartments in floor (but keep the floor)
   const deleteFloor = useCallback(
     (floor: number) => {
+      const floorApts = apartments.filter((a) => a.floor === floor);
+      const occupiedApts = floorApts.filter((a) => a.hasResidents);
+
       // If hasResidents is true, check if floor has residents
-      if (hasResidents && floorHasResidents(floor)) {
-        alert("Không thể xóa tầng đã có người ở!");
+      if (hasResidents && occupiedApts.length > 0) {
+        alert(
+          `⚠️ Không thể xóa tầng ${floor}!\n\nLý do: Tầng này có ${occupiedApts.length} căn hộ đang có người ở.\nVui lòng chuyển tất cả cư dân đi trước khi xóa tầng.`,
+        );
         return;
       }
 
+      // Delete all apartments on this floor
       setApartments((prev) => prev.filter((a) => a.floor !== floor));
       setSelected(null);
       setEditingId(null);
       setEditForm(null);
     },
-    [hasResidents, floorHasResidents],
+    [hasResidents, apartments],
   );
 
   // Add new floor
   const addFloor = useCallback(() => {
-    if (hasResidents) {
-      alert("Không thể thêm tầng mới khi tòa đã có người ở!");
-      return;
-    }
-
     const newFloor = maxFloor + 1;
     const newApartments: Apartment[] = [];
+    const blockName = props.blockName || "A";
 
     for (let index = 1; index <= props.apartmentsPerFloor; index++) {
-      const code = `A-${newFloor.toString().padStart(2, "0")}.${index.toString().padStart(2, "0")}`;
+      const code = `${blockName}-${newFloor.toString().padStart(2, "0")}.${index.toString().padStart(2, "0")}`;
 
       newApartments.push({
         id: crypto.randomUUID(),
@@ -190,20 +219,16 @@ export const UpdateApartmentMatrix: React.FC<UpdateApartmentMatrixProps> = (prop
     props.apartmentsPerFloor,
     props.areasPerApartment,
     props.typesOfApartment,
-    hasResidents,
+    props.blockName,
   ]);
 
   // Add apartment to existing floor
   const addApartmentToFloor = useCallback(
     (floor: number) => {
-      if (hasResidents) {
-        alert("Không thể thêm căn hộ mới khi tòa đã có người ở!");
-        return;
-      }
-
       const maxIndex = getMaxIndexForFloor(floor);
       const newIndex = maxIndex + 1;
-      const code = `A-${floor.toString().padStart(2, "0")}.${newIndex.toString().padStart(2, "0")}`;
+      const blockName = props.blockName || "A";
+      const code = `${blockName}-${floor.toString().padStart(2, "0")}.${newIndex.toString().padStart(2, "0")}`;
 
       const newApartment: Apartment = {
         id: crypto.randomUUID(),
@@ -217,14 +242,16 @@ export const UpdateApartmentMatrix: React.FC<UpdateApartmentMatrixProps> = (prop
 
       setApartments((prev) => [...prev, newApartment]);
     },
-    [getMaxIndexForFloor, props.areasPerApartment, props.typesOfApartment, hasResidents],
+    [getMaxIndexForFloor, props.areasPerApartment, props.typesOfApartment, props.blockName],
   );
 
   // Start editing
   const startEdit = useCallback(
     (apt: Apartment) => {
       if (apt.hasResidents && hasResidents) {
-        alert("Không thể chỉnh sửa căn hộ đã có người ở!");
+        alert(
+          `⚠️ Không thể chỉnh sửa căn hộ ${apt.code}!\n\nLý do: Căn hộ này đang có cư dân sinh sống. Việc thay đổi mã căn hộ, diện tích hoặc loại có thể ảnh hưởng đến dữ liệu cư dân, hợp đồng và thanh toán.\n\nGợi ý: Nếu cần thay đổi thông tin, vui lòng liên hệ quản lý hệ thống.`,
+        );
         return;
       }
 
@@ -270,9 +297,10 @@ export const UpdateApartmentMatrix: React.FC<UpdateApartmentMatrixProps> = (prop
   return (
     <div className="max-w-[1134px]">
       {hasResidents && (
-        <div className="bg-amber-50 border border-amber-200 p-4 rounded-lg mb-4">
-          <p className="text-amber-800 text-sm font-medium">
-            ⚠️ Tòa nhà đã có người ở. Bạn chỉ có thể xóa các tầng chưa có người ở.
+        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <p className="text-blue-800 text-sm">
+            <span className="font-semibold">ℹ️ Lưu ý:</span> Căn hộ có người ở sẽ không thể sửa/xóa.
+            Bạn vẫn có thể thêm tầng/căn hộ mới hoặc chỉnh sửa các căn hộ trống.
           </p>
         </div>
       )}
@@ -302,13 +330,8 @@ export const UpdateApartmentMatrix: React.FC<UpdateApartmentMatrixProps> = (prop
             {/* Header spacer */}
             <button
               onClick={addFloor}
-              disabled={hasResidents}
-              className={`w-20 h-14 rounded flex flex-col items-center justify-center text-sm font-semibold rounded-l-[15px] transition-all duration-200 active:scale-95 ${
-                hasResidents
-                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  : "bg-main text-white hover:bg-main/80"
-              }`}
-              title={hasResidents ? "Không thể thêm tầng khi đã có người ở" : "Thêm tầng mới"}
+              className="w-20 h-14 rounded bg-main text-white flex flex-col items-center justify-center text-sm font-semibold rounded-l-[15px] hover:bg-main/80 transition-all duration-200 active:scale-95"
+              title="Thêm tầng mới"
             >
               <Plus size={18} />
               <span className="text-[10px]">Thêm tầng</span>
@@ -420,18 +443,23 @@ export const UpdateApartmentMatrix: React.FC<UpdateApartmentMatrixProps> = (prop
                         <div
                           key={apt.id}
                           onClick={() => setSelected(apt.id!)}
+                          title={
+                            apt.hasResidents
+                              ? `${apt.code} - Đang có cư dân (Không thể sửa/xóa)`
+                              : `${apt.code} - Căn hộ trống (Click để xem)`
+                          }
                           className={`w-24 h-14 rounded-lg border-2 flex flex-col items-center justify-center text-xs transition-all duration-200 cursor-pointer relative group ${
                             colors.bg
                           } ${
                             colors.text
                           } border-transparent hover:border-main/45 hover:shadow-sm ${
-                            apt.hasResidents ? "opacity-60" : ""
+                            apt.hasResidents ? "opacity-70 ring-1 ring-red-300" : ""
                           }`}
                         >
                           <div className="font-semibold">{apt.code}</div>
                           <div className="text-[10px]">{apt.area} m²</div>
                           {apt.hasResidents && (
-                            <div className="absolute top-0 left-0 bg-red-500 text-white text-[8px] px-1 rounded-tl-lg rounded-br-lg">
+                            <div className="absolute top-0 left-0 bg-red-500 text-white text-[8px] px-1.5 py-0.5 rounded-tl-lg rounded-br-lg font-semibold shadow-sm">
                               Có người
                             </div>
                           )}
@@ -469,15 +497,8 @@ export const UpdateApartmentMatrix: React.FC<UpdateApartmentMatrixProps> = (prop
                   <div className="flex gap-2">
                     <button
                       onClick={() => addApartmentToFloor(floor)}
-                      disabled={hasResidents}
-                      className={`w-24 h-14 rounded-lg border-2 border-dashed flex flex-col items-center justify-center text-xs transition-all duration-200 active:scale-95 ${
-                        hasResidents
-                          ? "border-gray-300 text-gray-400 cursor-not-allowed"
-                          : "border-gray-300 text-gray-400 hover:border-main hover:text-main hover:bg-main/5"
-                      }`}
-                      title={
-                        hasResidents ? "Không thể thêm căn hộ khi đã có người ở" : "Thêm căn hộ"
-                      }
+                      className="w-24 h-14 rounded-lg border-2 border-dashed border-gray-300 text-gray-400 hover:border-main hover:text-main hover:bg-main/5 flex flex-col items-center justify-center text-xs transition-all duration-200 active:scale-95"
+                      title="Thêm căn hộ"
                     >
                       <Plus size={16} />
                     </button>
@@ -491,8 +512,8 @@ export const UpdateApartmentMatrix: React.FC<UpdateApartmentMatrixProps> = (prop
                       }`}
                       title={
                         hasResidents && hasResidentsInFloor
-                          ? "Không thể xóa tầng đã có người ở"
-                          : "Xóa tầng"
+                          ? "Không thể xóa căn hộ ở tầng có người ở"
+                          : "Xóa hết căn hộ tầng này"
                       }
                     >
                       <Trash2 size={16} />

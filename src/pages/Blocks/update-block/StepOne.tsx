@@ -95,7 +95,7 @@ const StepOne = ({ setStep, blockId }: StepOneProps) => {
 
       form.reset(formData);
 
-      // Initialize Redux with block data
+      // Initialize Redux with block data including hasResidents from API
       dispatch(
         initializeUpdateBlock({
           ...formData,
@@ -105,9 +105,14 @@ const StepOne = ({ setStep, blockId }: StepOneProps) => {
             type: apt.type,
             area: Number(apt.area),
             floor: apt.floor,
+            hasResidents: apt.hasResidents || false, // Use actual value from API
           })),
         }),
       );
+
+      // Check if any apartment has residents
+      const hasAnyResidents = blockData.apartments.some((apt) => apt.hasResidents);
+      dispatch(setHasResidents(hasAnyResidents));
     }
   }, [blockData, dispatch, form]);
 
@@ -126,8 +131,11 @@ const StepOne = ({ setStep, blockId }: StepOneProps) => {
       }
     };
 
-    checkResidents();
-  }, [blockId, dispatch]);
+    // Only call this if we couldn't get hasResidents from API (fallback)
+    if (!blockData || blockData.apartments.length === 0) {
+      checkResidents();
+    }
+  }, [blockId, dispatch, blockData]);
 
   // Sync form with Redux state
   useEffect(() => {

@@ -17,7 +17,11 @@ import { useCreateInvoice } from "@/hooks/data/useInvoices";
 import { useApartments } from "@/hooks/data/useApartments";
 import { toast } from "sonner";
 import { DatePicker } from "@/components/common/DatePicker";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -108,7 +112,9 @@ const CreateInvoiceModal = ({ open, setOpen }: ModalProps) => {
               control={form.control}
               name="apartmentId"
               render={({ field }) => {
-                const selectedOwner = apartmentOptions?.find((r) => r.value === field.value);
+                const selectedOwner = apartmentOptions?.find(
+                  (r) => r.value === field.value,
+                );
 
                 return (
                   <FormItem className="space-y-1.5">
@@ -122,7 +128,9 @@ const CreateInvoiceModal = ({ open, setOpen }: ModalProps) => {
                             role="combobox"
                             className="w-full justify-between font-normal"
                           >
-                            {selectedOwner ? selectedOwner.label : "Chọn căn hộ"}
+                            {selectedOwner
+                              ? selectedOwner.label
+                              : "Chọn căn hộ"}
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
@@ -168,7 +176,11 @@ const CreateInvoiceModal = ({ open, setOpen }: ModalProps) => {
                 <FormItem className="space-y-1.5">
                   <FormLabel isRequired>Kỳ thanh toán</FormLabel>
                   <FormControl>
-                    <DatePicker type="month" value={field.value} onChange={field.onChange} />
+                    <DatePicker
+                      type="month"
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
                   </FormControl>
                   <FormMessage className="text-xs" />
                 </FormItem>
@@ -186,6 +198,7 @@ const CreateInvoiceModal = ({ open, setOpen }: ModalProps) => {
                   <FormControl>
                     <Input
                       type="number"
+                      min="0"
                       placeholder="Nhập chỉ số nước"
                       value={field.value ?? ""}
                       onChange={(e) => field.onChange(Number(e.target.value))}
@@ -207,6 +220,7 @@ const CreateInvoiceModal = ({ open, setOpen }: ModalProps) => {
                   <FormControl>
                     <Input
                       type="number"
+                      min="0"
                       placeholder="Nhập chỉ số điện"
                       {...field}
                       onChange={(e) => field.onChange(Number(e.target.value))}

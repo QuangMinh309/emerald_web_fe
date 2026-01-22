@@ -18,10 +18,12 @@ const DeleteResident = ({ open, setOpen, selectedResident }: DeleteResidentProps
     deleteResident(selectedResident.id, {
       onSuccess: () => {
         toast.success("Cư dân đã được xóa thành công");
-        setOpen(false);
       },
       onError: (error: any) => {
         toast.error(error.response?.data?.message || "Lỗi khi xóa cư dân");
+      },
+      onSettled: () => {
+        setOpen(false);
       },
     });
   };
