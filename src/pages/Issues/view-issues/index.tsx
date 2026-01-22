@@ -25,7 +25,7 @@ import type { TabItem } from "@/types";
 
 const IssuesPage = () => {
   const navigate = useNavigate();
-  const { canUpdate } = usePermission();
+  const { canUpdate, userRole } = usePermission();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("ALL");
@@ -41,6 +41,12 @@ const IssuesPage = () => {
   const [isEditOpen, setIsEditOpen] = useState(false);
 
   const { data: issues = [], isLoading, isError, refetch } = useIssues();
+
+  // Subtitle thay đổi tuỳ theo role
+  const subtitle =
+    userRole === "TECHNICIAN"
+      ? "Quản lý các phản ánh được chỉ định cho bạn"
+      : "Quản lý tất cả phản ánh và yêu cầu từ cư dân";
 
   // filter
   const filteredData = useMemo(() => {
@@ -116,7 +122,7 @@ const IssuesPage = () => {
       <div className="p-1.5 pt-0 space-y-4">
         <PageHeader
           title="Phản ánh & Yêu cầu"
-          subtitle="Quản lý tất cả phản ánh và yêu cầu từ cư dân"
+          subtitle={subtitle}
           actions={
             <div className="flex items-center gap-2">
               <ActionDropdown options={headerActions} label="Thao tác" />
@@ -157,9 +163,9 @@ const IssuesPage = () => {
               data={filteredData}
               columns={getIssueColumns({
                 onView: (row) => navigate(`/issues/${row.id}`),
-                onEdit: canUpdate("issues") ? handleEdit : undefined,
-                onReceive: canUpdate("issues") ? handleReceive : undefined,
-                onReject: canUpdate("issues") ? handleReject : undefined,
+                onReceive: handleReceive,
+                onReject: handleReject,
+                onEdit: handleEdit,
               })}
               selection={selectedIds}
               onSelectionChange={(ids) => setSelectedIds(ids as string[])}
