@@ -3,6 +3,7 @@ import PageHeader from "@/components/common/PageHeader";
 import { SearchBar } from "@/components/common/SearchBar";
 import Spinner from "@/components/common/Spinner";
 import StatusBadge from "@/components/common/StatusBadge";
+import { MaintenanceTimeline } from "@/components/common/MaintenanceTimeline";
 import { Button } from "@/components/ui/button";
 import { useGetAssetById } from "@/hooks/data/useAssests";
 import DeleteAsset from "@/pages/Assets/delete-asset";
@@ -122,10 +123,19 @@ const DetailAssetPage = () => {
           </div>
           <div className="space-y-2">
             {/* 4 cột thông tin */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
               <div>
                 <h3 className="display-label">Ngày lắp đặt</h3>
                 <p className="display-text">{asset?.timeline.installationDate}</p>
+              </div>
+
+              <div>
+                <h3 className="display-label">Chu kỳ bảo trì (tháng)</h3>
+                <p className="display-text">
+                  {asset?.timeline.maintenanceIntervalMonths > 0
+                    ? `${asset?.timeline.maintenanceIntervalMonths} tháng`
+                    : "Không có"}
+                </p>
               </div>
 
               <div>
@@ -145,36 +155,8 @@ const DetailAssetPage = () => {
           <div>
             <h2 className="title-text">Lịch sử bảo trì, sửa chữa</h2>
           </div>
-          {/* <div className="bg-white p-4 rounded border shadow-sm">
-            <SearchBar
-              placeholder="Tìm theo tiêu đề, loại bảo trì, kỹ thuật viên..."
-              onSearch={setSearch}
-            />
-          </div>
 
-          <div>
-            {isLoading ? (
-              <div className="bg-white p-12 text-center text-gray-500 border rounded">
-                Đang tải dữ liệu...
-              </div>
-            ) : isError ? (
-              <div className="bg-red-50 border p-8 rounded text-center">
-                Không thể tải dữ liệu
-                <button
-                  onClick={() => refetch()}
-                  className="block mx-auto mt-3 px-4 py-2 bg-red-600 text-white rounded"
-                >
-                  Thử lại
-                </button>
-              </div>
-            ) : (
-              <CustomTable
-                data={filtered as Maintenance[]}
-                columns={maintenanceColumns}
-                defaultPageSize={10}
-              />
-            )}
-          </div> */}
+          <MaintenanceTimeline history={asset?.recentHistory || []} />
         </div>
       </div>
       <DeleteAsset seclectedAsset={asset} open={isDeleteOpen} setOpen={setIsDeleteOpen} />

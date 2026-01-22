@@ -55,8 +55,8 @@ const StepThree = ({ setStep, blockId }: StepThreeProps) => {
           toast.success("Tòa nhà đã được cập nhật thành công");
           handleClose();
         },
-        onError: (error) => {
-          toast.error(`Lỗi: ${error.message}`);
+        onError: (error: any) => {
+          toast.error(error.response?.data?.message || "Lỗi cập nhật tòa nhà");
         },
       },
     );

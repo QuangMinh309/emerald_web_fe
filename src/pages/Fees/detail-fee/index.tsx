@@ -3,7 +3,7 @@ import PageHeader from "@/components/common/PageHeader";
 import Spinner from "@/components/common/Spinner";
 import { useGetFeeById } from "@/hooks/data/useFees";
 
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 const tierColumns = [
   { key: "id", label: "ID", align: "center" as const, width: "60px" },
@@ -38,7 +38,6 @@ const feeTypeMap: Record<string, string> = {
 
 const DetailFeePage = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
   const { data: fee, isLoading } = useGetFeeById(Number(id));
 
   if (!id) {
@@ -97,7 +96,12 @@ const DetailFeePage = () => {
           <div>
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Chi tiết bậc giá</h3>
             {fee?.tiers && fee.tiers.length > 0 ? (
-              <CustomTable data={fee.tiers} columns={tierColumns} defaultPageSize={10} />
+              <CustomTable
+                showCheckbox={false}
+                data={fee.tiers}
+                columns={tierColumns}
+                defaultPageSize={10}
+              />
             ) : (
               <div className="bg-gray-50 p-8 rounded text-center text-gray-500">
                 Không có dữ liệu bậc giá

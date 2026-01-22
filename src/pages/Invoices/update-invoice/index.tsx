@@ -115,7 +115,7 @@ const UpdateInvoiceModal = ({ open, setOpen, invoiceId }: UpdateModalProps) => {
           handleClose();
         },
         onError: (error: any) => {
-          toast.error(`Lỗi cập nhật: ${error.message}`);
+          toast.error(error.response?.data?.message || "Lỗi cập nhật hóa đơn");
         },
       },
     );

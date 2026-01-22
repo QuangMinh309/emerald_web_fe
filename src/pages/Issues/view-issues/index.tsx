@@ -122,10 +122,6 @@ const IssuesPage = () => {
         />
 
         <div className="bg-white p-4 rounded-sm border border-gray-200 shadow-sm space-y-4">
-          <SearchBar
-            placeholder="Tìm kiếm theo tiêu đề, tên cư dân, tòa,..."
-            onSearch={setSearchTerm}
-          />
           <TabNavigation
             tabs={tabs}
             activeTab={activeTab}
@@ -134,6 +130,10 @@ const IssuesPage = () => {
               setSearchTerm("");
               setSelectedIds([]);
             }}
+          />
+          <SearchBar
+            placeholder="Tìm kiếm theo tiêu đề, tên cư dân, tòa,..."
+            onSearch={setSearchTerm}
           />
         </div>
 

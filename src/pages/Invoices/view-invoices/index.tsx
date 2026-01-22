@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Plus, Printer, FileDown, Trash2 } from "lucide-react";
+import { Plus, Printer, Trash2 } from "lucide-react";
 import PageHeader from "@/components/common/PageHeader";
 import ActionDropdown from "@/components/common/ActionDropdown";
 import CustomTable from "@/components/common/CustomTable";
@@ -18,6 +18,7 @@ import DeleteInvoice from "@/pages/Invoices/delete-invoice";
 import DeleteManyInvoiceModal from "@/pages/Invoices/multiple-delete-invoices";
 import UpdateInvoiceModal from "@/pages/Invoices/update-invoice";
 import VerifyInvoiceModal from "@/pages/Invoices/verify-invoice";
+import { PrintableInvoiceList } from "./print";
 
 const InvoicesPage = () => {
   const navigate = useNavigate();
@@ -87,20 +88,6 @@ const InvoicesPage = () => {
   const actions: ActionOption[] = useMemo(
     () => [
       {
-        id: "delete_all",
-        label: "Xóa tất cả",
-        icon: <Trash2 className="w-4 h-4" />,
-        variant: "danger",
-        onClick: () => confirm("Xóa toàn bộ dữ liệu?") && console.log("Delete All"),
-        disabled: dataLength === 0,
-      },
-      {
-        id: "import",
-        label: "Import Excel",
-        icon: <FileDown className="w-4 h-4" />,
-        onClick: () => console.log("Importing..."),
-      },
-      {
         id: "print",
         label: "In danh sách",
         icon: <Printer className="w-4 h-4" />,
@@ -113,7 +100,8 @@ const InvoicesPage = () => {
 
   return (
     <>
-      <div className="p-1.5 pt-0 space-y-4">
+      <PrintableInvoiceList data={filteredInvoices} />
+      <div className="p-1.5 pt-0 space-y-4 print:hidden">
         <PageHeader
           title="Hóa đơn"
           subtitle="Quản lý danh sách các hóa đơn thanh toán"
@@ -139,10 +127,7 @@ const InvoicesPage = () => {
                 )
               )}
 
-              <ActionDropdown
-                options={actions}
-                sampleFileUrl="/template/invoice_import_template.xlsx"
-              />
+              <ActionDropdown options={actions} />
             </div>
           }
         />

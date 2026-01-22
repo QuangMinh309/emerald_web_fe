@@ -20,8 +20,8 @@ const DeleteResident = ({ open, setOpen, selectedResident }: DeleteResidentProps
         toast.success("Cư dân đã được xóa thành công");
         setOpen(false);
       },
-      onError: (error) => {
-        toast.error(`Lỗi: ${error.message}`);
+      onError: (error: any) => {
+        toast.error(error.response?.data?.message || "Lỗi khi xóa cư dân");
       },
     });
   };

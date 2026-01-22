@@ -52,8 +52,8 @@ const CreateAssetTypeModal = ({ open, setOpen }: ModalProps) => {
           toast.success("Loại tài sản đã được tạo thành công");
           handleClose();
         },
-        onError: (error) => {
-          toast.error(`Lỗi: ${error.message}`);
+        onError: (error: any) => {
+          toast.error(error.response?.data?.message || "Lỗi khi tạo loại tài sản");
         },
       },
     );
@@ -74,7 +74,7 @@ const CreateAssetTypeModal = ({ open, setOpen }: ModalProps) => {
       onSubmit={form.handleSubmit(onSubmit)}
     >
       <Form {...form}>
-        <form className="space-y-4 w-[300px]">
+        <form className="space-y-4">
           {/* Tên loại tài sản */}
           <FormField
             disabled={isPending}

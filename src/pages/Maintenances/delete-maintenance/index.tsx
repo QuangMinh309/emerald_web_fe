@@ -20,8 +20,8 @@ const DeleteMaintenanceModal = ({ open, setOpen, selectedTicket }: DeleteMainten
         toast.success("Yêu cầu bảo trì đã được xóa thành công");
         setOpen(false);
       },
-      onError: (error) => {
-        toast.error(`Lỗi: ${error.message}`);
+      onError: (error: any) => {
+        toast.error(error.response?.data?.message || "Lỗi khi xóa yêu cầu bảo trì");
       },
     });
   };

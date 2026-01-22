@@ -32,12 +32,24 @@ export interface AssetDetail {
     warrantyExpirationDate: string;
     lastMaintenanceDate: null;
     nextMaintenanceDate: string;
+    maintenanceIntervalMonths: number;
   };
   computed: {
     isWarrantyValid: boolean;
     isOverdueMaintenance: boolean;
     daysUntilMaintenance: number;
   };
+  recentHistory: [
+    {
+      id: number;
+      title: string;
+      type: string;
+      status: string;
+      date: string;
+      result: string;
+      technicianName: string;
+    },
+  ];
 }
 interface AssetType {
   id: number;

@@ -5,24 +5,13 @@ import CustomTable from "@/components/common/CustomTable";
 import {
   useGetInvoicesAndPaymentsByResidentId,
   useGetResidentById,
+  useGetResidentResidences,
 } from "@/hooks/data/useResidents";
 import { useParams } from "react-router-dom";
 import type { TableColumn } from "@/types";
 import type { Invoice } from "@/types/invoice";
 import { formatVND } from "@/utils/money";
 import { InvoiceStatusMap } from "@/constants/invoiceStatus";
-const livingInformation = [
-  {
-    apartmentName: "A1",
-    relationship: "Chủ hộ",
-    dateMovedIn: "2022-01-15",
-  },
-  {
-    apartmentName: "A2",
-    relationship: "Chủ hộ",
-    dateMovedIn: "2022-01-15",
-  },
-];
 
 const invoiceColumns: TableColumn<Invoice>[] = [
   { key: "stt", label: "STT", align: "center" },
@@ -68,6 +57,10 @@ const DetailResidentPage = () => {
   const { data: resident, isLoading } = useGetResidentById(Number(id));
   const { data: invoicesAndPayments = [], isLoading: isInvoicesLoading } =
     useGetInvoicesAndPaymentsByResidentId(Number(id));
+  const { data: residencesData, isLoading: isResidencesLoading } = useGetResidentResidences(
+    Number(id),
+  );
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-[500px] ">
@@ -217,16 +210,26 @@ const DetailResidentPage = () => {
         <div>
           <h2 className="title-text">Thông tin cư trú </h2>
         </div>
-        <div className="flex flex-wrap gap-10">
-          {livingInformation.map((info, index) => (
-            <Card
-              key={index}
-              apartmentName={info.apartmentName}
-              relationship={info.relationship}
-              dateMovedIn={info.dateMovedIn}
-            />
-          ))}
-        </div>
+        {isResidencesLoading ? (
+          <div className="bg-white p-6 text-center text-gray-500 border rounded shadow-sm">
+            Đang tải thông tin cư trú...
+          </div>
+        ) : residencesData && residencesData.residences.length > 0 ? (
+          <div className="flex flex-wrap gap-10">
+            {residencesData.residences.map((residence) => (
+              <Card
+                key={residence.id}
+                apartmentName={`${residence.apartment.blockName} - ${residence.apartment.roomNumber}`}
+                relationship={residence.relationship}
+                area={residence.apartment.area}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="bg-gray-50 border border-gray-200 p-8 rounded text-center text-gray-600">
+            Không có thông tin cư trú
+          </div>
+        )}
 
         {/* hoa don */}
         <div>
@@ -240,6 +243,7 @@ const DetailResidentPage = () => {
           "invoices" in invoicesAndPayments &&
           invoicesAndPayments.invoices.length > 0 ? (
           <CustomTable
+            showCheckbox={false}
             data={invoicesAndPayments.invoices as any}
             columns={invoiceColumns}
             defaultPageSize={10}
@@ -256,22 +260,28 @@ const DetailResidentPage = () => {
 interface CardProps {
   apartmentName: string;
   relationship: string;
-  dateMovedIn: string;
+  area: number;
 }
-const Card = ({ apartmentName, dateMovedIn, relationship }: CardProps) => {
+const Card = ({ apartmentName, relationship, area }: CardProps) => {
+  const relationshipMap: { [key: string]: string } = {
+    OWNER: "Chủ hộ",
+    FAMILY_MEMBER: "Thành viên",
+    TENANT: "Người thuê",
+  };
+
   return (
     <div className="rounded-lg border p-4 w-[300px]">
-      <div className="flex items-center justify-between">
-        <h3 className="display-label">Tên tòa</h3>
-        <p className="display-text">{apartmentName}</p>
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="display-label">Căn hộ</h3>
+        <p className="display-text font-semibold">{apartmentName}</p>
+      </div>
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="display-label">Quan hệ</h3>
+        <p className="display-text">{relationshipMap[relationship] || relationship}</p>
       </div>
       <div className="flex items-center justify-between">
-        <h3 className="display-label">Quan hệ chủ hộ</h3>
-        <p className="display-text">{relationship}</p>
-      </div>
-      <div className="flex items-center justify-between">
-        <h3 className="display-label">Ngày chuyển đến</h3>
-        <p className="display-text">{new Date(dateMovedIn).toLocaleDateString("vi-VN")}</p>
+        <h3 className="display-label">Diện tích</h3>
+        <p className="display-text">{area} m²</p>
       </div>
     </div>
   );

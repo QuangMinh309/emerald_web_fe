@@ -22,17 +22,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import {
-  TicketPriority,
-  TicketPriorityOptions,
-} from "@/constants/ticketPriority";
+import { TicketPriority, TicketPriorityOptions } from "@/constants/ticketPriority";
 import { Textarea } from "@/components/ui/textarea";
 import { useCreateIncidentTicket } from "@/hooks/data/useMaintenance";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -68,9 +61,7 @@ const CreateIncidentMaintenanceSchema = z.object({
   assetId: z.string().min(1, "Vui lòng chọn tài sản"),
 });
 
-type IncidentMaintenanceFormValues = z.infer<
-  typeof CreateIncidentMaintenanceSchema
->;
+type IncidentMaintenanceFormValues = z.infer<typeof CreateIncidentMaintenanceSchema>;
 
 const CreateIncidentMaintenanceModal = ({
   open,
@@ -149,8 +140,8 @@ const CreateIncidentMaintenanceModal = ({
 
           handleClose();
         },
-        onError: (error) => {
-          toast.error(`Lỗi: ${error.message}`);
+        onError: (error: any) => {
+          toast.error(error.response?.data?.message || "Lỗi khi tạo yêu cầu bảo trì");
         },
       },
     );
@@ -193,9 +184,7 @@ const CreateIncidentMaintenanceModal = ({
               control={form.control}
               name="assetId"
               render={({ field }) => {
-                const selectedAsset = assetOptions?.find(
-                  (r) => r.value === field.value,
-                );
+                const selectedAsset = assetOptions?.find((r) => r.value === field.value);
 
                 return (
                   <FormItem className="space-y-1.5  col-span-2">
@@ -209,9 +198,7 @@ const CreateIncidentMaintenanceModal = ({
                             role="combobox"
                             className="w-full justify-between font-normal"
                           >
-                            {selectedAsset
-                              ? selectedAsset.label
-                              : "Chọn tài sản"}
+                            {selectedAsset ? selectedAsset.label : "Chọn tài sản"}
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
@@ -256,11 +243,7 @@ const CreateIncidentMaintenanceModal = ({
                 <FormItem className="space-y-1.5 col-span-2">
                   <FormLabel>Mô tả chi tiết</FormLabel>
                   <FormControl>
-                    <Textarea
-                      placeholder="Nhập mô tả chi tiết (nếu có)"
-                      rows={3}
-                      {...field}
-                    />
+                    <Textarea placeholder="Nhập mô tả chi tiết (nếu có)" rows={3} {...field} />
                   </FormControl>
                   <FormMessage className="text-xs" />
                 </FormItem>
@@ -274,10 +257,7 @@ const CreateIncidentMaintenanceModal = ({
               render={({ field }) => (
                 <FormItem className="space-y-1.5">
                   <FormLabel>Độ ưu tiên</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Chọn độ ưu tiên" />

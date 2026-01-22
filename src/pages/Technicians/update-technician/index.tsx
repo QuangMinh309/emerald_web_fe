@@ -87,8 +87,8 @@ const UpdateTechnicianModal = ({ open, setOpen, technician }: ModalProps) => {
           toast.success("Kỹ thuật viên đã được cập nhật thành công");
           handleClose();
         },
-        onError: (error) => {
-          toast.error(`Lỗi: ${error.message}`);
+        onError: (error: any) => {
+          toast.error(error.response?.data?.message || "Lỗi cập nhật kỹ thuật viên");
         },
       },
     );

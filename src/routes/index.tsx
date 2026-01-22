@@ -25,6 +25,8 @@ import IssuesPage from "@/pages/Issues/view-issues";
 import DetailIssuePage from "@/pages/Issues/detail-issue";
 import FeesPage from "@/pages/Fees/view-fees";
 import DetailFeePage from "@/pages/Fees/detail-fee";
+import AccountsPage from "@/pages/Accounts/view-accounts";
+import DetailAccountPage from "@/pages/Accounts/detail-account";
 
 const Assets = lazy(() => import("@/pages/Assets/view-assets"));
 const Notifications = lazy(() => import("@/pages/Notifications/view-notifications"));
@@ -84,6 +86,8 @@ export const routes = createBrowserRouter([
       { path: "issues/:id", element: <DetailIssuePage /> },
       { path: "fees", element: <FeesPage /> },
       { path: "fees/:id", element: <DetailFeePage /> },
+      { path: "accounts", element: <AccountsPage /> },
+      { path: "accounts/:accountId", element: <DetailAccountPage /> },
     ],
   },
 ]);

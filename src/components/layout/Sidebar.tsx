@@ -36,7 +36,7 @@ const Sidebar: React.FC = () => {
     { id: "maintenances", icon: Wrench, label: "Bảo trì" },
     { id: "notifications", icon: MessageSquare, label: "Thông báo" },
     { id: "reports", icon: TrendingUp, label: "Báo cáo thống kê" },
-    { id: "permissions", icon: UserCog, label: "Phân quyền" },
+    { id: "accounts", icon: UserCog, label: "Tài khoản" },
     { id: "profile", icon: User2, label: "Tài khoản" },
   ];
 

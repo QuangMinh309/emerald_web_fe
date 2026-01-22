@@ -20,8 +20,8 @@ const DeleteAsset = ({ open, setOpen, seclectedAsset }: DeleteAssetProps) => {
         toast.success("Tài sản đã được xóa thành công");
         setOpen(false);
       },
-      onError: (error) => {
-        toast.error(`Lỗi: ${error.message}`);
+      onError: (error: any) => {
+        toast.error(error.response?.data?.message || "Lỗi khi xóa tài sản");
       },
     });
   };

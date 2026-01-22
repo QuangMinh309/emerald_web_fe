@@ -45,6 +45,7 @@ const UpdateAssetSchema = z.object({
   }),
   warrantyYears: z.number(),
   note: z.string().optional(),
+  maintenanceIntervalMonths: z.number(),
 });
 
 type AssetFormValues = z.infer<typeof UpdateAssetSchema>;
@@ -66,6 +67,7 @@ const UpdateAssetModal = ({ open, setOpen, assetId }: UpdateModalProps) => {
       blockId: "",
       installationDate: undefined,
       warrantyYears: 0,
+      maintenanceIntervalMonths: 0,
     },
   });
 
@@ -82,6 +84,7 @@ const UpdateAssetModal = ({ open, setOpen, assetId }: UpdateModalProps) => {
         locationDetail: asset.location.detail,
         installationDate: new Date(asset.timeline.installationDate),
         warrantyYears: asset.timeline.warrantyExpirationDate ? 1 : 0,
+        maintenanceIntervalMonths: asset.timeline.maintenanceIntervalMonths || 0,
       });
     }
   }, [asset, open, form]);
@@ -134,6 +137,7 @@ const UpdateAssetModal = ({ open, setOpen, assetId }: UpdateModalProps) => {
           installationDate: values.installationDate.toISOString(),
           warrantyYears: values.warrantyYears,
           note: values.note,
+          maintenanceIntervalMonths: values.maintenanceIntervalMonths,
         },
       },
       {
@@ -142,7 +146,7 @@ const UpdateAssetModal = ({ open, setOpen, assetId }: UpdateModalProps) => {
           handleClose();
         },
         onError: (error: any) => {
-          toast.error(`Lỗi cập nhật: ${error.message}`);
+          toast.error(error.response?.data?.message || "Lỗi cập nhật tài sản");
         },
       },
     );
@@ -319,6 +323,26 @@ const UpdateAssetModal = ({ open, setOpen, assetId }: UpdateModalProps) => {
                     <Input
                       type="number"
                       placeholder="Nhập số năm bảo hành"
+                      value={field.value ?? ""}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                    />
+                  </FormControl>
+                  <FormMessage className="text-xs" />
+                </FormItem>
+              )}
+            />
+            {/* Số năm bảo hành */}
+            <FormField
+              disabled={isPending}
+              control={form.control}
+              name="maintenanceIntervalMonths"
+              render={({ field }) => (
+                <FormItem className="space-y-1.5 col-span-2">
+                  <FormLabel isRequired>Khoảng thời gian bảo trì (tháng)</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="Nhập khoảng thời gian bảo trì (tháng)"
                       value={field.value ?? ""}
                       onChange={(e) => field.onChange(Number(e.target.value))}
                     />

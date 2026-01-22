@@ -20,8 +20,8 @@ const DeleteTechnicianModal = ({ open, setOpen, technician }: ModalProps) => {
         toast.success("Kỹ thuật viên đã được xóa thành công");
         setOpen(false);
       },
-      onError: (error) => {
-        toast.error(`Lỗi: ${error.message}`);
+      onError: (error: any) => {
+        toast.error(error.response?.data?.message || "Lỗi khi xóa kỹ thuật viên");
       },
     });
   };

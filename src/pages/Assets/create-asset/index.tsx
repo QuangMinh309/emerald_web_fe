@@ -45,6 +45,7 @@ const CreateAssetSchema = z.object({
   }),
   warrantyYears: z.number(),
   note: z.string().optional(),
+  maintenanceIntervalMonths: z.number(),
 });
 
 type AssetFormValues = z.infer<typeof CreateAssetSchema>;
@@ -63,6 +64,8 @@ const CreateAssetModal = ({ open, setOpen }: ModalProps) => {
       floor: "",
       blockId: "",
       installationDate: undefined,
+      warrantyYears: 0,
+      maintenanceIntervalMonths: 0,
     },
   });
   // 1. Theo dõi giá trị blockId đã chọn
@@ -112,14 +115,15 @@ const CreateAssetModal = ({ open, setOpen }: ModalProps) => {
         installationDate: values.installationDate.toISOString(),
         warrantyYears: values.warrantyYears,
         note: values.note,
+        maintenanceIntervalMonths: values.maintenanceIntervalMonths,
       },
       {
         onSuccess: () => {
           toast.success("Tài sản đã được tạo thành công");
           handleClose();
         },
-        onError: (error) => {
-          toast.error(`Lỗi: ${error.message}`);
+        onError: (error: any) => {
+          toast.error(error.response?.data?.message || "Lỗi khi tạo tài sản");
         },
       },
     );
@@ -309,6 +313,26 @@ const CreateAssetModal = ({ open, setOpen }: ModalProps) => {
                     <Input
                       type="number"
                       placeholder="Nhập số năm bảo hành"
+                      value={field.value ?? ""}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                    />
+                  </FormControl>
+                  <FormMessage className="text-xs" />
+                </FormItem>
+              )}
+            />
+            {/* Số năm bảo hành */}
+            <FormField
+              disabled={isPending}
+              control={form.control}
+              name="maintenanceIntervalMonths"
+              render={({ field }) => (
+                <FormItem className="space-y-1.5 col-span-2">
+                  <FormLabel isRequired>Khoảng thời gian bảo trì (tháng)</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="Nhập khoảng thời gian bảo trì (tháng)"
                       value={field.value ?? ""}
                       onChange={(e) => field.onChange(Number(e.target.value))}
                     />

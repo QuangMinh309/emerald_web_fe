@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { format, formatDistanceToNow } from "date-fns";
 import { vi } from "date-fns/locale";
-import { Edit, Trash2, CalendarClock } from "lucide-react";
+import { Edit, Trash2, CalendarClock, Printer } from "lucide-react";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import DeleteVotingModal from "@/pages/Votings/delete-voting";
 import StatCard from "@/components/common/StatCard";
 import Spinner from "@/components/common/Spinner";
 import FileAttachmentItem from "@/components/common/FileAttachmentItem";
+import { PrintableVotingResult } from "./print";
 
 import { useVoting, useVotingStatistics } from "@/hooks/data/useVotings";
 
@@ -138,25 +139,39 @@ const DetailVotingPage = () => {
     return sorted[0].totalArea > 0 ? sorted[0].optionName : "Chưa có";
   }, [stats]);
 
-  // logic ẩn nút sửa/xóa
+  // logic ẩn nút sửa/xóa/in
   const isUpcoming = voting?.status === "UPCOMING";
+  const canPrint = voting?.status === "ONGOING" || voting?.status === "ENDED";
 
-  const headerActions = isUpcoming ? (
+  const headerActions = (
     <div className="flex items-center gap-2">
-      <Button
-        className="h-9 px-3 bg-red-600 text-white border-red-200 hover:bg-red-700"
-        onClick={() => setIsDeleteOpen(true)}
-      >
-        <Trash2 size={16} className="mr-2" /> Xóa
-      </Button>
-      <Button
-        className="h-9 px-4 bg-[#1F4E3D] hover:bg-[#16382b] text-white shadow-sm"
-        onClick={() => navigate(`/votings/update/${votingId}`)}
-      >
-        <Edit size={16} className="mr-2" /> Chỉnh sửa
-      </Button>
+      {canPrint && (
+        <Button
+          className="h-9 px-4 bg-[#1F4E3D] hover:bg-[#16382b] text-white shadow-sm"
+          onClick={() => navigate(`/votings/update/${votingId}`)}
+        >
+          <Printer size={16} className="mr-2" /> In biểu quyết
+        </Button>
+      )}
+
+      {isUpcoming && (
+        <>
+          <Button
+            className="h-9 px-3 bg-red-600 text-white border-red-200 hover:bg-red-700"
+            onClick={() => setIsDeleteOpen(true)}
+          >
+            <Trash2 size={16} className="mr-2" /> Xóa
+          </Button>
+          <Button
+            className="h-9 px-4 bg-[#1F4E3D] hover:bg-[#16382b] text-white shadow-sm"
+            onClick={() => navigate(`/votings/update/${votingId}`)}
+          >
+            <Edit size={16} className="mr-2" /> Chỉnh sửa
+          </Button>
+        </>
+      )}
     </div>
-  ) : null;
+  );
 
   if (isLoading) {
     return (
@@ -184,7 +199,9 @@ const DetailVotingPage = () => {
 
   return (
     <>
-      <div className="p-1.5 pt-0 space-y-4">
+      {canPrint && stats && <PrintableVotingResult voting={voting} stats={stats} />}
+
+      <div className="p-1.5 pt-0 space-y-4 print:hidden">
         <PageHeader title={voting.title} showBack actions={headerActions} />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

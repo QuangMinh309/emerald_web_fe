@@ -196,7 +196,7 @@ const CreateServiceModal = ({ open, setOpen }: ModalProps) => {
         handleClose();
       },
       onError: (error: any) => {
-        toast.error(`${error?.message ?? "Có lỗi xảy ra"}`);
+        toast.error(error.response?.data?.message || "Lỗi khi tạo dịch vụ");
       },
     });
   }

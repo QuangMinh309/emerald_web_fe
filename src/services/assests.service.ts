@@ -15,6 +15,7 @@ export const createAsset = async (assetData: {
   installationDate: string;
   warrantyYears: number;
   note?: string;
+  maintenanceIntervalMonths: number;
 }) => {
   const response = await axiosInstance.post("/assets", assetData);
   console.log("Created asset response:", assetData);
@@ -35,6 +36,7 @@ export const updateAsset = async ({
     installationDate: string;
     warrantyYears: number;
     note?: string;
+    maintenanceIntervalMonths: number;
   };
 }) => {
   console.log("Update asset called with id:", id, "and data:", data);

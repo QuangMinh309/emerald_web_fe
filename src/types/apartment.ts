@@ -12,6 +12,8 @@ export interface Apartment {
 }
 export interface ApartmentDetail {
   generalInfo: {
+    ownerId: number;
+    blockId: number;
     apartmentName: string;
     building: string;
     floor: number;
@@ -25,6 +27,7 @@ export interface ApartmentDetail {
     identityCard: string;
   };
   residents: {
+    identityCard: string;
     id: number;
     fullName: string;
     gender: string;

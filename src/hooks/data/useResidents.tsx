@@ -5,6 +5,7 @@ import {
   getResidentById,
   getResidents,
   getInvoicesAndPaymentsByResidentId,
+  getResidentResidences,
   updateResident,
 } from "@/services/residents.service";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -70,6 +71,14 @@ export const useGetInvoicesAndPaymentsByResidentId = (id: number) => {
   return useQuery({
     queryKey: ["resident-invoices-payments", id],
     queryFn: () => getInvoicesAndPaymentsByResidentId(id),
+    enabled: !!id,
+  });
+};
+
+export const useGetResidentResidences = (id: number) => {
+  return useQuery({
+    queryKey: ["resident-residences", id],
+    queryFn: () => getResidentResidences(id),
     enabled: !!id,
   });
 };

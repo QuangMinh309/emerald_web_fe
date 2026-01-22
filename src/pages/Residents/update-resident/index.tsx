@@ -123,7 +123,7 @@ const UpdateResidentModal = ({ open, setOpen, residentId }: UpdateModalProps) =>
           handleClose();
         },
         onError: (error: any) => {
-          toast.error(`Lỗi cập nhật: ${error.message}`);
+          toast.error(error.response?.data?.message || "Lỗi cập nhật cư dân");
         },
       },
     );
@@ -300,7 +300,7 @@ const UpdateResidentModal = ({ open, setOpen, residentId }: UpdateModalProps) =>
               name="province"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel isRequired>Tễnh / Thành phố</FormLabel>
+                  <FormLabel isRequired>Tỉnh / Thành phố</FormLabel>
                   <Select
                     value={field.value}
                     onValueChange={(value) => {
