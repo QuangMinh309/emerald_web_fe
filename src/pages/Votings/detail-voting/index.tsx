@@ -148,7 +148,7 @@ const DetailVotingPage = () => {
       {canPrint && (
         <Button
           className="h-9 px-4 bg-[#1F4E3D] hover:bg-[#16382b] text-white shadow-sm"
-          onClick={() => navigate(`/votings/update/${votingId}`)}
+          onClick={() => window.print()}
         >
           <Printer size={16} className="mr-2" /> In biểu quyết
         </Button>
