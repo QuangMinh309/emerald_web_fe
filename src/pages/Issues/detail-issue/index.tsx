@@ -195,7 +195,7 @@ const DetailIssuePage = () => {
               </div>
               {issue.maintenanceTicket && (
                 <div>
-                  <h3 className="display-label">Phiếu bảo trì liên quan</h3>
+                  <h3 className="display-label">Phiếu sữa chữa liên quan</h3>
                   <div
                     className="display-text font-semibold text-main hover:underline hover:opacity-90 cursor-pointer transition"
                     onClick={() => navigate(`/maintenances/${issue.maintenanceTicket?.id}`)}

@@ -17,16 +17,38 @@ import ActionDropdown from "@/components/common/ActionDropdown";
 import type { ActionOption } from "@/types";
 import { Printer } from "lucide-react";
 
-const DEFAULT_FROM = new Date(2025, 11, 1);
+const DEFAULT_FROM = new Date(2025, 6, 1);
 const DEFAULT_TO = new Date();
+const TZ_OFFSET = "+07:00";
+const ONE_DAY = 24 * 60 * 60 * 1000;
 
-function toISODate(d?: Date) {
+function pad2(n: number) {
+  return String(n).padStart(2, "0");
+}
+
+function addDaysLocal(d: Date, days: number) {
+  const x = new Date(d);
+  x.setDate(x.getDate() + days);
+  return x;
+}
+
+function toISOWithOffsetStart(d?: Date) {
   if (!d) return undefined;
   const yyyy = d.getFullYear();
-  const mm = String(d.getMonth() + 1).padStart(2, "0");
-  const dd = String(d.getDate()).padStart(2, "0");
-  return `${yyyy}-${mm}-${dd}`;
+  const mm = pad2(d.getMonth() + 1);
+  const dd = pad2(d.getDate());
+  return `${yyyy}-${mm}-${dd}T00:00:00.000${TZ_OFFSET}`;
 }
+
+function toISOWithOffsetEnd(d?: Date) {
+  if (!d) return undefined;
+  const yyyy = d.getFullYear();
+  const mm = pad2(d.getMonth() + 1);
+  const dd = pad2(d.getDate());
+  return `${yyyy}-${mm}-${dd}T23:59:59.999${TZ_OFFSET}`;
+}
+
+
 function endOfMonth(d: Date) {
   return new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59, 999);
 }
@@ -67,23 +89,30 @@ const ReportPage = () => {
       return { from: allFrom, to: allTo, label };
     }
   }, [periodTab, monthValue, yearValue, allFrom, allTo]);
+const reportParams = useMemo(() => {
+  const fromRaw = periodTab === "custom" ? allFrom : dateRange.from;
+  const toRaw = periodTab === "custom" ? allTo : dateRange.to;
 
-  const reportParams = useMemo(() => {
-    if (periodTab === "month" || periodTab === "year") {
-      return {
-        startDate: toISODate(dateRange.from),
-        endDate: toISODate(dateRange.to),
-      };
-    }
+  const fromShifted = fromRaw ? addDaysLocal(fromRaw, 1) : undefined;
+  const toShifted = toRaw ? addDaysLocal(toRaw, 1) : undefined;
 
-    return {
-      startDate: toISODate(allFrom),
-      endDate: toISODate(allTo),
-    };
-  }, [periodTab, dateRange.from, dateRange.to, allFrom, allTo]);
+  return {
+    startDate: toISOWithOffsetStart(fromShifted),
+    endDate: toISOWithOffsetEnd(toShifted),
+  };
+}, [periodTab, dateRange.from, dateRange.to, allFrom, allTo]);
+
   const { isLoading: authLoading, isAuthenticated } = useAuth();
 
   const { data, isLoading } = useReports(reportParams, !authLoading && isAuthenticated);
+console.log(data);
+
+//totalrevenue: tổng invoce đã paid
+//totalDeb: tổng hoá đơn unpaid
+//totalMaintenance: tổng đã bẢO TRÌ
+
+//invoce paid
+//ticket completed
 
   const totalRevenue = data?.revenue?.totalRevenue || 0;
   const percentageComparedToPreviousMonth = data?.revenue?.percentageComparedToPreviousMonth || 0;

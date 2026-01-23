@@ -91,7 +91,7 @@ const UpdateVotingPage = () => {
       form.reset({
         title: votingData.title,
         content: votingData.content || "",
-        isRequired: String(votingData.isRequired),
+        isRequired: votingData.isRequired === true ? "true" : "false",
         startTime: new Date(votingData.startTime),
         endTime: new Date(votingData.endTime),
         targetScope: votingData.targetScope as "ALL" | "BLOCK" | "FLOOR",
@@ -248,10 +248,10 @@ const UpdateVotingPage = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel isRequired>Tính chất</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value} key={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue />
+                          <SelectValue placeholder="Chọn tính chất" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>

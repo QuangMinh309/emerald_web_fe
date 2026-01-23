@@ -85,6 +85,7 @@ export const votingColumns: TableColumn<VotingData>[] = [
     key: "isRequired",
     label: "Tính chất",
     align: "center",
+    filterable: true,
     filterAccessor: (row) => (row.isRequired ? "Bắt buộc" : "Tự nguyện"),
     render: (row) => {
       const config = natureMap[String(row.isRequired)];
