@@ -13,7 +13,7 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
-import { addMinutes } from "date-fns";
+import { addSeconds } from "date-fns";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
@@ -179,7 +179,7 @@ const CreateNotificationModal = ({ open, setOpen }: ModalProps) => {
                     value={field.value}
                     onChange={field.onChange}
                     placeholder="Chọn thời gian đăng tin"
-                    minDate={addMinutes(new Date(), 15)}
+                    minDate={addSeconds(new Date(), 5)}
                   />
                 </FormControl>
                 <FormMessage />

@@ -176,34 +176,34 @@ const IssuesPage = () => {
       </div>
 
       {/* Chỉ ADMIN và TECHNICIAN mới có quyền update issues */}
-      <ModuleAccessGuard module="issues" action="update">
-        {isReceiveOpen && receivingItem && (
-          <ReceiveIssueModal
-            open={isReceiveOpen}
-            setOpen={setIsReceiveOpen}
-            issue={receivingItem}
-            onSuccess={() => setReceivingItem(null)}
-          />
-        )}
+      {/* <ModuleAccessGuard module="issues" action="update"> */}
+      {isReceiveOpen && receivingItem && (
+        <ReceiveIssueModal
+          open={isReceiveOpen}
+          setOpen={setIsReceiveOpen}
+          issue={receivingItem}
+          onSuccess={() => setReceivingItem(null)}
+        />
+      )}
 
-        {isRejectOpen && rejectingItem && (
-          <RejectIssueModal
-            open={isRejectOpen}
-            setOpen={setIsRejectOpen}
-            issue={rejectingItem}
-            onSuccess={() => setRejectingItem(null)}
-          />
-        )}
+      {isRejectOpen && rejectingItem && (
+        <RejectIssueModal
+          open={isRejectOpen}
+          setOpen={setIsRejectOpen}
+          issue={rejectingItem}
+          onSuccess={() => setRejectingItem(null)}
+        />
+      )}
 
-        {isEditOpen && editingItem && (
-          <UpdateIssueModal
-            open={isEditOpen}
-            setOpen={setIsEditOpen}
-            issueId={editingItem.id}
-            onSuccess={() => setEditingItem(null)}
-          />
-        )}
-      </ModuleAccessGuard>
+      {isEditOpen && editingItem && (
+        <UpdateIssueModal
+          open={isEditOpen}
+          setOpen={setIsEditOpen}
+          issueId={editingItem.id}
+          onSuccess={() => setEditingItem(null)}
+        />
+      )}
+      {/* </ModuleAccessGuard> */}
     </>
   );
 };

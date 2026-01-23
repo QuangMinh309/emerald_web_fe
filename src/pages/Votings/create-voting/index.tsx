@@ -28,7 +28,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { addHours } from "date-fns";
+import { addSeconds } from "date-fns";
 
 import { ScopeSelector } from "@/components/common/ScopeSelector";
 import { UploadFiles } from "@/components/common/UploadFiles";
@@ -187,8 +187,8 @@ const CreateVotingPage = () => {
                         value={field.value}
                         onChange={field.onChange}
                         placeholder="Chọn ngày giờ bắt đầu"
-                        // +5 tiếng từ hiện tại
-                        minDate={addHours(new Date(), 5)}
+                        // +5 giây từ hiện tại
+                        minDate={addSeconds(new Date(), 5)}
                       />
                     </FormControl>
                     <FormMessage />
